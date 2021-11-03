@@ -189,12 +189,13 @@ void MainWindow::initRightToolBar()
 {
 	m_rightToolBar = new QToolBar(this);
 	m_rightToolBar->setMovable(false);
-	m_rightToolBar->setFixedWidth(128);
+	m_rightToolBar->setFixedWidth(256);
 	this->addToolBar(Qt::RightToolBarArea, m_rightToolBar);
 
 	QWidget *toolsPanelWidget = new QWidget(m_rightToolBar);
 	m_rightToolBar->addWidget(toolsPanelWidget);
 	QVBoxLayout* mainLayout = new QVBoxLayout(toolsPanelWidget);
+	toolsPanelWidget->setLayout(mainLayout);
 
 	QLabel *canvasColorLabel = new QLabel("Canvas Color", toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
