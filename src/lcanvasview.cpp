@@ -317,7 +317,7 @@ void LCanvasView::setItemType(LCanvasItem::ItemType itemType)
 		m_itemType = itemType;
 }
 
-void LCanvasView::readItemsFromFile(const QString &filePath)
+void LCanvasView::readItemsFromFile(QString filePath)
 {
 	if (filePath.isEmpty())
 		return;
@@ -386,7 +386,7 @@ void LCanvasView::readItemsFromFile(const QString &filePath)
 	file.close();
 }
 
-void LCanvasView::writeItemsToFile(const QString &filePath)
+void LCanvasView::writeItemsToFile(QString filePath)
 {
 	if (filePath.isEmpty())
 		return;

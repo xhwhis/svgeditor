@@ -1,10 +1,7 @@
 #ifndef LCANVASITEM_H
 #define LCANVASITEM_H
 
-#include <QtCore>
-#include <QtGui>
 #include <QtWidgets>
-#include <QtGlobal>
 
 namespace lwscode {
 

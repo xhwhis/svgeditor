@@ -1,11 +1,7 @@
 #ifndef LCANVAS_H
 #define LCANVAS_H
 
-#include <QGuiApplication>
-#include <QScrollArea>
-#include <QPainter>
-#include <QPainterPath>
-#include <QMouseEvent>
+#include <QtWidgets>
 
 namespace lwscode {
 

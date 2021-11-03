@@ -42,8 +42,8 @@ protected:
 
 private slots:
 	void setItemType(LCanvasItem::ItemType itemType);
-	void readItemsFromFile(const QString &filePath);
-	void writeItemsToFile(const QString &filePath);
+	void readItemsFromFile(QString filePath);
+	void writeItemsToFile(QString filePath);
 	void cutItem();
 	void copyItem();
 	void pasteItem();

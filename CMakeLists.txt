@@ -23,6 +23,8 @@ set(INCLUDE_SOURCES
 	include/mainwindow.h
 	include/lcanvasview.h
 	include/lcanvasitem.h
+#	include/lcanvas.h
+#	include/utility.h
 )
 
 set(SRC_SOURCES
@@ -30,6 +32,8 @@ set(SRC_SOURCES
 	src/mainwindow.cpp
 	src/lcanvasview.cpp
 	src/lcanvasitem.cpp
+#	src/lcanvas.cpp
+#	src/utility.cpp
 )
 
 set(PROJECT_SOURCES

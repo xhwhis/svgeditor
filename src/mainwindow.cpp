@@ -274,8 +274,8 @@ void MainWindow::initCanvas()
 	}
 
 	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
-	connect(this, SIGNAL(sigWriteItemsToFile(QString &)), m_canvas, SLOT(writeItemsToFile(QString &)));
-	connect(this, SIGNAL(sigReadItemsFromFile(QString &)), m_canvas, SLOT(readItemsFromFile(QString &)));
+	connect(this, SIGNAL(sigReadItemsFromFile(QString)), m_canvas, SLOT(readItemsFromFile(QString)));
+	connect(this, SIGNAL(sigWriteItemsToFile(QString)), m_canvas, SLOT(writeItemsToFile(QString)));
 }
 
 void MainWindow::onPaintNone()
