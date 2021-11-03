@@ -28,7 +28,7 @@ public:
 
 	void setCanvasColor(const QColor &color);
 	void setStrokeColor(const QColor &color);
-	void setStrokeWidth(int size);
+	void setStrokeWidth(int width);
 	void clearCanvas();
 	bool noItems();
 

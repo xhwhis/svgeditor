@@ -1,16 +1,25 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/ellipse.svg</file>
-        <file>icons/line.svg</file>
-        <file>icons/none.svg</file>
-        <file>icons/rect.svg</file>
-        <file>icons/star.svg</file>
-        <file>icons/path.svg</file>
+        <file>icons/clear.svg</file>
         <file>icons/hexagon.svg</file>
         <file>icons/icon.svg</file>
-        <file>icons/clear.svg</file>
-        <file>icons/text.svg</file>
+        <file>icons/line.svg</file>
+        <file>icons/move-bottom.svg</file>
+        <file>icons/move-down.svg</file>
+        <file>icons/move-top.svg</file>
+        <file>icons/move-up.svg</file>
+        <file>icons/new.svg</file>
+        <file>icons/none.svg</file>
+        <file>icons/open.svg</file>
         <file>icons/palette.svg</file>
+        <file>icons/path.svg</file>
+        <file>icons/rect.svg</file>
+        <file>icons/redo.svg</file>
+        <file>icons/save-as.svg</file>
+        <file>icons/save.svg</file>
+        <file>icons/star.svg</file>
+        <file>icons/text.svg</file>
         <file>icons/triangle.svg</file>
+        <file>icons/undo.svg</file>
     </qresource>
 </RCC>

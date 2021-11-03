@@ -8,8 +8,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_centralWidget(nullptr)
 	, m_canvas(nullptr)
 	, m_canvasColorButton(nullptr)
-	, m_canvasWidth(500)
-	, m_canvasHeight(500)
+	, m_canvasWidth(400)
+	, m_canvasHeight(400)
 {
 	initUI();
 }
@@ -198,7 +198,7 @@ void MainWindow::initRightToolBar()
 
 	QLabel *canvasColorLabel = new QLabel("Canvas Color", toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
-	m_canvasColorButton->setFixedSize(60, 30);
+	m_canvasColorButton->setFixedSize(64, 32);
 	m_canvasColorButton->setStyleSheet("background-color:white; border-radius:10px");
 	QHBoxLayout *canvasColorLayout = new QHBoxLayout(toolsPanelWidget);
 	canvasColorLayout->addWidget(canvasColorLabel);
@@ -206,10 +206,10 @@ void MainWindow::initRightToolBar()
 
 	QLabel *canvasWidthLabel = new QLabel("Canvas Width", toolsPanelWidget);
 	QSpinBox *canvasWidthSpinBox = new QSpinBox(toolsPanelWidget);
-	canvasWidthSpinBox->setFixedSize(60, 30);
-	canvasWidthSpinBox->setRange(100, 2000);
+	canvasWidthSpinBox->setFixedSize(64, 32);
+	canvasWidthSpinBox->setRange(100, 1600);
 	canvasWidthSpinBox->setSingleStep(10);
-	canvasWidthSpinBox->setValue(500);
+	canvasWidthSpinBox->setValue(400);
 	canvasWidthSpinBox->setStyleSheet("QSpinBox{font-size:24px; border-radius:10px}"
 									  "QSpinBox::up-button{width:0px}"
 									  "QSpinBox::down-button{width:0px}");
@@ -219,10 +219,10 @@ void MainWindow::initRightToolBar()
 
 	QLabel *canvasHeightLabel = new QLabel("canvas Height", toolsPanelWidget);
 	QSpinBox *canvasHeightSpinBox = new QSpinBox(toolsPanelWidget);
-	canvasHeightSpinBox->setFixedSize(60, 30);
-	canvasHeightSpinBox->setRange(100, 2000);
+	canvasHeightSpinBox->setFixedSize(64, 32);
+	canvasHeightSpinBox->setRange(100, 1600);
 	canvasHeightSpinBox->setSingleStep(10);
-	canvasHeightSpinBox->setValue(500);
+	canvasHeightSpinBox->setValue(400);
 	canvasHeightSpinBox->setStyleSheet("QSpinBox{font-size:24px; border-radius:10px}"
 									   "QSpinBox::up-button{width:0px}"
 									   "QSpinBox::down-button{width:0px}");
@@ -232,7 +232,7 @@ void MainWindow::initRightToolBar()
 
 	QLabel *strokeWidthLabel = new QLabel("Stroke Width", toolsPanelWidget);
 	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
-	strokeWidthSpinBox->setFixedSize(60, 30);
+	strokeWidthSpinBox->setFixedSize(64, 32);
 	strokeWidthSpinBox->setRange(1, 10);
 	strokeWidthSpinBox->setStyleSheet("QSpinBox{font-size:24px; border-radius:10px}"
 									  "QSpinBox::up-button{width:0px}"
@@ -259,9 +259,9 @@ void MainWindow::initCanvas()
 	this->setCentralWidget(m_centralWidget);
 
 	m_canvas = new LCanvasView(m_centralWidget);
-	m_canvas->resize(500,500);
+	m_canvas->resize(400,400);
 	m_canvas->setMinimumSize(QSize(100, 100));
-	m_canvas->setMaximumSize(QSize(2000, 2000));
+	m_canvas->setMaximumSize(QSize(1600, 1600));
 	m_centralWidget->setWidget(m_canvas);
 
 	if (!m_canvasColor.isValid())
