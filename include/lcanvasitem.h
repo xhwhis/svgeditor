@@ -49,7 +49,7 @@ public:
 	virtual void moveItem(int dx, int dy) = 0;
 	virtual void scaleItem(double sx, double sy) = 0;
 	virtual void setBoundingRect() = 0;
-	virtual bool containsPoint(const QPoint &point) = 0;
+	virtual bool containsPos(const QPoint &point) = 0;
 	virtual void writeItemToXml(QXmlStreamWriter &writer) = 0;
 
 protected slots:
@@ -80,7 +80,7 @@ public:
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
-	bool containsPoint(const QPoint &point) override;
+	bool containsPos(const QPoint &point) override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 };
 
@@ -96,7 +96,7 @@ public:
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
-	bool containsPoint(const QPoint &point) override;
+	bool containsPos(const QPoint &point) override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 };
 
@@ -110,7 +110,7 @@ public:
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
-	bool containsPoint(const QPoint &point) override;
+	bool containsPos(const QPoint &point) override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -128,7 +128,7 @@ public:
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
-	bool containsPoint(const QPoint &point) override;
+	bool containsPos(const QPoint &point) override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -146,7 +146,7 @@ public:
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
-	bool containsPoint(const QPoint &point) override;
+	bool containsPos(const QPoint &point) override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -165,7 +165,7 @@ public:
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
-	bool containsPoint(const QPoint &point) override;
+	bool containsPos(const QPoint &point) override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -184,7 +184,7 @@ public:
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
-	bool containsPoint(const QPoint &point) override;
+	bool containsPos(const QPoint &point) override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:

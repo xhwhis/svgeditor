@@ -448,7 +448,7 @@ void LCanvasText::setBoundingRect()
 						   m_lineEdit->width(), m_lineEdit->height()).normalized();
 }
 
-bool LCanvasPath::containsPoint(const QPoint &point)
+bool LCanvasPath::containsPos(const QPoint &point)
 {
 	for (int i = 0; i < m_points.size(); ++i)
 	{
@@ -462,7 +462,7 @@ bool LCanvasPath::containsPoint(const QPoint &point)
 	return false;
 }
 
-bool LCanvasLine::containsPoint(const QPoint &point)
+bool LCanvasLine::containsPos(const QPoint &point)
 {
 	int length = sumDistance(m_startPos, m_endPos);
 	int lenOne = sumDistance(m_startPos, point);
@@ -471,7 +471,7 @@ bool LCanvasLine::containsPoint(const QPoint &point)
 	return length == (lenOne + lenTwo);
 }
 
-bool LCanvasRect::containsPoint(const QPoint &point)
+bool LCanvasRect::containsPos(const QPoint &point)
 {
 	QRect rect = QRect(m_startPos, m_endPos);
 	rect.adjust(-m_strokeWidth, -m_strokeWidth, +m_strokeWidth, +m_strokeWidth);
@@ -479,7 +479,7 @@ bool LCanvasRect::containsPoint(const QPoint &point)
 	return rect.contains(point);
 }
 
-bool LCanvasEllipse::containsPoint(const QPoint &point)
+bool LCanvasEllipse::containsPos(const QPoint &point)
 {
 	m_width = abs(m_endPos.x() - m_startPos.x()) / 2;
 	m_height = abs(m_endPos.y() - m_startPos.y()) / 2;
@@ -487,7 +487,7 @@ bool LCanvasEllipse::containsPoint(const QPoint &point)
 	return pow(point.x() - centerPoint.x(), 2) / pow(m_width, 2) + pow(point.y() - centerPoint.y(), 2) / pow(m_height, 2) <= 1;
 }
 
-bool LCanvasTriangle::containsPoint(const QPoint &point)
+bool LCanvasTriangle::containsPos(const QPoint &point)
 {
 	QPolygon polygon(m_vertices);
 	if (polygon.containsPoint(point, Qt::WindingFill))
@@ -496,7 +496,7 @@ bool LCanvasTriangle::containsPoint(const QPoint &point)
 	return false;
 }
 
-bool LCanvasHexagon::containsPoint(const QPoint &point)
+bool LCanvasHexagon::containsPos(const QPoint &point)
 {
 	QPolygon polygon(m_vertices);
 	if (polygon.containsPoint(point, Qt::WindingFill))
@@ -505,7 +505,7 @@ bool LCanvasHexagon::containsPoint(const QPoint &point)
 	return false;
 }
 
-bool LCanvasText::containsPoint(const QPoint &point)
+bool LCanvasText::containsPos(const QPoint &point)
 {
 	if (m_boundingRect.isValid())
 		return m_boundingRect.contains(point);

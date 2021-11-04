@@ -113,37 +113,70 @@ void LCanvasView::paintEvent(QPaintEvent *event)
 	if (m_showFrameRect && !m_startPos.isNull() && !m_endPos.isNull())
 	{
 		QPainter paint(this);
-		QPen pen(Qt::DotLine);
+		QPen pen(Qt::DashLine);
 		pen.setColor(Qt::blue);
-		pen.setWidth(3);
+		pen.setWidth(2);
 		paint.setPen(pen);
 		m_rubberBand = QRect(m_startPos, m_endPos);
 		paint.drawRect(m_rubberBand);
 	}
 }
 
-void LCanvasView::mousePressEvent(QMouseEvent* ev)
+void LCanvasView::mousePressEvent(QMouseEvent *event)
 {
 	m_bPaintingItem = true;
-	beforePaintItem(ev->pos());
-	m_itemHitPos = getItemHitPos(ev->pos());
+	QPoint pos = event->pos();
+	beforePaintItem(pos);
+
+	m_itemHitPos = getItemHitPos(pos);
+	switch (m_itemHitPos)
+	{
+	case ItemHitPos::None:
+	{
+		break;
+	}
+	case ItemHitPos::TopLeft:
+	case ItemHitPos::BottomRight:
+	{
+		this->setCursor(Qt::SizeFDiagCursor);
+		break;
+	}
+	case ItemHitPos::TopMiddle:
+	case ItemHitPos::BottomMiddle:
+	{
+		this->setCursor(Qt::SizeVerCursor);
+		break;
+	}
+	case ItemHitPos::TopRight:
+	case ItemHitPos::BottomLeft:
+	{
+		this->setCursor(Qt::SizeBDiagCursor);
+		break;
+	}
+	case ItemHitPos::MiddleRight:
+	case ItemHitPos::MiddleLeft:
+	{
+		this->setCursor(Qt::SizeHorCursor);
+		break;
+	}
+	}
+
 	if (m_itemHitPos != ItemHitPos::None)
 	{
-		this->setCursor(Qt::ClosedHandCursor);
 		m_mouseClickOutRect = true;
 		m_showFrameRect = false;
-		m_lastPos = ev->pos();
+		m_lastPos = pos;
 		return;
 	}
-	if (m_item == nullptr)
+	if (!m_item)
 	{
 		if (m_mouseFrameSelection && !m_selectedItems.isEmpty() && !m_mouseFrameSelect)
 		{
-			selectItemsByFrame(ev->pos());
+			selectItemsByFrame(pos);
 		}
 		else if(!m_mouseFrameSelect && m_selectedItems.isEmpty())
 		{
-			selectItemsByClick(ev->pos());
+			selectItemsByClick(pos);
 		}
 		update();
 	}
@@ -151,58 +184,48 @@ void LCanvasView::mousePressEvent(QMouseEvent* ev)
 	{
 		reselectItems();
 		m_bPaintingPath = true;
-
+		m_item->setStartPos(pos);
+		m_item->addPoint(pos);
 		m_allItems << m_item;
-		m_item->addPoint(ev->pos());
-		m_item->setStartPos(ev->pos());
 		update();
 		return;
 	}
 	else if (m_item != nullptr)
 	{
 		reselectItems();
+		m_bPaintingPath = false;
+		m_item->setStartPos(pos);
+		m_item->setEndPos(pos);
+		m_allItems << m_item;
 		if (m_itemType == LCanvasItem::Text)
 			m_textItems << m_item;
-		m_bPaintingPath = false;
-		m_allItems << m_item;
-		m_item->setStartPos(ev->pos());
-		m_item->setEndPos(ev->pos());
 	}
-	m_endPos = ev->pos();
+
+	m_endPos = pos;
 }
 
-void LCanvasView::mouseMoveEvent(QMouseEvent* ev)
+void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 {
-	if (m_itemType == LCanvasItem::Path)
-	{
-		this->setCursor(Qt::CrossCursor);
-	}
-	else
-	{
-		this->setCursor(Qt::ArrowCursor);
-	}
-
-	m_endPos = ev->pos();
+	QPoint pos = event->pos();
+	m_endPos = pos;
 	if (m_mouseClickOutRect && m_itemHitPos != ItemHitPos::None && m_itemType == LCanvasItem::None)
 	{
 		if (m_selectedItem)
 			m_selectedItem->setSelected(true);
-		resizeSelectedItem(ev->pos());
+
+		resizeSelectedItem(pos);
 		return;
 	}
-	if (ev->buttons() == Qt::LeftButton && m_item == nullptr && !m_mouseClickSelect)
+	if (event->buttons() & Qt::LeftButton && m_item == nullptr && !m_mouseClickSelect)
 	{
-		int size = m_allItems.size() - 1;
 		if (m_mouseFrameSelect)
 		{
-			int width = ev->pos().x() - m_lastPos.x();
-			int height = ev->pos().y() - m_lastPos.y();
+			int dx = pos.x() - m_lastPos.x();
+			int dy = pos.y() - m_lastPos.y();
+			foreach (auto &item, m_selectedItems)
+				item->moveItem(dx, dy);
 
-			for (auto& e:m_selectedItems)
-			{
-				e->moveItem(width, height);
-			}
-			m_lastPos = ev->pos();
+			m_lastPos = pos;
 			update();
 			return;
 		}
@@ -210,104 +233,85 @@ void LCanvasView::mouseMoveEvent(QMouseEvent* ev)
 		{
 			deselectAllItems();
 		}
-		for (; size >= 0; size--)
+		for (int i = m_allItems.size() - 1; i >= 0; --i)
 		{
-			if (m_rubberBand.intersects(m_allItems[size]->boundingRect()))
+			if (m_rubberBand.intersects(m_allItems[i]->boundingRect()))
 			{
-				m_selectedItems << m_allItems[size];
-				m_allItems[size]->setSelected(true);
+				m_allItems[i]->setSelected(true);
+				m_selectedItems << m_allItems[i];
 				m_showFrameRect = true;
 				m_mouseFrameSelection = true;
 			}
 		}
 	}
-	else if (ev->buttons() == Qt::LeftButton && m_item == nullptr && m_showFrameRect == false)
+	else if (event->buttons() & Qt::LeftButton && !m_item && !m_showFrameRect)
 	{
-		if (m_selectedItem != nullptr && m_selectedItem->isSelected())
+		if (m_selectedItem && m_selectedItem->isSelected())
 		{
-			int width = ev->pos().x() - m_lastPos.x();
-			int height = ev->pos().y() - m_lastPos.y();
-			m_selectedItem->moveItem(width, height);
-			m_lastPos = ev->pos();
+			int dx = pos.x() - m_lastPos.x();
+			int dy = pos.y() - m_lastPos.y();
+			m_selectedItem->moveItem(dx, dy);
+			m_lastPos = pos;
 		}
 	}
-	else if (ev->buttons() == Qt::LeftButton && m_bPaintingPath == true && m_item && m_itemType == LCanvasItem::Path)
+	else if (event->buttons() & Qt::LeftButton && m_bPaintingPath && m_item && m_itemType == LCanvasItem::Path)
 	{
-		m_item->addPoint(ev->pos());
+		m_item->addPoint(pos);
 	}
-	else if (ev->buttons() == Qt::LeftButton && m_item) {
-		m_item->setEndPos(ev->pos());
+	else if (event->buttons() & Qt::LeftButton && m_item)
+	{
+		m_item->setEndPos(pos);
 	}
 	update();
 }
 
-void LCanvasView::mouseReleaseEvent(QMouseEvent* ev)
+void LCanvasView::mouseReleaseEvent(QMouseEvent *event)
 {
-	m_endPos = ev->pos();
-	if (m_mouseClickOutRect)
-	{
-		m_mouseClickOutRect = false;
-		this->setCursor(Qt::ArrowCursor);
-	}
-	if (m_mouseClickSelect)
-		m_mouseClickSelect = false;
-	if (m_mouseFrameSelect)
-		m_mouseFrameSelect = false;
+	QPoint pos = event->pos();
+	m_endPos = pos;
 
-	if (m_bPaintingItem && m_item)
+	if (event->button() & Qt::LeftButton && m_item)
 	{
-		QPoint endPoint = ev->pos();
-	}
-
-	if (m_bPaintingPath == true && m_item && m_itemType == LCanvasItem::Path)
-	{
-		m_item->setEndPos(ev->pos());
-		m_item->addPoint(ev->pos());
-	}
-
-	if (ev->button() == Qt::LeftButton && m_item)
-	{
-		m_selectedItem = m_item;
 		m_item->setSelected(true);
+		m_selectedItem = m_item;
 	}
 
 	m_startPos = QPoint();
 	m_endPos = QPoint();
 	m_showFrameRect = false;
+	m_mouseClickOutRect = false;
+	m_mouseClickSelect = false;
+	m_mouseFrameSelect = false;
 	update();
 }
 
-void LCanvasView::mouseDoubleClickEvent(QMouseEvent* ev)
+void LCanvasView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-	bool flag = false;
 	if (!m_selectedItems.isEmpty())
 		deselectAllItems();
 
-	for (int i = m_textItems.size()-1; i >= 0; i--)
+	QPoint pos = event->pos();
+	for (int i = m_textItems.size() - 1; i >= 0; --i)
 	{
-		if (m_textItems[i]->containsPoint(ev->pos()))
+		if (m_textItems[i]->containsPos(pos))
 		{
-			m_lineEdit = m_textItems[i]->lineEdit();
-			m_selectedItem = m_textItems[i];
 			m_textItems[i]->setSelected(true);
-			flag = true;
+			m_selectedItem = m_textItems[i];
+			m_lineEdit = m_textItems[i]->lineEdit();
+			m_lineEdit->setVisible(true);
 			break;
 		}
 	}
-
-	if (flag)
-	{
-		m_lineEdit->setVisible(true);
-		m_selectedItem->boundingRect();
-	}
 }
 
-void LCanvasView::contextMenuEvent(QContextMenuEvent* ev)
+void LCanvasView::contextMenuEvent(QContextMenuEvent *event)
 {
-	if (m_itemType == LCanvasItem::None&& m_selectedItem && m_selectedItem->boundingRect().contains(ev->pos()))
+	QPoint pos = event->pos();
+	if (m_itemType == LCanvasItem::None && m_selectedItem &&
+		m_selectedItem->boundingRect().contains(pos))
 	{
 		m_rightClickMenu->show();
-		m_rightClickMenu->move(ev->globalPos());
+		m_rightClickMenu->move(pos);
 	}
 }
 
@@ -537,7 +541,7 @@ void LCanvasView::reselectItems()
 
 void LCanvasView::deselectAllItems()
 {
-	for (auto &item : m_selectedItems)
+	foreach (auto &item, m_selectedItems)
 		item->setSelected(false);
 
 	m_selectedItems.clear();
@@ -558,14 +562,14 @@ void LCanvasView::paintSelectedBox(LCanvasItem *item, QPainter &painter)
 	int top = selectedBox.top();
 	int width = selectedBox.width();
 	int height = selectedBox.height();
-	m_topLeftPos = QRect(left - 6, top - 6, 10, 10);
-	m_topMiddlePos = QRect(left + width / 2 - 6, top - 6, 10, 10);
-	m_topRightPos = QRect(left + width - 6, top - 6, 10, 10);
-	m_middleRightPos = QRect(left + width - 4, top + height / 2 - 6, 10, 10);
-	m_bottomRightPos = QRect(left + width - 6, top + height - 6, 10, 10);
-	m_bottomMiddlePos = QRect(left + width / 2 - 6, top + height - 3, 10, 10);
-	m_bottomLeftPos = QRect(left - 6, top + height - 6, 10, 10);
-	m_middleLeftPos = QRect(left - 6, top + height / 2 - 6, 10, 10);
+	m_topLeftPos = QRect(left - 4, top - 4, 8, 8);
+	m_topMiddlePos = QRect(left + width / 2 - 4, top - 4, 8, 8);
+	m_topRightPos = QRect(left + width - 4, top - 4, 8, 8);
+	m_middleRightPos = QRect(left + width - 4, top + height / 2 - 4, 8, 8);
+	m_bottomRightPos = QRect(left + width - 4, top + height - 4, 8, 8);
+	m_bottomMiddlePos = QRect(left + width / 2 - 4, top + height - 4, 8, 8);
+	m_bottomLeftPos = QRect(left - 4, top + height - 4, 8, 8);
+	m_middleLeftPos = QRect(left - 4, top + height / 2 - 4, 8, 8);
 
 	painter.setPen(Qt::blue);
 	painter.drawRect(selectedBox);
@@ -644,7 +648,7 @@ void LCanvasView::beforePaintItem(const QPoint &pos)
 		m_lineEdit = m_item->lineEdit();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
-		connect(m_lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(update()));
+		connect(m_lineEdit, SIGNAL(textChanged()), this, SLOT(update()));
 		break;
 	}
 	}
@@ -652,7 +656,6 @@ void LCanvasView::beforePaintItem(const QPoint &pos)
 
 void LCanvasView::selectItemsByClick(const QPoint &pos)
 {
-	bool flags = false;
 	if (!m_selectedItems.isEmpty())
 		deselectAllItems();
 
@@ -663,7 +666,7 @@ void LCanvasView::selectItemsByClick(const QPoint &pos)
 			m_allItems[i]->setSelected(false);
 		}
 
-		if (m_allItems[i]->containsPoint(pos))
+		if (m_allItems[i]->containsPos(pos))
 		{
 			if (m_selectedItem && m_selectedItem != m_allItems[i])
 				m_selectedItem->setSelected(false);
@@ -672,18 +675,14 @@ void LCanvasView::selectItemsByClick(const QPoint &pos)
 			m_selectedItem->setSelected(true);
 			m_lastPos = pos;
 			m_showFrameRect = false;
-			flags = true;
 			m_mouseClickSelect = true;
 			m_mouseFrameSelect = false;
-			break;
+			return;
 		}
-
 	}
 
-	if (!flags && m_selectedItem)
-	{
+	if (m_selectedItem)
 		m_selectedItem->setSelected(false);
-	}
 }
 
 void LCanvasView::selectItemsByFrame(const QPoint &pos)
@@ -692,9 +691,9 @@ void LCanvasView::selectItemsByFrame(const QPoint &pos)
 	m_selectedItem->setSelected(false);
 	m_selectedItem = nullptr;
 	bool containsFlag = false;
-	for (auto &item : m_selectedItems)
+	foreach (auto &item, m_selectedItems)
 	{
-		if (item->containsPoint(pos))
+		if (item->containsPos(pos))
 		{
 			m_lastPos = pos;
 			containsFlag = true;
@@ -702,7 +701,6 @@ void LCanvasView::selectItemsByFrame(const QPoint &pos)
 			m_mouseFrameSelect = true;
 			break;
 		}
-
 	}
 
 	if (containsFlag == false)
@@ -714,15 +712,14 @@ void LCanvasView::selectItemsByFrame(const QPoint &pos)
 
 void LCanvasView::resizeSelectedItem(const QPoint& pos)
 {
-	LCanvasItem::ItemType shape = m_selectedItem->getItemType();
-	LCanvasPath *ptr = static_cast<LCanvasPath *>(m_selectedItem);
-	QRect tmpRect = m_selectedItem->boundingRect();
+	if (!m_selectedItem)
+		return;
+
 	switch (m_itemHitPos)
 	{
 	case ItemHitPos::TopLeft:
 	{
-		if (shape != LCanvasItem::Path)
-			m_selectedItem->setStartPos(pos);
+		m_selectedItem->setStartPos(pos);
 		break;
 	}
 	case ItemHitPos::TopMiddle:
@@ -874,7 +871,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
-		connect(m_lineEdit, SIGNAL(textChanged(QString &)), this, SLOT(update()));
+		connect(m_lineEdit, SIGNAL(textChanged()), this, SLOT(update()));
 		m_textItems << m_item;
 		break;
 	}
