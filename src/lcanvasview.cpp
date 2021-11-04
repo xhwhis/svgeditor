@@ -19,7 +19,7 @@ LCanvasView::LCanvasView(QWidget *parent)
 	, m_mouseFrameSelect(false)
 	, m_mouseClickSelect(false)
 	, m_selectedItem(nullptr)
-	, m_clickOutRect(LCanvasView::None)
+	, m_itemHitPos(LCanvasView::None)
 	, m_mouseClickOutRect(false)
 {
 	this->setMouseTracking(true);
@@ -126,8 +126,8 @@ void LCanvasView::mousePressEvent(QMouseEvent* ev)
 {
 	m_bPaintingItem = true;
 	beforePaintItem(ev->pos());
-	m_clickOutRect = getItemHitPos(ev->pos());
-	if (m_clickOutRect != ItemHitPos::None)
+	m_itemHitPos = getItemHitPos(ev->pos());
+	if (m_itemHitPos != ItemHitPos::None)
 	{
 		this->setCursor(Qt::ClosedHandCursor);
 		m_mouseClickOutRect = true;
@@ -183,7 +183,7 @@ void LCanvasView::mouseMoveEvent(QMouseEvent* ev)
 	}
 
 	m_endPos = ev->pos();
-	if (m_mouseClickOutRect && m_clickOutRect != ItemHitPos::None && m_itemType == LCanvasItem::None)
+	if (m_mouseClickOutRect && m_itemHitPos != ItemHitPos::None && m_itemType == LCanvasItem::None)
 	{
 		if (m_selectedItem)
 			m_selectedItem->setSelected(true);
@@ -317,7 +317,7 @@ void LCanvasView::setItemType(LCanvasItem::ItemType itemType)
 		m_itemType = itemType;
 }
 
-void LCanvasView::readItemsFromFile(QString filePath)
+void LCanvasView::readItemsFromFile(const QString &filePath)
 {
 	if (filePath.isEmpty())
 		return;
@@ -386,7 +386,7 @@ void LCanvasView::readItemsFromFile(QString filePath)
 	file.close();
 }
 
-void LCanvasView::writeItemsToFile(QString filePath)
+void LCanvasView::writeItemsToFile(const QString &filePath)
 {
 	if (filePath.isEmpty())
 		return;
@@ -717,7 +717,7 @@ void LCanvasView::resizeSelectedItem(const QPoint& pos)
 	LCanvasItem::ItemType shape = m_selectedItem->getItemType();
 	LCanvasPath *ptr = static_cast<LCanvasPath *>(m_selectedItem);
 	QRect tmpRect = m_selectedItem->boundingRect();
-	switch (m_clickOutRect)
+	switch (m_itemHitPos)
 	{
 	case ItemHitPos::TopLeft:
 	{

@@ -40,10 +40,10 @@ protected:
 	void mouseDoubleClickEvent(QMouseEvent *event);
 	void contextMenuEvent(QContextMenuEvent *event);
 
-private slots:
+protected slots:
 	void setItemType(LCanvasItem::ItemType itemType);
-	void readItemsFromFile(QString filePath);
-	void writeItemsToFile(QString filePath);
+	void readItemsFromFile(const QString &filePath);
+	void writeItemsToFile(const QString &filePath);
 	void cutItem();
 	void copyItem();
 	void pasteItem();
@@ -97,7 +97,7 @@ private:
 	bool m_mouseFrameSelect;
 	bool m_mouseClickSelect;
 	LCanvasItem *m_selectedItem;
-	ItemHitPos m_clickOutRect;
+	ItemHitPos m_itemHitPos;
 	bool m_mouseClickOutRect;
 };
 

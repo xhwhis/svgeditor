@@ -22,10 +22,10 @@ public:
 
 signals:
 	void changeItemType(LCanvasItem::ItemType itemType);
-	void sigReadItemsFromFile(QString filPath);
-	void sigWriteItemsToFile(QString filPath);
+	void sigReadItemsFromFile(const QString &filPath);
+	void sigWriteItemsToFile(const QString &filPath);
 
-public slots:
+protected slots:
 	void onPaintNone();
 	void onPaintPath();
 	void onPaintLine();
