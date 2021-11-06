@@ -19,6 +19,7 @@ LCanvasView::LCanvasView(QWidget *parent)
 	, m_mouseFrameSelect(false)
 	, m_mouseClickSelect(false)
 	, m_selectedItem(nullptr)
+	, m_copyItem(nullptr)
 	, m_itemHitPos(LCanvasView::None)
 	, m_mouseClickOutRect(false)
 {
@@ -50,7 +51,8 @@ void LCanvasView::setCanvasColor(const QColor &color)
 	if (color.isValid())
 		m_canvasColor = color;
 
-	this->setStyleSheet("background-color:" + m_canvasColor.name() + "; border-radius:10px");
+	this->setStyleSheet(QStringLiteral("background-color:") + m_canvasColor.name() +
+						QStringLiteral("; border-radius:10px"));
 }
 
 void LCanvasView::setStrokeColor(const QColor &color)
@@ -306,13 +308,9 @@ void LCanvasView::mouseDoubleClickEvent(QMouseEvent *event)
 
 void LCanvasView::contextMenuEvent(QContextMenuEvent *event)
 {
-	QPoint pos = event->pos();
 	if (m_itemType == LCanvasItem::None && m_selectedItem &&
-		m_selectedItem->boundingRect().contains(pos))
-	{
-		m_rightClickMenu->show();
-		m_rightClickMenu->move(pos);
-	}
+		m_selectedItem->boundingRect().contains(event->pos()))
+		m_rightClickMenu->exec(event->globalPos());
 }
 
 void LCanvasView::setItemType(LCanvasItem::ItemType itemType)
@@ -329,64 +327,59 @@ void LCanvasView::readItemsFromFile(const QString &filePath)
 	QFile file(filePath);
 	if (!file.open(QFile::ReadOnly | QFile::Text))
 	{
-		QMessageBox::critical(this, "Error", "Read Error");
+		QMessageBox::critical(this, tr("Error"), tr("Read Error"));
 		return;
 	}
 
 	QXmlStreamReader reader(&file);
 
-	while(reader.name().toString() != "svg")
+	while(reader.name().toString() != QLatin1String("svg"))
 	{
 		reader.readNext();
 	}
 
-	if (reader.attributes().value("subset").toString() != "lwscode")
+	if (reader.attributes().value(QStringLiteral("subset")).toString() != QLatin1String("lwscode"))
 		return;
 
-	while (!reader.atEnd() && !reader.hasError())
+	while (!reader.atEnd())
 	{
 		if (reader.isEndElement())
-		{
-			reader.readNext();
-			continue;
-		}
+			break;
+
 		if (reader.isStartElement())
 		{
-			if (reader.name().toString() == "Path")
+			if (reader.name().toString() == QLatin1String("path"))
 			{
 				readItemFromXml(LCanvasItem::Path, reader);
 			}
-			else if (reader.name().toString() == "Line")
+			else if (reader.name().toString() == QLatin1String("line"))
 			{
 				readItemFromXml(LCanvasItem::Line, reader);
 			}
-			else if (reader.name().toString() == "Rect")
+			else if (reader.name().toString() == QLatin1String("rect"))
 			{
 				readItemFromXml(LCanvasItem::Rect, reader);
 			}
-			else if (reader.name().toString() == "Triangle")
+			else if (reader.name().toString() == QLatin1String("triangle"))
 			{
 				readItemFromXml(LCanvasItem::Triangle, reader);
 			}
-			else if (reader.name().toString() == "Hexagon")
+			else if (reader.name().toString() == QLatin1String("hexagon"))
 			{
 				readItemFromXml(LCanvasItem::Hexagon, reader);
 			}
-			else if (reader.name().toString() == "Ellipse")
+			else if (reader.name().toString() == QLatin1String("ellipse"))
 			{
 				readItemFromXml(LCanvasItem::Ellipse, reader);
 			}
-			else if (reader.name().toString() == "Text")
+			else if (reader.name().toString() == QLatin1String("text"))
 			{
 				readItemFromXml(LCanvasItem::Text, reader);
-			}
-			else
-			{
-				readItemFromXml(LCanvasItem::None, reader);
 			}
 		}
 		reader.readNext();
 	}
+
 	file.close();
 }
 
@@ -398,21 +391,20 @@ void LCanvasView::writeItemsToFile(const QString &filePath)
 	QFile file(filePath);
 	if (!file.open(QFile::WriteOnly | QFile::Text))
 	{
-		QMessageBox::critical(this, "Error", "Write Error");
+		QMessageBox::critical(this, tr("Error"), tr("Write Error"));
 		return;
 	}
 
 	QXmlStreamWriter writer(&file);
-	writer.setAutoFormatting(true);
 
 	writer.writeStartDocument();
-	writer.writeStartElement("svg");
-	writer.writeAttribute("subset", "lwscode");
-	writer.writeAttribute("width",QString::number(this->width()));
-	writer.writeAttribute("height", QString::number(this->height()));
-	writer.writeAttribute("xmlns", QString("http://www.w3.org/2000/svg"));
+	writer.writeStartElement(QStringLiteral("svg"));
+	writer.writeAttribute(QStringLiteral("subset"), QStringLiteral("lwscode"));
+	writer.writeAttribute(QStringLiteral("width"), QString::number(this->width()));
+	writer.writeAttribute(QStringLiteral("height"), QString::number(this->height()));
+	writer.writeAttribute(QStringLiteral("xmlns"), QStringLiteral("http://www.w3.org/2000/svg"));
 
-	for (auto &item : m_allItems)
+	foreach (auto &item, m_allItems)
 		item->writeItemToXml(writer);
 
 	writer.writeEndElement();
@@ -500,14 +492,14 @@ LCanvasView::ItemHitPos LCanvasView::getItemHitPos(const QPoint &point)
 void LCanvasView::initRightClickMenu()
 {
 	m_rightClickMenu = new QMenu(this);
-	QAction *cutAction = new QAction("Cut", m_rightClickMenu);
-	QAction *pasteAction = new QAction("Paste", m_rightClickMenu);
-	QAction *copyAction = new QAction("Copy", m_rightClickMenu);
-	QAction *deleteAction = new QAction("Delete", m_rightClickMenu);
-	QAction *moveTopAction = new QAction("Move Top", m_rightClickMenu);
-	QAction *moveUpAction = new QAction("Move Up", m_rightClickMenu);
-	QAction *moveDownAction = new QAction("Move Down", m_rightClickMenu);
-	QAction *moveBottomAction = new QAction("Move Bottom", m_rightClickMenu);
+	QAction *cutAction = new QAction(QStringLiteral("Cut"), m_rightClickMenu);
+	QAction *pasteAction = new QAction(QStringLiteral("Paste"), m_rightClickMenu);
+	QAction *copyAction = new QAction(QStringLiteral("Copy"), m_rightClickMenu);
+	QAction *deleteAction = new QAction(QStringLiteral("Delete"), m_rightClickMenu);
+	QAction *moveTopAction = new QAction(QStringLiteral("Move Top"), m_rightClickMenu);
+	QAction *moveUpAction = new QAction(QStringLiteral("Move Up"), m_rightClickMenu);
+	QAction *moveDownAction = new QAction(QStringLiteral("Move Down"), m_rightClickMenu);
+	QAction *moveBottomAction = new QAction(QStringLiteral("Move Bottom"), m_rightClickMenu);
 
 	m_rightClickMenu->addAction(cutAction);
 	m_rightClickMenu->addAction(pasteAction);
@@ -662,9 +654,7 @@ void LCanvasView::selectItemsByClick(const QPoint &pos)
 	for (int i = m_allItems.size() - 1; i >= 0; i--)
 	{
 		if (m_allItems[i]->isSelected())
-		{
 			m_allItems[i]->setSelected(false);
-		}
 
 		if (m_allItems[i]->containsPos(pos))
 		{
@@ -782,12 +772,12 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	{
 	case LCanvasItem::Path:
 	{
-		QString path = reader.attributes().value("d").toString();
-		QStringList points = path.split(QRegularExpression("[ML]"));
+		QString path = reader.attributes().value(QStringLiteral("d")).toString();
+		QStringList points = path.split(QRegularExpression(QStringLiteral("[ML]")));
 
 		m_item = new LCanvasPath();
 		m_bPaintingPath = true;
-		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
+		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setStartPos(QPoint(points[0].toInt(), points[1].toInt()));
 		int size = points.size();
@@ -801,74 +791,74 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	case LCanvasItem::Line:
 	{
 		m_item = new LCanvasLine();
-		m_item->setStartPos(QPoint(reader.attributes().value("x1").toInt(),
-								   reader.attributes().value("y1").toInt()));
-		m_item->setEndPos(QPoint(reader.attributes().value("x2").toInt(),
-								 reader.attributes().value("y2").toInt()));
-		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
+		m_item->setStartPos(QPoint(reader.attributes().value(QStringLiteral("x1")).toInt(),
+								   reader.attributes().value(QStringLiteral("y1")).toInt()));
+		m_item->setEndPos(QPoint(reader.attributes().value(QStringLiteral("x2")).toInt(),
+								 reader.attributes().value(QStringLiteral("y2")).toInt()));
+		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
 		break;
 	}
 	case LCanvasItem::Rect:
 	{
 		m_item = new LCanvasRect();
-		int x = reader.attributes().value("x").toInt();
-		int y = reader.attributes().value("y").toInt();
-		int width = reader.attributes().value("width").toInt();
-		int height = reader.attributes().value("height").toInt();
+		int x = reader.attributes().value(QStringLiteral("x")).toInt();
+		int y = reader.attributes().value(QStringLiteral("y")).toInt();
+		int width = reader.attributes().value(QStringLiteral("width")).toInt();
+		int height = reader.attributes().value(QStringLiteral("height")).toInt();
 		m_item->setStartPos(QPoint(x, y));
 		m_item->setEndPos(QPoint(x + width, y + height));
-		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
+		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
-		m_item->setFillColor(reader.attributes().value("fill").toString());
+		m_item->setFillColor(reader.attributes().value(QStringLiteral("fill")).toString());
 		break;
 	}
 	case LCanvasItem::Ellipse:
 	{
 		m_item = new LCanvasEllipse();
-		int cx = reader.attributes().value("cx").toInt();
-		int cy = reader.attributes().value("cy").toInt();
-		int rx = reader.attributes().value("rx").toInt();
-		int ry = reader.attributes().value("ry").toInt();
+		int cx = reader.attributes().value(QStringLiteral("cx")).toInt();
+		int cy = reader.attributes().value(QStringLiteral("cy")).toInt();
+		int rx = reader.attributes().value(QStringLiteral("rx")).toInt();
+		int ry = reader.attributes().value(QStringLiteral("ry")).toInt();
 		m_item->setStartPos(QPoint(cx - rx, cy - ry));
 		m_item->setEndPos(QPoint(cx + rx, cy + cy));
-		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
+		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
-		m_item->setFillColor(reader.attributes().value("fill").toString());
+		m_item->setFillColor(reader.attributes().value(QStringLiteral("fill")).toString());
 		break;
 	}
 	case LCanvasItem::Triangle:
 	{
 		m_item = new LCanvasTriangle();
-		QString polygon = reader.attributes().value("points").toString();
-		QStringList points = polygon.split(QRegularExpression("[,]"));
+		QString polygon = reader.attributes().value(QStringLiteral("points")).toString();
+		QStringList points = polygon.split(QRegularExpression(QStringLiteral("[,]")));
 		m_item->setStartPos(QPoint(points[4].toInt(), points[1].toInt()));
 		m_item->setEndPos(QPoint(points[2].toInt(), points[3].toInt()));
-		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
+		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
-		m_item->setFillColor(reader.attributes().value("fill").toString());
+		m_item->setFillColor(reader.attributes().value(QStringLiteral("fill")).toString());
 		break;
 	}
 	case LCanvasItem::Hexagon:
 	{
 		m_item = new LCanvasHexagon();
-		QString polygon = reader.attributes().value("points").toString();
-		QStringList points = polygon.split(QRegularExpression("[,]"));
+		QString polygon = reader.attributes().value(QStringLiteral("points")).toString();
+		QStringList points = polygon.split(QRegularExpression(QStringLiteral("[,]")));
 		m_item->setStartPos(QPoint(points[10].toInt(), points[1].toInt()));
 		m_item->setEndPos(QPoint(points[4].toInt(), points[7].toInt()));
-		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
+		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
-		m_item->setFillColor(reader.attributes().value("fill").toString());
+		m_item->setFillColor(reader.attributes().value(QStringLiteral("fill")).toString());
 		break;
 	}
 	case LCanvasItem::Text:
 	{
 		m_item = new LCanvasText(this);
-		m_item->setStartPos(QPoint(reader.attributes().value("x").toInt(),
-								   reader.attributes().value("y").toInt()));
+		m_item->setStartPos(QPoint(reader.attributes().value(QStringLiteral("x")).toInt(),
+								   reader.attributes().value(QStringLiteral("y")).toInt()));
 		m_lineEdit = m_item->lineEdit();
 		m_lineEdit->setText(reader.readElementText());
-		m_strokeWidth = reader.attributes().value("stroke-width").toInt();
+		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
 		connect(m_lineEdit, SIGNAL(textChanged()), this, SLOT(update()));

@@ -22,8 +22,8 @@ public:
 
 signals:
 	void changeItemType(LCanvasItem::ItemType itemType);
-	void sigReadItemsFromFile(const QString &filPath);
-	void sigWriteItemsToFile(const QString &filPath);
+	void sigReadItemsFromFile(const QString &filePath);
+	void sigWriteItemsToFile(const QString &filePath);
 
 protected slots:
 	void onPaintNone();
