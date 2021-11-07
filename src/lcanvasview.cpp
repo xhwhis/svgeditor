@@ -25,6 +25,7 @@ LCanvasView::LCanvasView(QWidget *parent)
 {
 	this->setMouseTracking(true);
 	this->setAttribute(Qt::WA_StyledBackground);
+	this->setStyleSheet(QStringLiteral("border-radius: 8px"));
 	initRightClickMenu();
 }
 
@@ -51,7 +52,7 @@ void LCanvasView::setCanvasColor(const QColor &color)
 	if (color.isValid())
 		m_canvasColor = color;
 
-	this->setStyleSheet(QStringLiteral("background-color:") + m_canvasColor.name());
+	this->setStyleSheet(QStringLiteral("background-color: ") + m_canvasColor.name());
 }
 
 void LCanvasView::setStrokeColor(const QColor &color)

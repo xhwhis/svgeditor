@@ -208,7 +208,7 @@ void MainWindow::initRightToolBar()
 	QLabel *canvasColorLabel = new QLabel(QStringLiteral("Canvas Color"), toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
 	m_canvasColorButton->setFixedSize(64, 32);
-	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color:white"));
+	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: white"));
 	QHBoxLayout *canvasColorLayout = new QHBoxLayout(toolsPanelWidget);
 	canvasColorLayout->addWidget(canvasColorLabel);
 	canvasColorLayout->addWidget(m_canvasColorButton);
@@ -266,11 +266,13 @@ void MainWindow::initCanvas()
 
 	if (!m_canvasColor.isValid())
 	{
-		m_canvas->setStyleSheet(QStringLiteral("background-color:white"));
+		m_canvas->setStyleSheet(QStringLiteral("background-color: white") +
+								QStringLiteral("; border-radius: 8px"));
 	}
 	else
 	{
-		m_canvas->setStyleSheet(QStringLiteral("background-color:") + m_canvasColor.name());
+		m_canvas->setStyleSheet(QStringLiteral("background-color: ") + m_canvasColor.name() +
+								QStringLiteral("; border-radius: 8px"));
 	}
 
 	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
@@ -361,7 +363,7 @@ void MainWindow::setCanvasColor()
 	if (getColor.isValid())
 	{
 		m_canvasColor = getColor;
-		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color:") + getColor.name());
+		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: ") + getColor.name());
 		m_canvas->setCanvasColor(getColor);
 	}
 }
