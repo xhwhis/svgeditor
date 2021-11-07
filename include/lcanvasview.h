@@ -73,7 +73,7 @@ private:
 	QList<LCanvasItem *> m_allItems;
 	QSet<LCanvasItem *> m_selectedItems;
 	QList<LCanvasItem *> m_textItems;
-	LCanvasItem *m_copyItem;
+	QSet<LCanvasItem *> m_duplicatedItems;
 	QColor m_canvasColor;
 	QColor m_fillColor;
 	QColor m_strokeColor;

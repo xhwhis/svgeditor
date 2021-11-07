@@ -25,10 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::initUI()
 {
+	initCanvas();
 	initMenuBar();
 	initLeftToolBar();
 	initRightToolBar();
-	initCanvas();
 }
 
 void MainWindow::initMenuBar()
@@ -103,6 +103,11 @@ void MainWindow::initMenuBar()
 	connect(newFileAction, SIGNAL(triggered()), this, SLOT(onNewFile()));
 	connect(openFileAction, SIGNAL(triggered()), this, SLOT(onOpenFile()));
 	connect(saveFileAction, SIGNAL(triggered()), this, SLOT(onSaveFile()));
+
+	connect(cutEditAction, SIGNAL(triggered()), m_canvas, SLOT(cutItem()));
+	connect(copyEditAction, SIGNAL(triggered()), m_canvas, SLOT(copyItem()));
+	connect(pasteEditAction, SIGNAL(triggered()), m_canvas, SLOT(pasteItem()));
+	connect(deleteEditAction, SIGNAL(triggered()), m_canvas, SLOT(deleteItem()));
 }
 
 void MainWindow::initLeftToolBar()

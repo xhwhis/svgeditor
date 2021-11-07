@@ -19,7 +19,6 @@ LCanvasView::LCanvasView(QWidget *parent)
 	, m_mouseFrameSelect(false)
 	, m_mouseClickSelect(false)
 	, m_selectedItem(nullptr)
-	, m_copyItem(nullptr)
 	, m_itemHitPos(LCanvasView::None)
 {
 	this->setMouseTracking(true);
@@ -354,7 +353,10 @@ void LCanvasView::readItemsFromFile(const QString &filePath)
 	while (!reader.atEnd())
 	{
 		if (reader.isEndElement())
-			break;
+		{
+			reader.readNext();
+			continue;
+		}
 
 		if (reader.isStartElement())
 		{
@@ -427,17 +429,34 @@ void LCanvasView::writeItemsToFile(const QString &filePath)
 void LCanvasView::cutItem()
 {
 	copyItem();
-	pasteItem();
+	deleteItem();
 }
 
 void LCanvasView::copyItem()
 {
-	LCanvasItem::ItemType shape = m_selectedItem->getItemType();
+	if (m_selectedItems.isEmpty())
+		return;
+
+	m_duplicatedItems.clear();
+	foreach (auto &item, m_selectedItems)
+	{
+		LCanvasItem *duplicatedItem = item;
+		duplicatedItem->moveItem(1, 1);
+		m_duplicatedItems << duplicatedItem;
+	}
 }
 
 void LCanvasView::pasteItem()
 {
+	if (m_duplicatedItems.isEmpty())
+		return;
 
+	m_selectedItems.clear();
+	foreach (auto &item, m_duplicatedItems)
+	{
+		m_allItems << item;
+		m_selectedItems << item;
+	}
 }
 
 void LCanvasView::deleteItem()
