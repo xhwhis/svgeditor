@@ -21,7 +21,6 @@ LCanvasView::LCanvasView(QWidget *parent)
 	, m_selectedItem(nullptr)
 	, m_copyItem(nullptr)
 	, m_itemHitPos(LCanvasView::None)
-	, m_mouseClickOutRect(false)
 {
 	this->setMouseTracking(true);
 	this->setAttribute(Qt::WA_StyledBackground);
@@ -165,7 +164,6 @@ void LCanvasView::mousePressEvent(QMouseEvent *event)
 
 	if (m_itemHitPos != ItemHitPos::None)
 	{
-		m_mouseClickOutRect = true;
 		m_showFrameRect = false;
 		m_lastPos = pos;
 		return;
@@ -210,7 +208,7 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 {
 	QPoint pos = event->pos();
 	m_endPos = pos;
-	if (m_mouseClickOutRect && m_itemHitPos != ItemHitPos::None && m_itemType == LCanvasItem::None)
+	if (m_itemHitPos != ItemHitPos::None && m_itemType == LCanvasItem::None)
 	{
 		if (m_selectedItem)
 			m_selectedItem->setSelected(true);
@@ -278,10 +276,15 @@ void LCanvasView::mouseReleaseEvent(QMouseEvent *event)
 		m_selectedItem = m_item;
 	}
 
+	if (m_itemHitPos != ItemHitPos::None)
+	{
+		m_itemHitPos = ItemHitPos::None;
+		this->setCursor(Qt::ArrowCursor);
+	}
+
 	m_startPos = QPoint();
 	m_endPos = QPoint();
 	m_showFrameRect = false;
-	m_mouseClickOutRect = false;
 	m_mouseClickSelect = false;
 	m_mouseFrameSelect = false;
 	update();
@@ -315,8 +318,15 @@ void LCanvasView::contextMenuEvent(QContextMenuEvent *event)
 
 void LCanvasView::setItemType(LCanvasItem::ItemType itemType)
 {
-	if (m_itemType != itemType)
-		m_itemType = itemType;
+	m_itemType = itemType;
+	if (itemType == LCanvasItem::None)
+	{
+		this->setCursor(Qt::ArrowCursor);
+	}
+	else
+	{
+		this->setCursor(Qt::CrossCursor);
+	}
 }
 
 void LCanvasView::readItemsFromFile(const QString &filePath)
@@ -396,6 +406,7 @@ void LCanvasView::writeItemsToFile(const QString &filePath)
 	}
 
 	QXmlStreamWriter writer(&file);
+	writer.setAutoFormatting(true);
 
 	writer.writeStartDocument();
 	writer.writeStartElement(QStringLiteral("svg"));
@@ -640,7 +651,7 @@ void LCanvasView::beforePaintItem(const QPoint &pos)
 		m_lineEdit = m_item->lineEdit();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
-		connect(m_lineEdit, SIGNAL(textChanged()), this, SLOT(update()));
+		connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(update()));
 		break;
 	}
 	}
@@ -861,7 +872,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
-		connect(m_lineEdit, SIGNAL(textChanged()), this, SLOT(update()));
+		connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(update()));
 		m_textItems << m_item;
 		break;
 	}

@@ -117,12 +117,6 @@ void MainWindow::initLeftToolBar()
 	noneButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	noneButton->setFixedWidth(64);
 
-	QToolButton *paletteButton = new QToolButton(this);
-	paletteButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
-	paletteButton->setText(QStringLiteral("Palette"));
-	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	paletteButton->setFixedWidth(64);
-
 	QToolButton *pathButton = new QToolButton(this);
 	pathButton->setIcon(QIcon(QStringLiteral(":icons/path.svg")));
 	pathButton->setText(QStringLiteral("Path"));
@@ -165,6 +159,12 @@ void MainWindow::initLeftToolBar()
 	textButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	textButton->setFixedWidth(64);
 
+	QToolButton *paletteButton = new QToolButton(this);
+	paletteButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
+	paletteButton->setText(QStringLiteral("Palette"));
+	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	paletteButton->setFixedWidth(64);
+
 	QToolButton *clearButton = new QToolButton(this);
 	clearButton->setIcon(QIcon(QStringLiteral(":icons/clear.svg")));
 	clearButton->setText(QStringLiteral("Clear"));
@@ -172,7 +172,6 @@ void MainWindow::initLeftToolBar()
 	clearButton->setFixedWidth(64);
 
 	m_leftToolBar->addWidget(noneButton);
-	m_leftToolBar->addWidget(paletteButton);
 	m_leftToolBar->addWidget(pathButton);
 	m_leftToolBar->addWidget(lineButton);
 	m_leftToolBar->addWidget(rectButton);
@@ -180,10 +179,10 @@ void MainWindow::initLeftToolBar()
 	m_leftToolBar->addWidget(triangleButton);
 	m_leftToolBar->addWidget(hexagonButton);
 	m_leftToolBar->addWidget(textButton);
+	m_leftToolBar->addWidget(paletteButton);
 	m_leftToolBar->addWidget(clearButton);
 
 	connect(noneButton, SIGNAL(clicked()), this, SLOT(onPaintNone()));
-	connect(paletteButton, SIGNAL(clicked()), this, SLOT(setBrushColor()));
 	connect(pathButton, SIGNAL(clicked()), this, SLOT(onPaintPath()));
 	connect(lineButton, SIGNAL(clicked()), this, SLOT(onPaintLine()));
 	connect(rectButton, SIGNAL(clicked()), this, SLOT(onPaintRect()));
@@ -191,6 +190,7 @@ void MainWindow::initLeftToolBar()
 	connect(triangleButton, SIGNAL(clicked()), this, SLOT(onPaintTriangle()));
 	connect(hexagonButton, SIGNAL(clicked()), this, SLOT(onPaintHexagon()));
 	connect(textButton, SIGNAL(clicked()), this, SLOT(onPaintText()));
+	connect(paletteButton, SIGNAL(clicked()), this, SLOT(setStrokeColor()));
 	connect(clearButton, SIGNAL(clicked()), this, SLOT(onNewFile()));
 }
 
@@ -202,16 +202,17 @@ void MainWindow::initRightToolBar()
 
 	QWidget *toolsPanelWidget = new QWidget(m_rightToolBar);
 	m_rightToolBar->addWidget(toolsPanelWidget);
-	QVBoxLayout* mainLayout = new QVBoxLayout(toolsPanelWidget);
-	toolsPanelWidget->setLayout(mainLayout);
+
+	QVBoxLayout *mainLayout = new QVBoxLayout(toolsPanelWidget);
 
 	QLabel *canvasColorLabel = new QLabel(QStringLiteral("Canvas Color"), toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
 	m_canvasColorButton->setFixedSize(64, 32);
 	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: white"));
-	QHBoxLayout *canvasColorLayout = new QHBoxLayout(toolsPanelWidget);
+	QHBoxLayout *canvasColorLayout = new QHBoxLayout();
 	canvasColorLayout->addWidget(canvasColorLabel);
 	canvasColorLayout->addWidget(m_canvasColorButton);
+	mainLayout->addLayout(canvasColorLayout);
 
 	QLabel *canvasWidthLabel = new QLabel(QStringLiteral("Canvas Width"), toolsPanelWidget);
 	QSpinBox *canvasWidthSpinBox = new QSpinBox(toolsPanelWidget);
@@ -219,9 +220,10 @@ void MainWindow::initRightToolBar()
 	canvasWidthSpinBox->setRange(100, 1600);
 	canvasWidthSpinBox->setSingleStep(10);
 	canvasWidthSpinBox->setValue(400);
-	QHBoxLayout *canvasWidthLayout = new QHBoxLayout(toolsPanelWidget);
+	QHBoxLayout *canvasWidthLayout = new QHBoxLayout();
 	canvasWidthLayout->addWidget(canvasWidthLabel);
 	canvasWidthLayout->addWidget(canvasWidthSpinBox);
+	mainLayout->addLayout(canvasWidthLayout);
 
 	QLabel *canvasHeightLabel = new QLabel(QStringLiteral("Canvas Height"), toolsPanelWidget);
 	QSpinBox *canvasHeightSpinBox = new QSpinBox(toolsPanelWidget);
@@ -229,21 +231,18 @@ void MainWindow::initRightToolBar()
 	canvasHeightSpinBox->setRange(100, 1600);
 	canvasHeightSpinBox->setSingleStep(10);
 	canvasHeightSpinBox->setValue(400);
-	QHBoxLayout *canvasHeightLayout = new QHBoxLayout(toolsPanelWidget);
+	QHBoxLayout *canvasHeightLayout = new QHBoxLayout();
 	canvasHeightLayout->addWidget(canvasHeightLabel);
 	canvasHeightLayout->addWidget(canvasHeightSpinBox);
+	mainLayout->addLayout(canvasHeightLayout);
 
 	QLabel *strokeWidthLabel = new QLabel(QStringLiteral("Stroke Width"), toolsPanelWidget);
 	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
 	strokeWidthSpinBox->setFixedSize(64, 32);
 	strokeWidthSpinBox->setRange(1, 10);
-	QHBoxLayout *strokeWidthLayout = new QHBoxLayout(toolsPanelWidget);
+	QHBoxLayout *strokeWidthLayout = new QHBoxLayout();
 	strokeWidthLayout->addWidget(strokeWidthLabel);
 	strokeWidthLayout->addWidget(strokeWidthSpinBox);
-
-	mainLayout->addLayout(canvasColorLayout);
-	mainLayout->addLayout(canvasWidthLayout);
-	mainLayout->addLayout(canvasHeightLayout);
 	mainLayout->addLayout(strokeWidthLayout);
 
 	connect(m_canvasColorButton, SIGNAL(clicked()), this, SLOT(setCanvasColor()));

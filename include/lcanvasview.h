@@ -99,7 +99,6 @@ private:
 	bool m_mouseClickSelect;
 	LCanvasItem *m_selectedItem;
 	ItemHitPos m_itemHitPos;
-	bool m_mouseClickOutRect;
 };
 
 } // namespace
