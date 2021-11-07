@@ -51,8 +51,7 @@ void LCanvasView::setCanvasColor(const QColor &color)
 	if (color.isValid())
 		m_canvasColor = color;
 
-	this->setStyleSheet(QStringLiteral("background-color:") + m_canvasColor.name() +
-						QStringLiteral("; border-radius:10px"));
+	this->setStyleSheet(QStringLiteral("background-color:") + m_canvasColor.name());
 }
 
 void LCanvasView::setStrokeColor(const QColor &color)
@@ -325,7 +324,7 @@ void LCanvasView::readItemsFromFile(const QString &filePath)
 		return;
 
 	QFile file(filePath);
-	if (!file.open(QFile::ReadOnly | QFile::Text))
+	if (!file.open(QFile::ReadOnly))
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Read Error"));
 		return;
@@ -389,7 +388,7 @@ void LCanvasView::writeItemsToFile(const QString &filePath)
 		return;
 
 	QFile file(filePath);
-	if (!file.open(QFile::WriteOnly | QFile::Text))
+	if (!file.open(QFile::WriteOnly))
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Write Error"));
 		return;

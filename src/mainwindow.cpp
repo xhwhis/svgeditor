@@ -11,6 +11,15 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_canvasWidth(400)
 	, m_canvasHeight(400)
 {
+	this->setWindowTitle(QStringLiteral("SVG Editor"));
+	this->setWindowIcon(QIcon(QStringLiteral(":icons/logo.svg")));
+	this->setMinimumSize(800, 600);
+
+	QFile file(QStringLiteral(":qss/light.qss"));
+	file.open(QFile::ReadOnly);
+	this->setStyleSheet(file.readAll());
+	file.close();
+
 	initUI();
 }
 
@@ -199,7 +208,7 @@ void MainWindow::initRightToolBar()
 	QLabel *canvasColorLabel = new QLabel(QStringLiteral("Canvas Color"), toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
 	m_canvasColorButton->setFixedSize(64, 32);
-	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color:white; border-radius:10px"));
+	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color:white"));
 	QHBoxLayout *canvasColorLayout = new QHBoxLayout(toolsPanelWidget);
 	canvasColorLayout->addWidget(canvasColorLabel);
 	canvasColorLayout->addWidget(m_canvasColorButton);
@@ -210,8 +219,6 @@ void MainWindow::initRightToolBar()
 	canvasWidthSpinBox->setRange(100, 1600);
 	canvasWidthSpinBox->setSingleStep(10);
 	canvasWidthSpinBox->setValue(400);
-	canvasWidthSpinBox->setStyleSheet("QSpinBox{font-size:24px; border-radius:10px}"
-									  "QSpinBox::up-button, QSpinBox::down-button{width:0px}");
 	QHBoxLayout *canvasWidthLayout = new QHBoxLayout(toolsPanelWidget);
 	canvasWidthLayout->addWidget(canvasWidthLabel);
 	canvasWidthLayout->addWidget(canvasWidthSpinBox);
@@ -222,8 +229,6 @@ void MainWindow::initRightToolBar()
 	canvasHeightSpinBox->setRange(100, 1600);
 	canvasHeightSpinBox->setSingleStep(10);
 	canvasHeightSpinBox->setValue(400);
-	canvasHeightSpinBox->setStyleSheet("QSpinBox{font-size:24px; border-radius:10px}"
-									   "QSpinBox::up-button, QSpinBox::down-button{width:0px}");
 	QHBoxLayout *canvasHeightLayout = new QHBoxLayout(toolsPanelWidget);
 	canvasHeightLayout->addWidget(canvasHeightLabel);
 	canvasHeightLayout->addWidget(canvasHeightSpinBox);
@@ -232,8 +237,6 @@ void MainWindow::initRightToolBar()
 	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
 	strokeWidthSpinBox->setFixedSize(64, 32);
 	strokeWidthSpinBox->setRange(1, 10);
-	strokeWidthSpinBox->setStyleSheet("QSpinBox{font-size:24px; border-radius:10px}"
-									  "QSpinBox::up-button, QSpinBox::down-button{width:0px}");
 	QHBoxLayout *strokeWidthLayout = new QHBoxLayout(toolsPanelWidget);
 	strokeWidthLayout->addWidget(strokeWidthLabel);
 	strokeWidthLayout->addWidget(strokeWidthSpinBox);
@@ -263,12 +266,11 @@ void MainWindow::initCanvas()
 
 	if (!m_canvasColor.isValid())
 	{
-		m_canvas->setStyleSheet(QStringLiteral("background-color:white; border-radius:10px"));
+		m_canvas->setStyleSheet(QStringLiteral("background-color:white"));
 	}
 	else
 	{
-		m_canvas->setStyleSheet(QStringLiteral("background-color:") + m_canvasColor.name() +
-								QStringLiteral("; border-radius:10px"));
+		m_canvas->setStyleSheet(QStringLiteral("background-color:") + m_canvasColor.name());
 	}
 
 	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
@@ -359,8 +361,7 @@ void MainWindow::setCanvasColor()
 	if (getColor.isValid())
 	{
 		m_canvasColor = getColor;
-		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color:") + getColor.name() +
-										   QStringLiteral("; border-radius:10px"));
+		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color:") + getColor.name());
 		m_canvas->setCanvasColor(getColor);
 	}
 }

@@ -1,0 +1,16 @@
+QWidegt {
+	border-radius: 10px;
+}
+
+QPushButton {
+	border-radius: 10px;
+}
+
+QSpinBox {
+	font-size: 24px;
+	border-radius: 10px;
+}
+
+QSpinBox::up-button, QSpinBox::down-button {
+	width: 0px;
+}
