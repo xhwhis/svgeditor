@@ -213,7 +213,7 @@ void MainWindow::initRightToolBar()
 	QLabel *canvasColorLabel = new QLabel(QStringLiteral("Canvas Color"), toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
 	m_canvasColorButton->setFixedSize(64, 32);
-	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: white"));
+	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: white; border-radius: 8px"));
 	QHBoxLayout *canvasColorLayout = new QHBoxLayout();
 	canvasColorLayout->addWidget(canvasColorLabel);
 	canvasColorLayout->addWidget(m_canvasColorButton);
@@ -367,7 +367,8 @@ void MainWindow::setCanvasColor()
 	if (getColor.isValid())
 	{
 		m_canvasColor = getColor;
-		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: ") + getColor.name());
+		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: ") + getColor.name() +
+										   QStringLiteral("border-radius: 8px"));
 		m_canvas->setCanvasColor(getColor);
 	}
 }

@@ -1,7 +1,3 @@
-QPushButton {
-	border-radius: 8px;
-}
-
 QSpinBox {
 	border-radius: 8px;
 }
