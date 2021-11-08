@@ -63,24 +63,24 @@ private:
 	bool m_bChanged;
 };
 
-LCanvas::LCanvas(QObject *parent)
+LCanvasScene::LCanvasScene(QObject *parent)
 	: QObject(parent)
 {
 	init(0, 0);
 }
 
-LCanvas::LCanvas(int width, int height)
+LCanvasScene::LCanvasScene(int width, int height)
 {
 	init(width, height);
 }
 
-LCanvas::LCanvas(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight)
+LCanvasScene::LCanvasScene(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight)
 {
 	init(hTiles * tileWidth, vTiles * tileHeight, scm(tileWidth, tileHeight));
 	setTiles(image, hTiles, vTiles, tileWidth, tileHeight);
 }
 
-LCanvas::~LCanvas()
+LCanvasScene::~LCanvasScene()
 {
 	for (int i = 0; i < m_viewList.size(); ++i)
 		m_viewList[i]->setCanvas(nullptr);
@@ -93,7 +93,7 @@ LCanvas::~LCanvas()
 	delete[] m_grid;
 }
 
-void LCanvas::init(int width, int height, int chunkSize, int maxClusters)
+void LCanvasScene::init(int width, int height, int chunkSize, int maxClusters)
 {
 	m_width = width;
 	m_height = height;
@@ -108,22 +108,22 @@ void LCanvas::init(int width, int height, int chunkSize, int maxClusters)
 	m_vTiles = 0;
 }
 
-LCanvasChunk &LCanvas::chunk(int i, int j) const
+LCanvasChunk &LCanvasScene::chunk(int i, int j) const
 {
 	return m_chunks[i + m_chunkWidth * j];
 }
 
-LCanvasChunk &LCanvas::chunkContaining(int x, int y) const
+LCanvasChunk &LCanvasScene::chunkContaining(int x, int y) const
 {
 	return chunk(x / m_chunkSize, y / m_chunkSize);
 }
 
-LCanvasItemList LCanvas::allItems()
+LCanvasItemList LCanvasScene::allItems()
 {
 	return m_itemList;
 }
 
-void LCanvas::resize(int width, int height)
+void LCanvasScene::resize(int width, int height)
 {
 	if (m_width == width && m_height == height)
 		return;
@@ -158,7 +158,7 @@ void LCanvas::resize(int width, int height)
 	emit resized();
 }
 
-void LCanvas::retune(int chunkSize, int maxClusters)
+void LCanvasScene::retune(int chunkSize, int maxClusters)
 {
 	m_maxClusters = maxClusters;
 
@@ -191,17 +191,17 @@ void LCanvas::retune(int chunkSize, int maxClusters)
 	}
 }
 
-void LCanvas::addItem(LCanvasItem *item)
+void LCanvasScene::addItem(LCanvasItem *item)
 {
 	m_itemList.append(item);
 }
 
-void LCanvas::removeItem(LCanvasItem* item)
+void LCanvasScene::removeItem(LCanvasItem* item)
 {
 	m_itemList.removeAll(item);
 }
 
-void LCanvas::addView(LCanvasView *view)
+void LCanvasScene::addView(LCanvasView *view)
 {
 	m_viewList.append(view);
 	if (m_hTiles > 1 || m_vTiles > 1 || m_image.isNull())
@@ -213,12 +213,12 @@ void LCanvas::addView(LCanvasView *view)
 	}
 }
 
-void LCanvas::removeView(LCanvasView *view)
+void LCanvasScene::removeView(LCanvasView *view)
 {
 	m_viewList.removeAll(view);
 }
 
-void LCanvas::drawViewArea(LCanvasView *view, QPainter *painter, const QRect &rect)
+void LCanvasScene::drawViewArea(LCanvasView *view, QPainter *painter, const QRect &rect)
 {
 	QTransform wm = view->worldMatrix();
 	QTransform iwm = wm.inverted();
@@ -226,10 +226,10 @@ void LCanvas::drawViewArea(LCanvasView *view, QPainter *painter, const QRect &re
 	QRect ivr = iwm.mapRect(rect);
 
 	painter->setTransform(wm);
-	drawCanvasArea(ivr, painter, false);
+	drawCanvasArea(ivr, painter);
 }
 
-void LCanvas::update()
+void LCanvasScene::update()
 {
 	QRect rect = changeBounds();
 	for (int i = 0; i < m_viewList.size(); ++i)
@@ -244,12 +244,12 @@ void LCanvas::update()
 	setUnchanged(rect);
 }
 
-void LCanvas::setAllChanged()
+void LCanvasScene::setAllChanged()
 {
 	setChanged(QRect(0, 0, width(), height()));
 }
 
-void LCanvas::setChanged(const QRect &rect)
+void LCanvasScene::setChanged(const QRect &rect)
 {
 	QRect area = rect.intersected(QRect(0, 0, width(), height()));
 
@@ -273,7 +273,7 @@ void LCanvas::setChanged(const QRect &rect)
 	}
 }
 
-void LCanvas::setUnchanged(const QRect &rect)
+void LCanvasScene::setUnchanged(const QRect &rect)
 {
 	QRect area = rect.intersected(QRect(0, 0, width(), height()));
 
@@ -297,7 +297,7 @@ void LCanvas::setUnchanged(const QRect &rect)
 	}
 }
 
-QRect LCanvas::changeBounds()
+QRect LCanvasScene::changeBounds()
 {
 	QRect rect = QRect(0, 0, width(), height());
 
@@ -325,13 +325,13 @@ QRect LCanvas::changeBounds()
 	return result;
 }
 
-void LCanvas::drawArea(const QRect &rect, QPainter *painter, bool doubleBuffer)
+void LCanvasScene::drawArea(const QRect &rect, QPainter *painter)
 {
 	if (painter)
-		drawCanvasArea(rect, painter, doubleBuffer);
+		drawCanvasArea(rect, painter);
 }
 
-void LCanvas::drawCanvasArea(const QRect &rect, QPainter *painter, bool doubleBuffer)
+void LCanvasScene::drawCanvasArea(const QRect &rect, QPainter *painter)
 {
 	if (!painter)
 		return;
@@ -388,48 +388,48 @@ void LCanvas::drawCanvasArea(const QRect &rect, QPainter *painter, bool doubleBu
 	}
 }
 
-void LCanvas::setChangedChunk(int x, int y)
+void LCanvasScene::setChangedChunk(int x, int y)
 {
 	if (validChunk(x, y))
 		chunk(x, y).change();
 }
 
-void LCanvas::setChangedChunkContaining(int x, int y)
+void LCanvasScene::setChangedChunkContaining(int x, int y)
 {
 	if (x >= 0 && x < m_width && y >= 0 && y < m_height)
 		chunkContaining(x, y).change();
 }
 
-void LCanvas::addItemToChunk(LCanvasItem *item, int x, int y)
+void LCanvasScene::addItemToChunk(LCanvasItem *item, int x, int y)
 {
 	if (validChunk(x, y))
 		chunk(x, y).add(item);
 }
 
-void LCanvas::removeItemFromChunk(LCanvasItem *item, int x, int y)
+void LCanvasScene::removeItemFromChunk(LCanvasItem *item, int x, int y)
 {
 	if (validChunk(x, y))
 		chunk(x, y).remove(item);
 }
 
-void LCanvas::addItemToChunkContaining(LCanvasItem *item, int x, int y)
+void LCanvasScene::addItemToChunkContaining(LCanvasItem *item, int x, int y)
 {
 	if (x >= 0 && x < width() && y >= 0 && y < height())
 		chunkContaining(x, y).add(item);
 }
 
-void LCanvas::removeItemFromChunkContaining(LCanvasItem *item, int x, int y)
+void LCanvasScene::removeItemFromChunkContaining(LCanvasItem *item, int x, int y)
 {
 	if (x >= 0 && x < width() && y >= 0 && y < height())
 		chunkContaining(x, y).remove(item);
 }
 
-QColor LCanvas::backgroundColor() const
+QColor LCanvasScene::backgroundColor() const
 {
 	return m_backgroundColor;
 }
 
-void LCanvas::setBackgroundColor(const QColor &color)
+void LCanvasScene::setBackgroundColor(const QColor &color)
 {
 	if (m_backgroundColor != color)
 	{
@@ -446,12 +446,12 @@ void LCanvas::setBackgroundColor(const QColor &color)
 	}
 }
 
-QImage LCanvas::backgroundImage() const
+QImage LCanvasScene::backgroundImage() const
 {
 	return m_image;
 }
 
-void LCanvas::setBackgroundImage(const QImage &image)
+void LCanvasScene::setBackgroundImage(const QImage &image)
 {
 	setTiles(image, 1, 1, image.width(), image.height());
 	for (int i = 0; i < m_viewList.size(); ++i)
@@ -461,7 +461,7 @@ void LCanvas::setBackgroundImage(const QImage &image)
 	}
 }
 
-void LCanvas::drawBackground(QPainter &painter, const QRect &rect)
+void LCanvasScene::drawBackground(QPainter &painter, const QRect &rect)
 {
 	if (m_image.isNull())
 	{
@@ -501,7 +501,7 @@ void LCanvas::drawBackground(QPainter &painter, const QRect &rect)
 	}
 }
 
-void LCanvas::setTiles(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight)
+void LCanvasScene::setTiles(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight)
 {
 	if (!image.isNull() &&
 		(!tileWidth || !tileHeight || image.width() % tileWidth != 0 || image.height() % tileHeight != 0))
@@ -530,7 +530,7 @@ void LCanvas::setTiles(QImage image, int hTiles, int vTiles, int tileWidth, int 
 	setAllChanged();
 }
 
-void LCanvas::setTile(int x, int y, int tileNum)
+void LCanvasScene::setTile(int x, int y, int tileNum)
 {
 	int &num = m_grid[x + y * m_hTiles];
 	if (num != tileNum) {
@@ -546,14 +546,14 @@ void LCanvas::setTile(int x, int y, int tileNum)
 	}
 }
 
-LCanvasItemList LCanvas::collisions(const QPoint &p) const
+LCanvasItemList LCanvasScene::collisions(const QPoint &p) const
 {
 	return collisions(QRect(p, QSize(1, 1)));
 }
 
-LCanvasItemList LCanvas::collisions(const QRect& rect) const
+LCanvasItemList LCanvasScene::collisions(const QRect& rect) const
 {
-	LCanvasRectangle i(rect, (LCanvas*)this);
+	LCanvasRect i(rect, (LCanvasScene*)this);
 	i.setPen(Qt::NoPen);
 	i.show();
 	LCanvasItemList l = i.collisions(true);
@@ -568,7 +568,7 @@ LCanvasItemList LCanvas::collisions(const QRect& rect) const
 	return l;
 }
 
-LCanvasItemList LCanvas::collisions(
+LCanvasItemList LCanvasScene::collisions(
 	const QPolygon& chunklist,
 	const LCanvasItem *item,
 	bool exact) const
@@ -664,17 +664,17 @@ LCanvasView::LCanvasView(QWidget *parent)
 	: QScrollArea(parent)
 {
 	this->setWidget(new LCanvasWidget(this));
-	m_canvas = nullptr;
+	m_scene = nullptr;
 	setCanvas(nullptr);
 }
 
-LCanvasView::LCanvasView(LCanvas *canvas, QWidget *parent)
+LCanvasView::LCanvasView(LCanvasScene *scene, QWidget *parent)
 	: QScrollArea(parent)
-	, m_canvas(canvas)
+	, m_scene(scene)
 {
 	this->setWidget(new LCanvasWidget(this));
-	m_canvas = nullptr;
-	setCanvas(canvas);
+	m_scene = nullptr;
+	setCanvas(scene);
 }
 
 LCanvasView::~LCanvasView()
@@ -728,19 +728,20 @@ void LCanvasView::contentsContextMenuEvent(QContextMenuEvent *event)
 	event->ignore();
 }
 
-void LCanvasView::setCanvas(LCanvas *canvas)
+void LCanvasView::setCanvas(LCanvasScene *scene)
 {
-	if (m_canvas == canvas) return;
+	if (m_scene == scene) return;
 
-	if (m_canvas)
+	if (m_scene)
 	{
-		disconnect(m_canvas);
-		m_canvas->removeView(this);
+		disconnect(m_scene);
+		m_scene->removeView(this);
 	}
-	m_canvas = canvas;
-	if (m_canvas) {
-		connect(m_canvas, SIGNAL(resized()), this, SLOT(updateContentsSize()));
-		m_canvas->addView(this);
+	m_scene = scene;
+	if (m_scene)
+	{
+		connect(m_scene, SIGNAL(resized()), this, SLOT(updateContentsSize()));
+		m_scene->addView(this);
 	}
 	updateContentsSize();
 	update();
@@ -771,9 +772,9 @@ bool LCanvasView::setWorldMatrix(const QTransform &matrix)
 
 void LCanvasView::updateContentsSize()
 {
-	if (m_canvas)
+	if (m_scene)
 	{
-		QRect rect = m_worldMatrix.mapRect(QRect(0, 0, m_canvas->width(), m_canvas->height()));
+		QRect rect = m_worldMatrix.mapRect(QRect(0, 0, m_scene->width(), m_scene->height()));
 		widget()->resize(rect.size());
 	}
 	else
@@ -784,24 +785,23 @@ void LCanvasView::updateContentsSize()
 
 void LCanvasView::drawContents(QPainter *painter, int x, int y, int width, int height)
 {
-	if (!m_canvas) return;
+	if (!m_scene) return;
 
 	QPainterPath clipPath;
-	clipPath.addRect(m_canvas->rect());
+	clipPath.addRect(m_scene->rect());
 	painter->setClipPath(m_worldMatrix.map(clipPath), Qt::IntersectClip);
-	m_canvas->drawViewArea(this, painter, QRect(x, y, width, height));
+	m_scene->drawViewArea(this, painter, QRect(x, y, width, height));
 }
 
 QSize LCanvasView::sizeHint() const
 {
-	if (!canvas())
-		return QScrollArea::sizeHint();
+	if (!m_scene) return QScrollArea::sizeHint();
 
-	return (canvas()->size() + 2 * QSize(this->frameWidth(), this->frameWidth())).boundedTo(3 * QGuiApplication::primaryScreen()->size() / 4);
+	return (m_scene->size() + 2 * QSize(this->frameWidth(), this->frameWidth())).boundedTo(3 * QApplication::primaryScreen()->size() / 4);
 }
 
-LCanvasItem::LCanvasItem(LCanvas *canvas)
-	: m_canvas(canvas)
+LCanvasItem::LCanvasItem(LCanvasScene *scene)
+	: m_scene(scene)
 	, m_x(0)
 	, m_y(0)
 	, m_z(0)
@@ -811,23 +811,23 @@ LCanvasItem::LCanvasItem(LCanvas *canvas)
 	, m_bEnabled(false)
 	, m_bActive(false)
 {
-	if (m_canvas)
-		m_canvas->addItem(this);
+	if (m_scene)
+		m_scene->addItem(this);
 }
 
 LCanvasItem::~LCanvasItem()
 {
-	if (m_canvas)
-		m_canvas->removeItem(this);
+	if (m_scene)
+		m_scene->removeItem(this);
 }
 
-void LCanvasItem::moveBy(double deltaX, double deltaY)
+void LCanvasItem::moveBy(double dX, double dY)
 {
-	if (deltaX || deltaY)
+	if (dX || dY)
 	{
 		removeFromChunks();
-		m_x += deltaX;
-		m_y += deltaY;
+		m_x += dX;
+		m_y += dY;
 		addToChunks();
 	}
 }
@@ -837,16 +837,16 @@ void LCanvasItem::move(double x, double y)
 	moveBy(x - m_x, y - m_y);
 }
 
-void LCanvasItem::setCanvas(LCanvas *canvas)
+void LCanvasItem::setCanvas(LCanvasScene *scene)
 {
 	bool visible = m_bVisible;
 	setVisible(false);
-	if (m_canvas)
-		m_canvas->removeItem(this);
+	if (m_scene)
+		m_scene->removeItem(this);
 
-	m_canvas = canvas;
-	if (m_canvas)
-		m_canvas->addItem(this);
+	m_scene = scene;
+	if (m_scene)
+		m_scene->addItem(this);
 
 	setVisible(visible);
 }
@@ -907,16 +907,16 @@ void LCanvasItem::setActive(bool active)
 
 LCanvasItemList LCanvasItem::collisions(bool exact) const
 {
-	return m_canvas->collisions(chunks(), this, exact);
+	return m_scene->collisions(chunks(), this, exact);
 }
 
 void LCanvasItem::addToChunks()
 {
-	if (m_bVisible && m_canvas)
+	if (m_bVisible && m_scene)
 	{
 		QPolygon polygon = chunks();
 		for (int i = 0; i < polygon.size(); ++i)
-			canvas()->addItemToChunk(this, polygon[i].x(), polygon[i].y());
+			m_scene->addItemToChunk(this, polygon[i].x(), polygon[i].y());
 
 		m_bValid = true;
 	}
@@ -924,23 +924,23 @@ void LCanvasItem::addToChunks()
 
 void LCanvasItem::removeFromChunks()
 {
-	if (m_bVisible && m_canvas)
+	if (m_bVisible && m_scene)
 	{
 		QPolygon polygon = chunks();
 		for (int i = 0; i < polygon.size(); ++i)
-			canvas()->removeItemFromChunk(this, polygon[i].x(), polygon[i].y());
+			m_scene->removeItemFromChunk(this, polygon[i].x(), polygon[i].y());
 	}
 }
 
 void LCanvasItem::changeChunks()
 {
-	if (m_bVisible && m_canvas) {
+	if (m_bVisible && m_scene) {
 		if (!m_bValid)
 			addToChunks();
 
 		QPolygon polygon = chunks();
 		for (int i = 0; i < polygon.size(); i++)
-			canvas()->setChangedChunk(polygon[i].x(), polygon[i].y());
+			m_scene->setChangedChunk(polygon[i].x(), polygon[i].y());
 	}
 }
 
@@ -949,10 +949,10 @@ QPolygon LCanvasItem::chunks() const
 	QPolygon polygon;
 	int n = 0;
 	QRect br = boundingRect();
-	if (isVisible() && canvas())
+	if (this->isVisible() && m_scene)
 	{
-		int chunkSize = m_canvas->chunkSize();
-		br &= QRect(0, 0, m_canvas->width(), m_canvas->height());
+		int chunkSize = m_scene->chunkSize();
+		br &= QRect(0, 0, m_scene->width(), m_scene->height());
 		if (br.isValid())
 		{
 			polygon.resize((br.width() / chunkSize + 2) * (br.height() / chunkSize + 2));
@@ -969,11 +969,11 @@ int LCanvasItem::m_type = None;
 
 static bool collision_double_dispatch(
 	const LCanvasShape *shape1,
-	const LCanvasRectangle *rectangle1,
+	const LCanvasRect *rectangle1,
 	const LCanvasEllipse *ellipse1,
 	const LCanvasText *text1,
 	const LCanvasShape *shape2,
-	const LCanvasRectangle *rectangle2,
+	const LCanvasRect *rectangle2,
 	const LCanvasEllipse *ellipse2,
 	const LCanvasText *text2)
 {
@@ -1030,7 +1030,7 @@ static const QBrush& defaultPolygonBrush()
 	return *g_brush;
 }
 
-LCanvasShape::LCanvasShape(LCanvas* canvas)
+LCanvasShape::LCanvasShape(LCanvasScene* canvas)
 	: LCanvasItem(canvas)
 	, m_brush(defaultPolygonBrush())
 	, m_pen(defaultPolygonPen())
@@ -1055,7 +1055,7 @@ bool LCanvasShape::collidesWith(const LCanvasItem *item) const
 }
 
 bool LCanvasShape::collidesWith(const LCanvasShape *shape,
-								const LCanvasRectangle *rectangle,
+								const LCanvasRect *rectangle,
 								const LCanvasEllipse *ellipse,
 								const LCanvasText *text) const
 {
@@ -1096,46 +1096,46 @@ void LCanvasShape::setBrush(QBrush brush)
 int LCanvasShape::g_type = Shape;
 
 
-LCanvasRectangle::LCanvasRectangle(LCanvas *canvas)
-	: LCanvasShape(canvas)
+LCanvasRect::LCanvasRect(LCanvasScene *scene)
+	: LCanvasShape(scene)
 	, m_width(32)
 	, m_height(32)
 {
 
 }
 
-LCanvasRectangle::LCanvasRectangle(const QRect &rect, LCanvas *canvas)
-	: LCanvasShape(canvas)
+LCanvasRect::LCanvasRect(const QRect &rect, LCanvasScene *scene)
+	: LCanvasShape(scene)
 	, m_width(rect.width())
 	, m_height(rect.height())
 {
 	move(rect.left(), rect.top());
 }
 
-LCanvasRectangle::LCanvasRectangle(int x, int y, int width, int height, LCanvas *canvas)
-	: LCanvasShape(canvas)
+LCanvasRect::LCanvasRect(int x, int y, int width, int height, LCanvasScene *scene)
+	: LCanvasShape(scene)
 	, m_width(width)
 	, m_height(height)
 {
 	move(x, y);
 }
 
-LCanvasRectangle::~LCanvasRectangle()
+LCanvasRect::~LCanvasRect()
 {
 	hide();
 }
 
-int LCanvasRectangle::width() const
+int LCanvasRect::width() const
 {
 	return m_width;
 }
 
-int LCanvasRectangle::height() const
+int LCanvasRect::height() const
 {
 	return m_height;
 }
 
-void LCanvasRectangle::setSize(int width, int height)
+void LCanvasRect::setSize(int width, int height)
 {
 	if (m_width != width || m_height != height) {
 		removeFromChunks();
@@ -1145,7 +1145,7 @@ void LCanvasRectangle::setSize(int width, int height)
 	}
 }
 
-QPolygon LCanvasRectangle::areaPoints() const
+QPolygon LCanvasRect::areaPoints() const
 {
 	QPolygon polygon(4);
 	int penWidth = (pen().width() + 1) / 2;
@@ -1158,21 +1158,21 @@ QPolygon LCanvasRectangle::areaPoints() const
 	return polygon;
 }
 
-void LCanvasRectangle::drawShape(QPainter & p)
+void LCanvasRect::drawShape(QPainter & p)
 {
 	p.drawRect(this->x(), this->y(), m_width, m_height);
 }
 
-int LCanvasRectangle::g_type = Rectangle;
+int LCanvasRect::g_type = Rectangle;
 
-bool LCanvasRectangle::collidesWith(const LCanvasItem *item) const
+bool LCanvasRect::collidesWith(const LCanvasItem *item) const
 {
 	return item->collidesWith(this, this, nullptr, nullptr);
 }
 
-bool LCanvasRectangle::collidesWith(
+bool LCanvasRect::collidesWith(
 	const LCanvasShape *shape,
-	const LCanvasRectangle *rectangle,
+	const LCanvasRect *rectangle,
 	const LCanvasEllipse *ellipse,
 	const LCanvasText *text) const
 {
@@ -1180,12 +1180,12 @@ bool LCanvasRectangle::collidesWith(
 									 this, this, nullptr, nullptr);
 }
 
-QPolygon LCanvasRectangle::chunks() const
+QPolygon LCanvasRect::chunks() const
 {
 	return LCanvasItem::chunks();
 }
 
-LCanvasPolygon::LCanvasPolygon(LCanvas* canvas)
+LCanvasPolygon::LCanvasPolygon(LCanvasScene* canvas)
 	: LCanvasShape(canvas)
 {
 
@@ -1211,13 +1211,13 @@ void LCanvasPolygon::setPoints(QPolygon polygon)
 	addToChunks();
 }
 
-void LCanvasPolygon::moveBy(double deltaX, double deltaY)
+void LCanvasPolygon::moveBy(double dX, double dY)
 {
-	if (deltaX || deltaY) {
+	if (dX || dY) {
 		removeFromChunks();
-		m_polygon.translate(deltaX, deltaY);
-		m_x += deltaX;
-		m_y += deltaY;
+		m_polygon.translate(dX, dY);
+		m_x += dX;
+		m_y += dY;
 		addToChunks();
 	}
 }
@@ -1236,7 +1236,7 @@ QPolygon LCanvasPolygon::areaPoints() const
 
 int LCanvasPolygon::g_type = Polygon;
 
-LCanvasLine::LCanvasLine(LCanvas* canvas)
+LCanvasLine::LCanvasLine(LCanvasScene* canvas)
 	: LCanvasShape(canvas)
 	, m_x1(0)
 	, m_y1(0)
@@ -1317,15 +1317,15 @@ QPolygon LCanvasLine::areaPoints() const
 
 int LCanvasLine::g_type = Line;
 
-LCanvasEllipse::LCanvasEllipse(LCanvas *canvas)
-	: LCanvasShape(canvas)
+LCanvasEllipse::LCanvasEllipse(LCanvasScene *scene)
+	: LCanvasShape(scene)
 	, m_width(32)
 	, m_height(32)
 {
 
 }
 
-LCanvasEllipse::LCanvasEllipse(int width, int height, LCanvas* canvas)
+LCanvasEllipse::LCanvasEllipse(int width, int height, LCanvasScene* canvas)
 	: LCanvasShape(canvas)
 	, m_width(width)
 	, m_height(height)
@@ -1372,7 +1372,6 @@ QPolygon LCanvasEllipse::areaPoints() const
 
 void LCanvasEllipse::drawShape(QPainter &painter)
 {
-	painter.setPen(Qt::NoPen);
 	painter.drawEllipse(this->x(), this->y(), m_width, m_height);
 }
 
@@ -1385,7 +1384,7 @@ bool LCanvasEllipse::collidesWith(const LCanvasItem *item) const
 
 bool LCanvasEllipse::collidesWith(
 	const LCanvasShape *shape,
-	const LCanvasRectangle *rectangle,
+	const LCanvasRect *rectangle,
 	const LCanvasEllipse *ellipse,
 	const LCanvasText *text) const
 {
@@ -1393,24 +1392,24 @@ bool LCanvasEllipse::collidesWith(
 									 this, nullptr, this, nullptr);
 }
 
-LCanvasText::LCanvasText(LCanvas *canvas)
-	: LCanvasItem(canvas)
+LCanvasText::LCanvasText(LCanvasScene *scene)
+	: LCanvasItem(scene)
 	, m_text("text")
 	, m_flags(0)
 {
 	setRect();
 }
 
-LCanvasText::LCanvasText(const QString &text, LCanvas *canvas)
-	: LCanvasItem(canvas)
+LCanvasText::LCanvasText(const QString &text, LCanvasScene *scene)
+	: LCanvasItem(scene)
 	, m_text(text)
 	, m_flags(0)
 {
 	setRect();
 }
 
-LCanvasText::LCanvasText(const QString &text, const QFont &font, LCanvas *canvas)
-	: LCanvasItem(canvas)
+LCanvasText::LCanvasText(const QString &text, const QFont &font, LCanvasScene *scene)
+	: LCanvasItem(scene)
 	, m_text(text)
 	, m_flags(0)
 	, m_font(font)
@@ -1467,7 +1466,8 @@ QFont LCanvasText::font() const
 
 void LCanvasText::setFont(const QFont &font)
 {
-	if (m_font != font) {
+	if (m_font != font)
+	{
 		removeFromChunks();
 		m_font = font;
 		setRect();
@@ -1486,14 +1486,14 @@ void LCanvasText::setColor(const QColor& c)
 	changeChunks();
 }
 
-void LCanvasText::moveBy(double deltaX, double deltaY)
+void LCanvasText::moveBy(double dX, double dY)
 {
-	if (deltaX || deltaY)
+	if (dX || dY)
 	{
 		removeFromChunks();
-		m_x += deltaX;
-		m_y += deltaY;
-		m_boundingRect.translate(deltaX, deltaY);
+		m_x += dX;
+		m_y += dY;
+		m_boundingRect.translate(dX, dY);
 		addToChunks();
 	}
 }
@@ -1507,34 +1507,34 @@ void LCanvasText::draw(QPainter &painter)
 
 void LCanvasText::changeChunks()
 {
-	if (this->isVisible() && this->canvas())
+	if (this->isVisible() && this->scene())
 	{
-		int chunkSize = canvas()->chunkSize();
+		int chunkSize = this->scene()->chunkSize();
 		for (int j = m_boundingRect.top() / chunkSize; j <= m_boundingRect.bottom() / chunkSize; ++j)
 			for (int i = m_boundingRect.left() / chunkSize; i <= m_boundingRect.right() / chunkSize; ++i)
-				canvas()->setChangedChunk(i, j);
+				this->scene()->setChangedChunk(i, j);
 	}
 }
 
 void LCanvasText::addToChunks()
 {
-	if (this->isVisible() && this->canvas())
+	if (this->isVisible() && scene())
 	{
-		int chunkSize = canvas()->chunkSize();
+		int chunkSize = m_scene->chunkSize();
 		for (int j = m_boundingRect.top() / chunkSize; j <= m_boundingRect.bottom() / chunkSize; ++j)
 			for (int i = m_boundingRect.left() / chunkSize; i <= m_boundingRect.right() / chunkSize; ++i)
-				canvas()->addItemToChunk(this, i, j);
+				m_scene->addItemToChunk(this, i, j);
 	}
 }
 
 void LCanvasText::removeFromChunks()
 {
-	if (this->isVisible() && this->canvas())
+	if (this->isVisible() && this->scene())
 	{
-		int chunkSize = canvas()->chunkSize();
+		int chunkSize = this->scene()->chunkSize();
 		for (int j = m_boundingRect.top() / chunkSize; j <= m_boundingRect.bottom() / chunkSize; ++j)
 			for (int i = m_boundingRect.left() / chunkSize; i <= m_boundingRect.right() / chunkSize; ++i)
-				canvas()->removeItemFromChunk(this, i, j);
+				this->scene()->removeItemFromChunk(this, i, j);
 	}
 }
 
@@ -1547,7 +1547,7 @@ bool LCanvasText::collidesWith(const LCanvasItem *item) const
 
 bool LCanvasText::collidesWith(
 	const LCanvasShape *shape,
-	const LCanvasRectangle *rectangle,
+	const LCanvasRect *rectangle,
 	const LCanvasEllipse *ellipse,
 	const LCanvasText *text) const
 {

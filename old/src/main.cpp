@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	LCanvas canvas(800,600);
+	LCanvasScene canvas(800,600);
 	MainWindow w(&canvas);
 	w.resize(w.sizeHint());
 	w.setWindowTitle("SVG Editor");

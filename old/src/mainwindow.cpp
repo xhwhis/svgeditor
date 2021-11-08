@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 
-SVGCanvasView::SVGCanvasView(LCanvas *canvas, QWidget *parent)
-	: LCanvasView(canvas, parent)
+SVGCanvasView::SVGCanvasView(LCanvasScene *scene, QWidget *parent)
+	: LCanvasView(scene, parent)
 {
 
 }
@@ -53,69 +53,97 @@ void SVGCanvasView::moveBottomItem()
 
 void SVGCanvasView::contentsMousePressEvent(QMouseEvent *event)
 {
-	QPoint pos = inverseWorldMatrix().map(event->pos());
+	QPoint pos = event->pos();
 	m_startPos = m_lastPos = m_endPos = pos;
+	switch (m_itemType)
+	{
+	case LCanvasItem::Line:
+	{
+		m_paintingLine = new LCanvasLine(this->scene());
+		m_paintingLine->setX(pos.x());
+		m_paintingLine->setY(pos.y());
+		m_bPaintingItem = true;
+		break;
+	}
+	case LCanvasItem::Rectangle:
+	{
+		m_paintingRect = new LCanvasRect(this->scene());
+		m_paintingRect->setX(pos.x());
+		m_paintingRect->setY(pos.y());
+		m_bPaintingItem = true;
+		break;
+	}
+	case LCanvasItem::Ellipse:
+	{
+		m_paintingEllipse = new LCanvasEllipse(this->scene());
+		m_paintingEllipse->setX(pos.x());
+		m_paintingEllipse->setY(pos.y());
+		m_bPaintingItem = true;
+		break;
+	}
+	default:
+	{
+		m_bPaintingItem = false;
+		break;
+	}
+	}
 }
 
 void SVGCanvasView::contentsMouseMoveEvent(QMouseEvent *event)
 {
-	QPoint pos = inverseWorldMatrix().map(event->pos());
+	QPoint pos = event->pos();
 	m_endPos = pos;
-
+	if (m_bPaintingItem)
+	{
+		switch (m_itemType)
+		{
+		case LCanvasItem::Line:
+		{
+			m_paintingLine->setPoints(m_startPos.x(), m_startPos.y(), m_endPos.x(), m_endPos.y());
+			m_paintingLine->show();
+			this->scene()->update();
+			break;
+		}
+		case LCanvasItem::Rectangle:
+		{
+			m_paintingRect->setSize(qAbs(m_endPos.x() - m_startPos.x()),
+									qAbs(m_endPos.y() - m_startPos.y()));
+			m_paintingRect->show();
+			this->scene()->update();
+			break;
+		}
+		case LCanvasItem::Ellipse:
+		{
+			m_paintingEllipse->setSize(qAbs(m_endPos.x() - m_startPos.x()),
+									   qAbs(m_endPos.y() - m_startPos.y()));
+			m_paintingEllipse->show();
+			this->scene()->update();
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
 	m_lastPos = pos;
 }
 
 void SVGCanvasView::contentsMouseReleaseEvent(QMouseEvent *event)
 {
-	QPoint pos = inverseWorldMatrix().map(event->pos());
+	QPoint pos = event->pos();
 	m_endPos = pos;
-	QPoint offset = m_endPos - m_startPos;
-	if (qAbs(offset.x()) < 8 && qAbs(offset.y()) < 8)
-		return;
 
-	switch (m_itemType)
+	if (m_bPaintingItem)
 	{
-	case LCanvasItem::None:
-	{
-		m_activeItem = nullptr;
-		break;
+		m_paintingLine = nullptr;
+		m_paintingRect = nullptr;
+		m_paintingEllipse = nullptr;
 	}
-	case LCanvasItem::Line:
-	{
-		LCanvasLine *line = new LCanvasLine(this->canvas());
-		line->setPoints(m_startPos.x(), m_startPos.y(), m_endPos.x(), m_endPos.y());
-		canvas()->update();
-		break;
-	}
-	case LCanvasItem::Rectangle:
-	{
-		LCanvasRectangle *rect = new LCanvasRectangle(this->canvas());
-		rect->setX(qMin(m_endPos.x(), m_startPos.x()));
-		rect->setX(qMin(m_endPos.y(), m_startPos.y()));
-		rect->setSize(qAbs(m_endPos.x() - m_startPos.x()),
-					  qAbs(m_endPos.y() - m_startPos.y()));
-		rect->show();
-		rect->draw(m_painter);
-		canvas()->update();
-		break;
-	}
-	case LCanvasItem::Ellipse:
-	{
-		LCanvasEllipse *ellipse = new LCanvasEllipse(this->canvas());
-		ellipse->setX(qMin(m_endPos.x(), m_startPos.x()));
-		ellipse->setX(qMin(m_endPos.y(), m_startPos.y()));
-		ellipse->setSize(qAbs(m_endPos.x() - m_startPos.x()),
-						 qAbs(m_endPos.y() - m_startPos.y()));
-		canvas()->update();
-		break;
-	}
-	default:
-	{
-		m_activeItem = nullptr;
-		break;
-	}
-	}
-	m_lastPos = pos;
+
+	m_startPos = QPoint();
+	m_endPos = QPoint();
+	m_lastPos = QPoint();
 }
 
 void SVGCanvasView::contentsContextMenuEvent(QContextMenuEvent *event)
@@ -123,9 +151,9 @@ void SVGCanvasView::contentsContextMenuEvent(QContextMenuEvent *event)
 
 }
 
-MainWindow::MainWindow(LCanvas *canvas, QWidget *parent)
+MainWindow::MainWindow(LCanvasScene *scene, QWidget *parent)
 	: QMainWindow(parent)
-	, m_canvas(canvas)
+	, m_scene(scene)
 {
 	initUI();
 }
@@ -211,39 +239,39 @@ void MainWindow::initLeftToolBar()
 
 	m_noneButton = new QToolButton(m_leftToolBar);
 	m_noneButton->setIcon(QIcon(":icons/none.svg"));
-	m_noneButton->setIconSize(QSize(64, 64));
 	m_noneButton->setText("None");
 	m_noneButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	m_noneButton->setFixedWidth(64);
 
 	m_pathButton = new QToolButton(m_leftToolBar);
 	m_pathButton->setIcon(QIcon(":icons/path.svg"));
-	m_pathButton->setIconSize(QSize(64, 64));
 	m_pathButton->setText("Path");
 	m_pathButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	m_pathButton->setFixedWidth(64);
 
 	m_lineButton = new QToolButton(m_leftToolBar);
 	m_lineButton->setIcon(QIcon(":icons/line.svg"));
-	m_lineButton->setIconSize(QSize(64, 64));
 	m_lineButton->setText("Line");
 	m_lineButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	m_lineButton->setFixedWidth(64);
 
 	m_rectButton = new QToolButton(m_leftToolBar);
 	m_rectButton->setIcon(QIcon(":icons/rect.svg"));
-	m_rectButton->setIconSize(QSize(64, 64));
 	m_rectButton->setText("Rect");
 	m_rectButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	m_rectButton->setFixedWidth(64);
 
 	m_ellipseButton = new QToolButton(m_leftToolBar);
 	m_ellipseButton->setIcon(QIcon(":icons/ellipse.svg"));
-	m_ellipseButton->setIconSize(QSize(64, 64));
 	m_ellipseButton->setText("Ellipse");
 	m_ellipseButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	m_ellipseButton->setFixedWidth(64);
 
 	m_starButton = new QToolButton(m_leftToolBar);
 	m_starButton->setIcon(QIcon(":icons/star.svg"));
-	m_starButton->setIconSize(QSize(64, 64));
 	m_starButton->setText("Star");
 	m_starButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	m_starButton->setFixedWidth(64);
 
 	m_leftToolBar->addWidget(m_noneButton);
 	m_leftToolBar->addWidget(m_pathButton);
@@ -272,7 +300,7 @@ void MainWindow::initRightToolBar()
 
 void MainWindow::initCanvas()
 {
-	m_view = new SVGCanvasView(m_canvas, this);
+	m_view = new SVGCanvasView(m_scene, this);
 	this->setCentralWidget(m_view);
 }
 

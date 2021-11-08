@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	this->setWindowTitle(QStringLiteral("SVG Editor"));
 	this->setWindowIcon(QIcon(QStringLiteral(":icons/logo.svg")));
-	this->setMinimumSize(800, 600);
+	this->setMinimumSize(800, 640);
 
 	QFile file(QStringLiteral(":qss/light.qss"));
 	file.open(QFile::ReadOnly);

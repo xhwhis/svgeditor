@@ -1,19 +1,15 @@
 #ifndef LCANVAS_H
 #define LCANVAS_H
 
-#include <QGuiApplication>
-#include <QScrollArea>
-#include <QPainter>
-#include <QPainterPath>
-#include <QMouseEvent>
+#include <QtWidgets>
 
 namespace lwscode {
 
-class LCanvas;
+class LCanvasScene;
 class LCanvasView;
 class LCanvasItem;
 class LCanvasShape;
-class LCanvasRectangle;
+class LCanvasRect;
 class LCanvasPolygon;
 class LCanvasEllipse;
 class LCanvasText;
@@ -23,15 +19,15 @@ class LCanvasChunk;
 typedef QList<LCanvasItem *> LCanvasItemList;
 typedef QList<LCanvasView *> LCanvasViewList;
 
-class LCanvas : public QObject
+class LCanvasScene : public QObject
 {
 	Q_OBJECT
 
 public:
-	LCanvas(QObject *parent = nullptr);
-	LCanvas(int width, int height);
-	LCanvas(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight);
-	virtual ~LCanvas();
+	LCanvasScene(QObject *parent = nullptr);
+	LCanvasScene(int width, int height);
+	LCanvasScene(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight);
+	virtual ~LCanvasScene();
 
 	virtual void setTiles(QImage image, int hTiles, int vTiles,
 						  int tileWidth, int tileHeight);
@@ -42,67 +38,25 @@ public:
 	QColor backgroundColor() const;
 
 	virtual void setTile(int x, int y, int tileNum);
-	int tile(int x, int y) const
-	{
-		return m_grid[x + y * m_hTiles];
-	}
+	int tile(int x, int y) const { return m_grid[x + y * m_hTiles]; }
 
-	int tilesHorizontally() const
-	{
-		return m_hTiles;
-	}
-	int tilesVertically() const
-	{
-		return m_vTiles;
-	}
+	int tilesHorizontally() const { return m_hTiles; }
+	int tilesVertically() const { return m_vTiles; }
 
-	int tileWidth() const
-	{
-		return m_tileWidth;
-	}
-	int tileHeight() const
-	{
-		return m_tileHeight;
-	}
+	int tileWidth() const { return m_tileWidth; }
+	int tileHeight() const { return m_tileHeight; }
 
 	virtual void resize(int width, int height);
-	int width() const
-	{
-		return m_width;
-	}
-	int height() const
-	{
-		return m_height;
-	}
-	QSize size() const
-	{
-		return QSize(m_width, m_height);
-	}
-	QRect rect() const
-	{
-		return QRect(0, 0, m_width, m_height);
-	}
-	bool onCanvas(int x, int y) const
-	{
-		return x >= 0 && y >= 0 && x < m_width && y < m_height;
-	}
-	bool onCanvas(const QPoint &point) const
-	{
-		return onCanvas(point.x(), point.y());
-	}
-	bool validChunk(int x, int y) const
-	{
-		return x >= 0 && y >= 0 && x < m_chunkWidth && y < m_chunkHeight;
-	}
-	bool validChunk(const QPoint &point) const
-	{
-		return validChunk(point.x(), point.y());
-	}
+	int width() const { return m_width; }
+	int height() const { return m_height; }
+	QSize size() const { return QSize(m_width, m_height); }
+	QRect rect() const { return QRect(0, 0, m_width, m_height); }
+	bool onCanvas(int x, int y) const { return x >= 0 && y >= 0 && x < m_width && y < m_height; }
+	bool onCanvas(const QPoint &point) const { return onCanvas(point.x(), point.y()); }
+	bool validChunk(int x, int y) const { return x >= 0 && y >= 0 && x < m_chunkWidth && y < m_chunkHeight; }
+	bool validChunk(const QPoint &point) const { return validChunk(point.x(), point.y()); }
 
-	int chunkSize() const
-	{
-		return m_chunkSize;
-	}
+	int chunkSize() const { return m_chunkSize; }
 	virtual void retune(int chunkSize, int maxClusters = 100);
 
 	bool sameChunk(int x1, int y1, int x2, int y2) const
@@ -123,15 +77,15 @@ public:
 	LCanvasItemList allItems();
 	LCanvasItemList collisions(const QPoint &) const;
 	LCanvasItemList collisions(const QRect &) const;
-	LCanvasItemList collisions(const QPolygon &pa, const LCanvasItem *item,
+	LCanvasItemList collisions(const QPolygon &polygon, const LCanvasItem *item,
 							   bool exact) const;
 
-	void drawArea(const QRect &rect, QPainter *painter, bool doubleBuffer = false);
+	void drawArea(const QRect &rect, QPainter *painter);
 
 	virtual void addView(LCanvasView *view);
 	virtual void removeView(LCanvasView *view);
 
-	void drawCanvasArea(const QRect &rect, QPainter *painter = nullptr, bool doubleBuffer = true);
+	void drawCanvasArea(const QRect &rect, QPainter *painter = nullptr);
 	void drawViewArea(LCanvasView *view, QPainter *painter, const QRect &rect);
 
 	virtual void addItem(LCanvasItem *item);
@@ -205,14 +159,11 @@ class LCanvasView : public QScrollArea
 
 public:
 	LCanvasView(QWidget *parent = nullptr);
-	LCanvasView(LCanvas *canvas, QWidget *parent = nullptr);
+	LCanvasView(LCanvasScene *scene, QWidget *parent = nullptr);
 	virtual ~LCanvasView();
 
-	LCanvas *canvas() const
-	{
-		return m_canvas;
-	}
-	void setCanvas(LCanvas *canvas);
+	LCanvasScene *scene() const { return m_scene; }
+	void setCanvas(LCanvasScene *scene);
 
 	const QTransform &worldMatrix() const;
 	const QTransform &inverseWorldMatrix() const;
@@ -242,8 +193,8 @@ private:
 	void drawContents(QPainter *painter);
 
 private:
-	friend class LCanvas;
-	LCanvas *m_canvas;
+	friend class LCanvasScene;
+	LCanvasScene *m_scene;
 	QTransform m_worldMatrix;
 	QTransform m_inverseWorldMatrix;
 };
@@ -251,43 +202,24 @@ private:
 class LCanvasItem
 {
 public:
-	LCanvasItem(LCanvas *canvas);
+	LCanvasItem(LCanvasScene *scene);
 	virtual ~LCanvasItem();
 
-	double x() const
-	{
-		return m_x;
-	}
-	double y() const
-	{
-		return m_y;
-	}
-	double z() const
-	{
-		return m_z;
-	}
+	double x() const { return m_x; }
+	double y() const { return m_y; }
+	double z() const { return m_z; }
 
-	virtual void moveBy(double deltaX, double deltaY);
+	virtual void moveBy(double dx, double dy);
 	void move(double x, double y);
-	void setX(double x)
-	{
-		move(x, y());
-	}
-	void setY(double y)
-	{
-		move(x(), y);
-	}
-	void setZ(double z)
-	{
-		m_z = z;
-		changeChunks();
-	}
+	void setX(double x) { move(x, y()); }
+	void setY(double y) { move(x(), y); }
+	void setZ(double z) { m_z = z; changeChunks(); }
 
 	virtual bool collidesWith(const LCanvasItem *item) const = 0;
 
 	LCanvasItemList collisions(bool exact) const;
 
-	virtual void setCanvas(LCanvas *canvas);
+	virtual void setCanvas(LCanvasScene *scene);
 
 	virtual void draw(QPainter &painter) = 0;
 
@@ -295,25 +227,14 @@ public:
 	void hide();
 
 	virtual void setVisible(bool visible);
-	bool isVisible() const
-	{
-		return m_bVisible;
-	}
 	virtual void setSelected(bool selected);
-	bool isSelected() const
-	{
-		return m_bSelected;
-	}
 	virtual void setEnabled(bool enabled);
-	bool isEnabled() const
-	{
-		return m_bEnabled;
-	}
 	virtual void setActive(bool active);
-	bool isActive() const
-	{
-		return m_bActive;
-	}
+
+	bool isVisible() const { return m_bVisible; }
+	bool isSelected() const { return m_bSelected; }
+	bool isEnabled() const { return m_bEnabled; }
+	bool isActive() const { return m_bActive; }
 
 	enum ItemType
 	{
@@ -331,21 +252,15 @@ public:
 
 	virtual QRect boundingRect() const = 0;
 
-	LCanvas *canvas() const
-	{
-		return m_canvas;
-	}
+	LCanvasScene *scene() const { return m_scene; }
 
 protected:
-	void update()
-	{
-		changeChunks();
-	}
+	void update() { changeChunks(); }
 
 private:
 	friend class LCanvasShape;
 	friend class LCanvasLine;
-	friend class LCanvasRectangle;
+	friend class LCanvasRect;
 	friend class LCanvasPolygon;
 	friend class LCanvasEllipse;
 	friend class LCanvasText;
@@ -357,13 +272,12 @@ private:
 	virtual void changeChunks();
 	virtual bool collidesWith(
 		const LCanvasShape *shape,
-		const LCanvasRectangle *rectangle,
+		const LCanvasRect *rectangle,
 		const LCanvasEllipse *ellipse,
 		const LCanvasText *text) const = 0;
 
 private:
-	LCanvas *m_canvas;
-	static LCanvas *m_currentCanvas;
+	LCanvasScene *m_scene;
 	double m_x;
 	double m_y;
 	double m_z;
@@ -377,7 +291,7 @@ private:
 class LCanvasShape : public LCanvasItem
 {
 public:
-	LCanvasShape(LCanvas *canvas);
+	LCanvasShape(LCanvasScene *scene);
 	virtual ~LCanvasShape();
 
 	bool collidesWith(const LCanvasItem *) const;
@@ -385,23 +299,14 @@ public:
 	virtual void setPen(QPen pen);
 	virtual void setBrush(QBrush brush);
 
-	QPen pen() const
-	{
-		return m_pen;
-	}
-	QBrush brush() const
-	{
-		return m_brush;
-	}
+	QPen pen() const { return m_pen; }
+	QBrush brush() const { return m_brush; }
 
 	virtual QPolygon areaPoints() const = 0;
 	QRect boundingRect() const;
 
 	static int g_type;
-	int type() const
-	{
-		return g_type;
-	}
+	int type() const { return g_type; }
 
 protected:
 	void draw(QPainter &);
@@ -411,15 +316,12 @@ protected:
 	void setWinding(bool);
 
 	void invalidate();
-	bool isValid() const
-	{
-		return LCanvasItem::m_bValid;
-	}
+	bool isValid() const { return LCanvasItem::m_bValid; }
 
 private:
 	bool collidesWith(
 		const LCanvasShape *shape,
-		const LCanvasRectangle *rectangle,
+		const LCanvasRect *rectangle,
 		const LCanvasEllipse *ellipse,
 		const LCanvasText *text) const;
 
@@ -428,34 +330,25 @@ private:
 	QPen m_pen;
 };
 
-class LCanvasRectangle : public LCanvasShape
+class LCanvasRect : public LCanvasShape
 {
 public:
-	LCanvasRectangle(LCanvas *canvas);
-	LCanvasRectangle(const QRect &rect, LCanvas *canvas);
-	LCanvasRectangle(int x, int y, int width, int height, LCanvas *canvas);
-	virtual ~LCanvasRectangle();
+	LCanvasRect(LCanvasScene *scene);
+	LCanvasRect(const QRect &rect, LCanvasScene *scene);
+	LCanvasRect(int x, int y, int width, int height, LCanvasScene *scene);
+	virtual ~LCanvasRect();
 
 	int width() const;
 	int height() const;
 	void setSize(int width, int height);
-	QSize size() const
-	{
-		return QSize(m_width, m_height);
-	}
+	QSize size() const { return QSize(m_width, m_height); }
 	QPolygon areaPoints() const;
-	QRect rect() const
-	{
-		return QRect(this->x(), this->y(), m_width, m_height);
-	}
+	QRect rect() const { return QRect(this->x(), this->y(), m_width, m_height); }
 
 	bool collidesWith(const LCanvasItem *item) const;
 
 	static int g_type;
-	int type() const
-	{
-		return g_type;
-	}
+	int type() const { return g_type; }
 
 protected:
 	void drawShape(QPainter &painter);
@@ -464,7 +357,7 @@ protected:
 private:
 	bool collidesWith(
 		const LCanvasShape *shape,
-		const LCanvasRectangle *rectangle,
+		const LCanvasRect *rectangle,
 		const LCanvasEllipse *ellipse,
 		const LCanvasText *text) const;
 
@@ -475,19 +368,16 @@ private:
 class LCanvasPolygon : public LCanvasShape
 {
 public:
-	LCanvasPolygon(LCanvas *canvas);
+	LCanvasPolygon(LCanvasScene *scene);
 	virtual ~LCanvasPolygon();
 	void setPoints(QPolygon polygon);
 	QPolygon points() const;
-	void moveBy(double detlaX, double deltaY);
+	void moveBy(double detlaX, double dY);
 
 	QPolygon areaPoints() const;
 
 	static int g_type;
-	int type() const
-	{
-		return g_type;
-	}
+	int type() const { return g_type; }
 
 protected:
 	void drawShape(QPainter &painter);
@@ -497,24 +387,15 @@ protected:
 class LCanvasLine : public LCanvasShape
 {
 public:
-	LCanvasLine(LCanvas *canvas);
+	LCanvasLine(LCanvasScene *scene);
 	virtual ~LCanvasLine();
 	void setPoints(int x1, int y1, int x2, int y2);
 
-	QPoint startPoint() const
-	{
-		return QPoint(m_x1, m_y1);
-	}
-	QPoint endPoint() const
-	{
-		return QPoint(m_x2, m_y2);
-	}
+	QPoint startPoint() const { return QPoint(m_x1, m_y1); }
+	QPoint endPoint() const { return QPoint(m_x2, m_y2); }
 
 	static int g_type;
-	int type() const
-	{
-		return g_type;
-	}
+	int type() const { return g_type; }
 
 protected:
 	void drawShape(QPainter &painter);
@@ -530,8 +411,8 @@ private:
 class LCanvasEllipse : public LCanvasShape
 {
 public:
-	LCanvasEllipse(LCanvas *canvas);
-	LCanvasEllipse(int width, int height, LCanvas *canvas);
+	LCanvasEllipse(LCanvasScene *scene);
+	LCanvasEllipse(int width, int height, LCanvasScene *scene);
 	virtual ~LCanvasEllipse();
 
 	int width() const;
@@ -542,10 +423,7 @@ public:
 	bool collidesWith(const LCanvasItem *item) const;
 
 	static int g_type;
-	int type() const
-	{
-		return g_type;
-	}
+	int type() const { return g_type; }
 
 protected:
 	void drawShape(QPainter &painter);
@@ -553,7 +431,7 @@ protected:
 private:
 	bool collidesWith(
 		const LCanvasShape *shape,
-		const LCanvasRectangle *rectangle,
+		const LCanvasRect *rectangle,
 		const LCanvasEllipse *ellipse,
 		const LCanvasText *text) const;
 
@@ -565,9 +443,9 @@ private:
 class LCanvasText : public LCanvasItem
 {
 public:
-	LCanvasText(LCanvas *canvas);
-	LCanvasText(const QString &text, LCanvas *canvas);
-	LCanvasText(const QString &text, const QFont &font, LCanvas *canvas);
+	LCanvasText(LCanvasScene *scene);
+	LCanvasText(const QString &text, LCanvasScene *scene);
+	LCanvasText(const QString &text, const QFont &font, LCanvasScene *scene);
 	virtual ~LCanvasText();
 
 	void setText(const QString &text);
@@ -577,12 +455,9 @@ public:
 	QFont font() const;
 	QColor color() const;
 
-	void moveBy(double deltaX, double deltaY);
+	void moveBy(double dX, double dY);
 
-	int textFlags() const
-	{
-		return m_flags;
-	}
+	int textFlags() const { return m_flags; }
 	void setTextFlags(int flags);
 
 	QRect boundingRect() const;
@@ -590,10 +465,7 @@ public:
 	bool collidesWith(const LCanvasItem *item) const;
 
 	static int g_type;
-	int type() const
-	{
-		return g_type;
-	}
+	int type() const { return g_type; }
 
 protected:
 	virtual void draw(QPainter &painter);
@@ -606,7 +478,7 @@ private:
 	void setRect();
 	bool collidesWith(
 		const LCanvasShape *shape,
-		const LCanvasRectangle *rectangle,
+		const LCanvasRect *rectangle,
 		const LCanvasEllipse *ellipse,
 		const LCanvasText *text) const;
 

@@ -1,14 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QMenuBar>
-#include <QMenu>
-#include <QAction>
-#include <QStackedWidget>
-#include <QToolBar>
-#include <QToolButton>
-
 #include "lcanvas.h"
 
 using namespace lwscode;
@@ -18,13 +10,10 @@ class SVGCanvasView : public LCanvasView
 	Q_OBJECT
 
 public:
-	SVGCanvasView(LCanvas *canvas, QWidget *parent = nullptr);
+	SVGCanvasView(LCanvasScene *scene, QWidget *parent = nullptr);
 	~SVGCanvasView();
 
-	void setItemType(int type)
-	{
-		m_itemType = type;
-	}
+	void setItemType(int type) { m_itemType = type; }
 
 public slots:
 	void cutItem();
@@ -44,14 +33,18 @@ protected:
 
 private:
 	int m_itemType;
-	LCanvasItem *m_activeItem;
+	LCanvasLine *m_paintingLine;
+	LCanvasRect *m_paintingRect;
+	LCanvasEllipse *m_paintingEllipse;
 	LCanvasItemList *m_selectionItems;
 	QPoint m_startPos;
 	QPoint m_lastPos;
 	QPoint m_endPos;
 	int m_minZ;
 	int m_maxZ;
-	QPainter m_painter;
+	bool m_bPaintingItem;
+	bool m_bTranslatingItem;
+	bool m_bScalingItem;
 };
 
 class MainWindow : public QMainWindow
@@ -59,25 +52,13 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MainWindow(LCanvas *canvas, QWidget *parent = nullptr);
+	MainWindow(LCanvasScene *scene, QWidget *parent = nullptr);
 	~MainWindow();
 
-	void setCanvas(LCanvas *canvas)
-	{
-		m_canvas = canvas;
-	}
-	LCanvas *canvas()
-	{
-		return m_canvas;
-	}
-	void setView(SVGCanvasView *view)
-	{
-		m_view = view;
-	}
-	SVGCanvasView *view()
-	{
-		return m_view;
-	}
+	void setScene(LCanvasScene *scene) { m_scene = scene; }
+	LCanvasScene *scene() const { return m_scene; }
+	void setView(SVGCanvasView *view) { m_view = view; }
+	SVGCanvasView *view() const { return m_view; }
 
 public slots:
 	void drawNone();
@@ -132,7 +113,7 @@ private:
 	QToolBar *m_rightToolBar;
 	QStackedWidget *m_toolsPanelWidget;
 
-	LCanvas *m_canvas;
+	LCanvasScene *m_scene;
 	SVGCanvasView *m_view;
 };
 
