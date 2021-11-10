@@ -31,75 +31,115 @@ void MainWindow::initUI()
 	initRightToolBar();
 }
 
+void MainWindow::initCanvas()
+{
+	m_centralWidget = new QScrollArea(this);
+	m_centralWidget->setAlignment(Qt::AlignCenter);
+	this->setCentralWidget(m_centralWidget);
+
+	m_canvas = new LCanvasView(m_centralWidget);
+	m_centralWidget->setWidget(m_canvas);
+
+
+
+	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
+	connect(this, SIGNAL(sigReadItemsFromFile(const QString &)), m_canvas, SLOT(readItemsFromFile(const QString &)));
+	connect(this, SIGNAL(sigWriteItemsToFile(const QString &)), m_canvas, SLOT(writeItemsToFile(const QString &)));
+}
+
 void MainWindow::initMenuBar()
 {
 	m_mainMenuBar = new QMenuBar(this);
 	this->setMenuBar(m_mainMenuBar);
 
-	QMenu *fileMenu = new QMenu(QStringLiteral("File"), m_mainMenuBar);
-	QAction *newFileAction = new QAction(QStringLiteral("New"), fileMenu);
+	// file menu
+	QMenu *fileMenu = new QMenu(tr("File"), m_mainMenuBar);
+
+	QAction *newFileAction = new QAction(tr("New"), fileMenu);
 	newFileAction->setIcon(QIcon(QStringLiteral(":icons/new.svg")));
 	newFileAction->setShortcut(QKeySequence::New);
-	fileMenu->addAction(newFileAction);
-	QAction *openFileAction = new QAction(QStringLiteral("Open"), fileMenu);
+
+	QAction *openFileAction = new QAction(tr("Open"), fileMenu);
 	openFileAction->setIcon(QIcon(QStringLiteral(":icons/open.svg")));
 	openFileAction->setShortcut(QKeySequence::Open);
-	fileMenu->addAction(openFileAction);
-	QAction *saveFileAction = new QAction(QStringLiteral("Save"), fileMenu);
+
+	QAction *saveFileAction = new QAction(tr("Save"), fileMenu);
 	saveFileAction->setIcon(QIcon(QStringLiteral(":icons/save.svg")));
 	saveFileAction->setShortcut(QKeySequence::Save);
-	fileMenu->addAction(saveFileAction);
-	QAction *saveAsFileAction = new QAction(QStringLiteral("Save As"), fileMenu);
+
+	QAction *saveAsFileAction = new QAction(tr("Save As"), fileMenu);
 	saveAsFileAction->setIcon(QIcon(QStringLiteral(":icons/save-as.svg")));
 	saveAsFileAction->setShortcut(QKeySequence::SaveAs);
-	fileMenu->addAction(saveAsFileAction);
-	m_mainMenuBar->addAction(fileMenu->menuAction());
 
-	QMenu *editMenu = new QMenu(QStringLiteral("Edit"), m_mainMenuBar);
-	QAction *undoEditAction = new QAction(QStringLiteral("Undo"), editMenu);
+	m_mainMenuBar->addAction(fileMenu->menuAction());
+	fileMenu->addAction(newFileAction);
+	fileMenu->addAction(openFileAction);
+	fileMenu->addAction(saveFileAction);
+	fileMenu->addAction(saveAsFileAction);
+
+	// edit menu
+	QMenu *editMenu = new QMenu(tr("Edit"), m_mainMenuBar);
+
+	QAction *undoEditAction = new QAction(tr("Undo"), editMenu);
 	undoEditAction->setIcon(QIcon(QStringLiteral(":icons/undo.svg")));
 	undoEditAction->setShortcut(QKeySequence::Undo);
-	editMenu->addAction(undoEditAction);
-	QAction *redoEditAction = new QAction(QStringLiteral("Redo"), editMenu);
+
+	QAction *redoEditAction = new QAction(tr("Redo"), editMenu);
 	redoEditAction->setIcon(QIcon(QStringLiteral(":icons/redo.svg")));
 	redoEditAction->setShortcut(QKeySequence::Redo);
-	editMenu->addAction(redoEditAction);
-	editMenu->addSeparator();
-	QAction *cutEditAction = new QAction(QStringLiteral("Cut"), editMenu);
+
+	QAction *cutEditAction = new QAction(tr("Cut"), editMenu);
 	cutEditAction->setIcon(QIcon(QStringLiteral(":icons/cut.svg")));
 	cutEditAction->setShortcut(QKeySequence::Cut);
-	editMenu->addAction(cutEditAction);
-	QAction *copyEditAction = new QAction(QStringLiteral("Copy"), editMenu);
+
+	QAction *copyEditAction = new QAction(tr("Copy"), editMenu);
 	copyEditAction->setIcon(QIcon(QStringLiteral(":icons/copy.svg")));
 	copyEditAction->setShortcut(QKeySequence::Copy);
-	editMenu->addAction(copyEditAction);
-	QAction *pasteEditAction = new QAction(QStringLiteral("Paste"), editMenu);
+
+	QAction *pasteEditAction = new QAction(tr("Paste"), editMenu);
 	pasteEditAction->setIcon(QIcon(QStringLiteral(":icons/paste.svg")));
 	pasteEditAction->setShortcut(QKeySequence::Paste);
-	editMenu->addAction(pasteEditAction);
-	QAction *deleteEditAction = new QAction(QStringLiteral("Delete"), editMenu);
+
+	QAction *deleteEditAction = new QAction(tr("Delete"), editMenu);
 	deleteEditAction->setIcon(QIcon(QStringLiteral(":icons/delete.svg")));
 	deleteEditAction->setShortcut(QKeySequence::Delete);
-	editMenu->addAction(deleteEditAction);
+
 	m_mainMenuBar->addAction(editMenu->menuAction());
+	editMenu->addAction(undoEditAction);
+	editMenu->addAction(redoEditAction);
+	editMenu->addSeparator();
+	editMenu->addAction(cutEditAction);
+	editMenu->addAction(copyEditAction);
+	editMenu->addAction(pasteEditAction);
+	editMenu->addAction(deleteEditAction);
 
-	QMenu *objectMenu = new QMenu(QStringLiteral("Object"), m_mainMenuBar);
-	QAction *moveTopObjectAction = new QAction(QStringLiteral("Move Top"), objectMenu);
-	objectMenu->addAction(moveTopObjectAction);
-	QAction *moveUpObjectAction = new QAction(QStringLiteral("Move Up"), objectMenu);
-	objectMenu->addAction(moveUpObjectAction);
-	QAction *moveDownObjectAction = new QAction(QStringLiteral("Move Down"), objectMenu);
-	objectMenu->addAction(moveDownObjectAction);
-	QAction *moveBottomObjectAction = new QAction(QStringLiteral("Move Bottom"), objectMenu);
-	objectMenu->addAction(moveBottomObjectAction);
+	// object menu
+	QMenu *objectMenu = new QMenu(tr("Object"), m_mainMenuBar);
+
+	QAction *moveTopObjectAction = new QAction(tr("Move Top"), objectMenu);
+
+	QAction *moveUpObjectAction = new QAction(tr("Move Up"), objectMenu);
+
+	QAction *moveDownObjectAction = new QAction(tr("Move Down"), objectMenu);
+
+	QAction *moveBottomObjectAction = new QAction(tr("Move Bottom"), objectMenu);
+
 	m_mainMenuBar->addAction(objectMenu->menuAction());
+	objectMenu->addAction(moveTopObjectAction);
+	objectMenu->addAction(moveUpObjectAction);
+	objectMenu->addAction(moveDownObjectAction);
+	objectMenu->addAction(moveBottomObjectAction);
 
-	QMenu *viewMenu = new QMenu(QStringLiteral("View"), m_mainMenuBar);
-	QAction *showRulesViewAction = new QAction(QStringLiteral("Show Rules"), viewMenu);
+	// view menu
+	QMenu *viewMenu = new QMenu(tr("View"), m_mainMenuBar);
+
+	QAction *showRulesViewAction = new QAction(tr("Show Rules"), viewMenu);
 	showRulesViewAction->setCheckable(true);
-	viewMenu->addAction(showRulesViewAction);
-	m_mainMenuBar->addAction(viewMenu->menuAction());
 
+	m_mainMenuBar->addAction(viewMenu->menuAction());
+	viewMenu->addAction(showRulesViewAction);
+
+	// init connect
 	connect(newFileAction, SIGNAL(triggered()), this, SLOT(onNewFile()));
 	connect(openFileAction, SIGNAL(triggered()), this, SLOT(onOpenFile()));
 	connect(saveFileAction, SIGNAL(triggered()), this, SLOT(onSaveFile()));
@@ -256,34 +296,6 @@ void MainWindow::initRightToolBar()
 	connect(strokeWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStrokeWidth(int)));
 }
 
-void MainWindow::initCanvas()
-{
-	m_centralWidget = new QScrollArea(this);
-	m_centralWidget->setAlignment(Qt::AlignCenter);
-	this->setCentralWidget(m_centralWidget);
-
-	m_canvas = new LCanvasView(m_centralWidget);
-	m_canvas->resize(500, 500);
-	m_canvas->setMinimumSize(QSize(100, 100));
-	m_canvas->setMaximumSize(QSize(1600, 1600));
-	m_centralWidget->setWidget(m_canvas);
-
-	if (!m_canvasColor.isValid())
-	{
-		m_canvas->setStyleSheet(QStringLiteral("background-color: white") +
-								QStringLiteral("; border-radius: 8px"));
-	}
-	else
-	{
-		m_canvas->setStyleSheet(QStringLiteral("background-color: ") + m_canvasColor.name() +
-								QStringLiteral("; border-radius: 8px"));
-	}
-
-	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
-	connect(this, SIGNAL(sigReadItemsFromFile(const QString &)), m_canvas, SLOT(readItemsFromFile(const QString &)));
-	connect(this, SIGNAL(sigWriteItemsToFile(const QString &)), m_canvas, SLOT(writeItemsToFile(const QString &)));
-}
-
 void MainWindow::onPaintNone()
 {
 	emit changeItemType(LCanvasItem::None);
@@ -362,14 +374,13 @@ void MainWindow::onSaveFile()
 
 void MainWindow::setCanvasColor()
 {
-	QColorDialog color;
-	QColor getColor = color.getColor();
-	if (getColor.isValid())
+	QColor color = QColorDialog::getColor();
+	if (color.isValid() && m_canvasColor != color)
 	{
-		m_canvasColor = getColor;
-		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: ") + getColor.name() +
-										   QStringLiteral("border-radius: 8px"));
-		m_canvas->setCanvasColor(getColor);
+		m_canvasColor = color;
+		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: ") + color.name() +
+										   QStringLiteral("; border-radius: 8px"));
+		m_canvas->setCanvasColor(color);
 	}
 }
 

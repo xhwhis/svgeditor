@@ -21,9 +21,16 @@ LCanvasView::LCanvasView(QWidget *parent)
 	, m_selectedItem(nullptr)
 	, m_itemHitPos(LCanvasView::None)
 {
-	this->setMouseTracking(true);
-	this->setAttribute(Qt::WA_StyledBackground);
+	this->resize(500, 500);
+	this->setMinimumSize(QSize(100, 100));
+	this->setMaximumSize(QSize(2000, 2000));
 	this->setStyleSheet(QStringLiteral("border-radius: 8px"));
+
+	QPalette::ColorRole role = this->backgroundRole();
+	QPalette palette = this->palette();
+	palette.setColor(role, m_canvasColor);
+	this->setPalette(palette);
+
 	initLineEdit();
 	initRightClickMenu();
 }
@@ -42,10 +49,16 @@ LCanvasView::~LCanvasView()
 
 void LCanvasView::setCanvasColor(const QColor &color)
 {
-	if (color.isValid())
+	if (color.isValid() && m_canvasColor != color)
+	{
 		m_canvasColor = color;
 
-	this->setStyleSheet(QStringLiteral("background-color: ") + m_canvasColor.name());
+		m_canvasColor = Qt::white;
+		QPalette::ColorRole role = this->backgroundRole();
+		QPalette palette = this->palette();
+		palette.setColor(role, m_canvasColor);
+		this->setPalette(palette);
+	}
 }
 
 void LCanvasView::setStrokeColor(const QColor &color)
@@ -170,7 +183,7 @@ void LCanvasView::mousePressEvent(QMouseEvent *event)
 	}
 	else if (m_item && m_itemType == LCanvasItem::Path)
 	{
-		reselectItems();
+		deselectAllItems();
 		m_bPaintingPath = true;
 		m_item->setStartPos(pos);
 		m_item->addPoint(pos);
@@ -180,7 +193,7 @@ void LCanvasView::mousePressEvent(QMouseEvent *event)
 	}
 	else if (m_item != nullptr)
 	{
-		reselectItems();
+		deselectAllItems();
 		m_bPaintingPath = false;
 		m_item->setStartPos(pos);
 		m_item->setEndPos(pos);
@@ -453,11 +466,13 @@ void LCanvasView::pasteItem()
 		m_allItems << item;
 		m_selectedItems << item;
 	}
+	this->update();
 }
 
 void LCanvasView::deleteItem()
 {
 	m_allItems.removeOne(m_selectedItem);
+	this->update();
 }
 
 void LCanvasView::moveTopItem()
@@ -557,15 +572,6 @@ void LCanvasView::initRightClickMenu()
 	connect(moveUpAction, SIGNAL(triggered()), this, SLOT(moveUpItem()));
 	connect(moveDownAction, SIGNAL(triggered()), this, SLOT(moveDownItem()));
 	connect(moveBottomAction, SIGNAL(triggered()), this, SLOT(moveBottomItem()));
-}
-
-void LCanvasView::reselectItems()
-{
-	if (!m_selectedItems.isEmpty())
-		deselectAllItems();
-
-	for (auto &item : m_allItems)
-		item->setSelected(false);
 }
 
 void LCanvasView::deselectAllItems()

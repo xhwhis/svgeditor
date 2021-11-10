@@ -61,7 +61,6 @@ private:
 	ItemHitPos getItemHitPos(const QPoint &point);
 	void initLineEdit();
 	void initRightClickMenu();
-	void reselectItems();
 	void deselectAllItems();
 	void paintRubberBand(SPtrLCanvasItem item, QPainter &painter);
 	void paintSelectedBox(SPtrLCanvasItem item, QPainter &painter);

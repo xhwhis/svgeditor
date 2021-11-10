@@ -39,10 +39,10 @@ protected slots:
 
 private:
 	void initUI();
+	void initCanvas();
 	void initMenuBar();
 	void initLeftToolBar();
 	void initRightToolBar();
-	void initCanvas();
 
 private:
 	QMenuBar *m_mainMenuBar;
