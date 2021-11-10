@@ -14,12 +14,6 @@ public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow() {}
 
-	void initUI();
-	void initMenuBar();
-	void initLeftToolBar();
-	void initRightToolBar();
-	void initCanvas();
-
 signals:
 	void changeItemType(LCanvasItem::ItemType itemType);
 	void sigReadItemsFromFile(const QString &filePath);
@@ -42,6 +36,13 @@ protected slots:
 	void setCanvasHeight(int height);
 	void setStrokeColor();
 	void setStrokeWidth(int width);
+
+private:
+	void initUI();
+	void initMenuBar();
+	void initLeftToolBar();
+	void initRightToolBar();
+	void initCanvas();
 
 private:
 	QMenuBar *m_mainMenuBar;

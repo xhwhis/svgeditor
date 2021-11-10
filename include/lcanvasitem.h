@@ -5,10 +5,8 @@
 
 namespace lwscode {
 
-class LCanvasItem : public QObject
+class LCanvasItem
 {
-	Q_OBJECT
-
 public:
 	enum ItemType {
 		None,
@@ -21,7 +19,7 @@ public:
 		Text
 	};
 
-	LCanvasItem(QWidget *parent = nullptr);
+	LCanvasItem();
 	virtual ~LCanvasItem() {}
 
 	ItemType getItemType();
@@ -42,7 +40,6 @@ public:
 
 	QRect boundingRect();
 
-	QLineEdit *lineEdit();
 	void addPoint(const QPoint &point);
 
 	virtual void paintItem(QPainter &painter) = 0;
@@ -51,10 +48,6 @@ public:
 	virtual void setBoundingRect() = 0;
 	virtual bool containsPos(const QPoint &point) = 0;
 	virtual void writeItemToXml(QXmlStreamWriter &writer) = 0;
-
-protected slots:
-	void setLineEditVisible();
-	void resizeLineEdit();
 
 protected:
 	ItemType m_itemType;
@@ -67,13 +60,12 @@ protected:
 	QRect m_boundingRect;
 	QPainterPath m_path;
 	QVector<QPoint> m_points;
-	QLineEdit *m_lineEdit;
 };
 
 class LCanvasPath : public LCanvasItem
 {
 public:
-	LCanvasPath(QWidget *parent = nullptr);
+	LCanvasPath();
 	virtual ~LCanvasPath() {}
 
 	void paintItem(QPainter &painter) override;
@@ -87,7 +79,7 @@ public:
 class LCanvasLine : public LCanvasItem
 {
 public:
-	LCanvasLine(QWidget *parent = nullptr);
+	LCanvasLine();
 	virtual ~LCanvasLine() {}
 
 	int sumDistance(const QPoint &p1, const QPoint &p2);
@@ -103,7 +95,7 @@ public:
 class LCanvasRect : public LCanvasItem
 {
 public:
-	LCanvasRect(QWidget *parent = nullptr);
+	LCanvasRect();
 	virtual ~LCanvasRect() {}
 
 	void paintItem(QPainter &painter) override;
@@ -121,7 +113,7 @@ private:
 class LCanvasEllipse : public LCanvasItem
 {
 public:
-	LCanvasEllipse(QWidget *parent = nullptr);
+	LCanvasEllipse();
 	virtual ~LCanvasEllipse() {}
 
 	void paintItem(QPainter &painter) override;
@@ -139,7 +131,7 @@ private:
 class LCanvasTriangle : public LCanvasItem
 {
 public:
-	LCanvasTriangle(QWidget *parent = nullptr);
+	LCanvasTriangle();
 	virtual ~LCanvasTriangle() {}
 
 	void paintItem(QPainter &painter) override;
@@ -158,7 +150,7 @@ private:
 class LCanvasHexagon : public LCanvasItem
 {
 public:
-	LCanvasHexagon(QWidget *parent = nullptr);
+	LCanvasHexagon();
 	virtual ~LCanvasHexagon() {}
 
 	void paintItem(QPainter &painter) override;
@@ -177,8 +169,11 @@ private:
 class LCanvasText : public LCanvasItem
 {
 public:
-	LCanvasText(QWidget *parent = nullptr);
+	LCanvasText();
 	virtual ~LCanvasText() {}
+
+	void setFont(const QFont &font);
+	void setText(const QString &text);
 
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
@@ -191,6 +186,7 @@ private:
 	int m_width;
 	int m_height;
 	QFont m_font;
+	QString m_text;
 };
 
 } // namespace

@@ -24,6 +24,7 @@ LCanvasView::LCanvasView(QWidget *parent)
 	this->setMouseTracking(true);
 	this->setAttribute(Qt::WA_StyledBackground);
 	this->setStyleSheet(QStringLiteral("border-radius: 8px"));
+	initLineEdit();
 	initRightClickMenu();
 }
 
@@ -301,7 +302,6 @@ void LCanvasView::mouseDoubleClickEvent(QMouseEvent *event)
 		{
 			m_textItems[i]->setSelected(true);
 			m_selectedItem = m_textItems[i];
-			m_lineEdit = m_textItems[i]->lineEdit();
 			m_lineEdit->setVisible(true);
 			break;
 		}
@@ -328,17 +328,29 @@ void LCanvasView::setItemType(LCanvasItem::ItemType itemType)
 	}
 }
 
+void LCanvasView::resizeLineEdit()
+{
+	QString text = m_lineEdit->text();
+	QFontMetrics fontMetrics = m_lineEdit->fontMetrics();
+
+	QRect rect = fontMetrics.boundingRect(text);
+	int width = rect.width() < 8 ? 8 : rect.width();
+	int height = rect.height();
+	m_lineEdit->resize(width, height);
+}
+
+void LCanvasView::addText()
+{
+
+}
+
 void LCanvasView::readItemsFromFile(const QString &filePath)
 {
 	if (filePath.isEmpty())
 		return;
 
 	QFile file(filePath);
-	if (!file.open(QFile::ReadOnly))
-	{
-		QMessageBox::critical(this, tr("Error"), tr("Read Error"));
-		return;
-	}
+	file.open(QFile::ReadOnly);
 
 	QXmlStreamReader reader(&file);
 
@@ -401,11 +413,7 @@ void LCanvasView::writeItemsToFile(const QString &filePath)
 		return;
 
 	QFile file(filePath);
-	if (!file.open(QFile::WriteOnly))
-	{
-		QMessageBox::critical(this, tr("Error"), tr("Write Error"));
-		return;
-	}
+	file.open(QFile::WriteOnly);
 
 	QXmlStreamWriter writer(&file);
 	writer.setAutoFormatting(true);
@@ -517,6 +525,19 @@ LCanvasView::ItemHitPos LCanvasView::getItemHitPos(const QPoint &point)
 		return ItemHitPos::MiddleLeft;
 
 	return ItemHitPos::None;
+}
+
+void LCanvasView::initLineEdit()
+{
+	m_lineEdit = new QLineEdit(this);
+	m_lineEdit->setVisible(false);
+	m_lineEdit->resize(m_lineEdit->minimumSizeHint());
+	m_lineEdit->setFont(QFont("PingFang SC", 32));
+	m_lineEdit->resize(m_lineEdit->fontMetrics().averageCharWidth() * 8,
+					   m_lineEdit->fontMetrics().height());
+
+	connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(resizeLineEdit()));
+	connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(addText()));
 }
 
 void LCanvasView::initRightClickMenu()
@@ -666,11 +687,9 @@ void LCanvasView::beforePaintItem(const QPoint &pos)
 	}
 	case LCanvasItem::Text:
 	{
-		m_item = new LCanvasText(this);
-		m_lineEdit = m_item->lineEdit();
+		m_item = new LCanvasText();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
-		connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(update()));
 		break;
 	}
 	}
@@ -883,15 +902,13 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	}
 	case LCanvasItem::Text:
 	{
-		m_item = new LCanvasText(this);
+		m_item = new LCanvasText();
 		m_item->setStartPos(QPoint(reader.attributes().value(QStringLiteral("x")).toInt(),
 								   reader.attributes().value(QStringLiteral("y")).toInt()));
-		m_lineEdit = m_item->lineEdit();
 		m_lineEdit->setText(reader.readElementText());
 		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
-		connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(update()));
 		m_textItems << m_item;
 		break;
 	}

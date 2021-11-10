@@ -999,13 +999,13 @@ static bool collision_double_dispatch(
 		double dx = ellipse1->x() - ellipse2->x();
 		double dy = ellipse1->y() - ellipse2->y();
 		double dr = (ellipse1->width() + ellipse2->width()) / 2;
-		return dx * dx +dy * dy <= dr * dr;
+		return dx * dx + dy * dy <= dr * dr;
 	}
 	else if (shape1 && (shape2 || text2))
 	{
 		QPolygon polygon1 = shape1->areaPoints();
 		QPolygon polygon2 = shape2 ? shape2->areaPoints() : QPolygon(item2->boundingRect());
-		return !(QRegion(polygon1) & QRegion(polygon2, Qt::WindingFill)).isEmpty();
+		return QRegion(polygon1).intersects(QRegion(polygon2, Qt::WindingFill));
 	}
 	else
 	{

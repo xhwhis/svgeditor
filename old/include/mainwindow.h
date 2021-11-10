@@ -40,8 +40,6 @@ private:
 	QPoint m_startPos;
 	QPoint m_lastPos;
 	QPoint m_endPos;
-	int m_minZ;
-	int m_maxZ;
 	bool m_bPaintingItem;
 	bool m_bTranslatingItem;
 	bool m_bScalingItem;

@@ -8,12 +8,12 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_centralWidget(nullptr)
 	, m_canvas(nullptr)
 	, m_canvasColorButton(nullptr)
-	, m_canvasWidth(400)
-	, m_canvasHeight(400)
+	, m_canvasWidth(500)
+	, m_canvasHeight(500)
 {
 	this->setWindowTitle(QStringLiteral("SVG Editor"));
 	this->setWindowIcon(QIcon(QStringLiteral(":icons/logo.svg")));
-	this->setMinimumSize(800, 640);
+	this->setMinimumSize(1000, 750);
 
 	QFile file(QStringLiteral(":qss/light.qss"));
 	file.open(QFile::ReadOnly);
@@ -222,9 +222,9 @@ void MainWindow::initRightToolBar()
 	QLabel *canvasWidthLabel = new QLabel(QStringLiteral("Canvas Width"), toolsPanelWidget);
 	QSpinBox *canvasWidthSpinBox = new QSpinBox(toolsPanelWidget);
 	canvasWidthSpinBox->setFixedSize(64, 32);
-	canvasWidthSpinBox->setRange(100, 1600);
+	canvasWidthSpinBox->setRange(100, 2000);
 	canvasWidthSpinBox->setSingleStep(10);
-	canvasWidthSpinBox->setValue(400);
+	canvasWidthSpinBox->setValue(500);
 	QHBoxLayout *canvasWidthLayout = new QHBoxLayout();
 	canvasWidthLayout->addWidget(canvasWidthLabel);
 	canvasWidthLayout->addWidget(canvasWidthSpinBox);
@@ -233,9 +233,9 @@ void MainWindow::initRightToolBar()
 	QLabel *canvasHeightLabel = new QLabel(QStringLiteral("Canvas Height"), toolsPanelWidget);
 	QSpinBox *canvasHeightSpinBox = new QSpinBox(toolsPanelWidget);
 	canvasHeightSpinBox->setFixedSize(64, 32);
-	canvasHeightSpinBox->setRange(100, 1600);
+	canvasHeightSpinBox->setRange(100, 2000);
 	canvasHeightSpinBox->setSingleStep(10);
-	canvasHeightSpinBox->setValue(400);
+	canvasHeightSpinBox->setValue(500);
 	QHBoxLayout *canvasHeightLayout = new QHBoxLayout();
 	canvasHeightLayout->addWidget(canvasHeightLabel);
 	canvasHeightLayout->addWidget(canvasHeightSpinBox);
@@ -263,7 +263,7 @@ void MainWindow::initCanvas()
 	this->setCentralWidget(m_centralWidget);
 
 	m_canvas = new LCanvasView(m_centralWidget);
-	m_canvas->resize(400,400);
+	m_canvas->resize(500, 500);
 	m_canvas->setMinimumSize(QSize(100, 100));
 	m_canvas->setMaximumSize(QSize(1600, 1600));
 	m_centralWidget->setWidget(m_canvas);

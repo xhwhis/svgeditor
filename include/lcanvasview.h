@@ -42,6 +42,8 @@ protected:
 
 protected slots:
 	void setItemType(LCanvasItem::ItemType itemType);
+	void resizeLineEdit();
+	void addText();
 	void readItemsFromFile(const QString &filePath);
 	void writeItemsToFile(const QString &filePath);
 	void cutItem();
@@ -55,6 +57,7 @@ protected slots:
 
 private:
 	ItemHitPos getItemHitPos(const QPoint &point);
+	void initLineEdit();
 	void initRightClickMenu();
 	void reselectItems();
 	void deselectAllItems();

@@ -312,9 +312,6 @@ protected:
 	void draw(QPainter &);
 	virtual void drawShape(QPainter &) = 0;
 
-	bool winding() const;
-	void setWinding(bool);
-
 	void invalidate();
 	bool isValid() const { return LCanvasItem::m_bValid; }
 

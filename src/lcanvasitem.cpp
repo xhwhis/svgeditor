@@ -2,15 +2,14 @@
 
 namespace lwscode {
 
-LCanvasItem::LCanvasItem(QWidget *parent)
+LCanvasItem::LCanvasItem()
 	: m_itemType(None)
 	, m_fillColor(Qt::white)
 	, m_strokeColor(Qt::black)
 	, m_strokeWidth(1.0f)
 	, m_bSelected(false)
-	, m_lineEdit(nullptr)
 {
-	this->setParent(parent);
+
 }
 
 LCanvasItem::ItemType LCanvasItem::getItemType()
@@ -83,35 +82,12 @@ void LCanvasItem::addPoint(const QPoint &point)
 	m_points.push_back(point);
 }
 
-QLineEdit *LCanvasItem::lineEdit()
-{
-	return m_lineEdit;
-}
-
-void LCanvasItem::resizeLineEdit()
-{
-	if (m_lineEdit ==  nullptr)
-		return;
-
-	QFontMetrics fontMetrics = m_lineEdit->fontMetrics();
-	int width = fontMetrics.horizontalAdvance(m_lineEdit->text()) + fontMetrics.averageCharWidth();
-	int height = m_lineEdit->height();
-	m_lineEdit->resize(width, height);
-}
-
-void LCanvasItem::setLineEditVisible()
-{
-	m_lineEdit->setVisible(!m_lineEdit->isVisible());
-}
-
-LCanvasPath::LCanvasPath(QWidget *parent)
-	: LCanvasItem(parent)
+LCanvasPath::LCanvasPath()
 {
 	m_itemType = Path;
 }
 
-LCanvasLine::LCanvasLine(QWidget *parent)
-	: LCanvasItem(parent)
+LCanvasLine::LCanvasLine()
 {
 	m_itemType = Line;
 }
@@ -121,45 +97,53 @@ int LCanvasLine::sumDistance(const QPoint &p1, const QPoint &p2)
 	return QLineF(p1, p2).length();
 }
 
-LCanvasRect::LCanvasRect(QWidget *parent)
-	: LCanvasItem(parent)
+LCanvasRect::LCanvasRect()
 {
 	m_itemType = Rect;
 }
 
-LCanvasEllipse::LCanvasEllipse(QWidget *parent)
-	: LCanvasItem(parent)
+LCanvasEllipse::LCanvasEllipse()
 {
 	m_itemType = Ellipse;
 }
 
-LCanvasTriangle::LCanvasTriangle(QWidget *parent)
-	: LCanvasItem(parent)
-	, m_vertices(QList<QPoint>(3, QPoint()))
+LCanvasTriangle::LCanvasTriangle()
+	: m_vertices(QList<QPoint>(3, QPoint()))
 {
 	m_itemType = Triangle;
 }
 
-LCanvasHexagon::LCanvasHexagon(QWidget *parent)
-	: LCanvasItem(parent)
-	, m_vertices(QList<QPoint>(6, QPoint()))
+LCanvasHexagon::LCanvasHexagon()
+	: m_vertices(QList<QPoint>(6, QPoint()))
 {
 	m_itemType = Hexagon;
 }
 
-LCanvasText::LCanvasText(QWidget *parent)
-	: LCanvasItem(parent)
+LCanvasText::LCanvasText()
+	: m_width(0)
+	, m_height(0)
 {
 	m_itemType = Text;
-	m_lineEdit = new QLineEdit(parent);
-	m_lineEdit->setAlignment(Qt::AlignLeft);
-	m_lineEdit->setFont(QFont("PingFang SC", 32));
-	m_font = m_lineEdit->font();
-	m_lineEdit->resize(m_lineEdit->fontMetrics().averageCharWidth(),
-					   m_lineEdit->fontMetrics().height());
+}
 
-	connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(resizeLineEdit()));
-	connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(setLineEditVisible()));
+void LCanvasText::setFont(const QFont &font)
+{
+	m_font = font;
+
+	QFontMetrics fontMetrics(m_font);
+	QRect rect = fontMetrics.boundingRect(m_text);
+	m_width = rect.width() < 8 ? 8 : rect.width();
+	m_height = rect.height();
+}
+
+void LCanvasText::setText(const QString &text)
+{
+	m_text = text;
+
+	QFontMetrics fontMetrics(m_font);
+	QRect rect = fontMetrics.boundingRect(m_text);
+	m_width = rect.width() < 8 ? 8 : rect.width();
+	m_height = rect.height();
 }
 
 void LCanvasPath::paintItem(QPainter &painter)
@@ -172,11 +156,9 @@ void LCanvasPath::paintItem(QPainter &painter)
 	for (int i = 1; i < m_points.size(); ++i)
 		path.lineTo(m_points[i]);
 
-	painter.setBrush(m_fillColor);
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawPath(path);
 	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::NoBrush);
 }
 
 void LCanvasLine::paintItem(QPainter &painter)
@@ -184,8 +166,8 @@ void LCanvasLine::paintItem(QPainter &painter)
 	painter.setBrush(m_fillColor);
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawLine(m_startPos, m_endPos);
-	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);
+	painter.setPen(Qt::NoPen);
 }
 
 void LCanvasRect::paintItem(QPainter &painter)
@@ -194,21 +176,18 @@ void LCanvasRect::paintItem(QPainter &painter)
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawRect(m_startPos.x(), m_startPos.y(),
 					 m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
-	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);
+	painter.setPen(Qt::NoPen);
 }
 
 void LCanvasEllipse::paintItem(QPainter &painter)
 {
-	QPen pen;
-	pen.setWidth(m_strokeWidth);
-	pen.setColor(m_strokeColor);
-	painter.setPen(pen);
 	painter.setBrush(m_fillColor);
+	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawEllipse(m_startPos.x(), m_startPos.y(),
 						m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
-	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);
+	painter.setPen(Qt::NoPen);
 }
 
 void LCanvasTriangle::paintItem(QPainter &painter)
@@ -223,7 +202,7 @@ void LCanvasTriangle::paintItem(QPainter &painter)
 	QPolygon polygon(m_vertices);
 
 	painter.setBrush(QBrush(m_fillColor));
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth + 1));
+	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawPolygon(polygon);
 	painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::NoPen);
@@ -244,7 +223,7 @@ void LCanvasHexagon::paintItem(QPainter &painter)
 	QPolygon polygon(m_vertices);
 
 	painter.setBrush(QBrush(m_fillColor));
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth + 1));
+	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawPolygon(polygon);
 	painter.setBrush(Qt::NoBrush);
 	painter.setPen(Qt::NoPen);
@@ -252,26 +231,10 @@ void LCanvasHexagon::paintItem(QPainter &painter)
 
 void LCanvasText::paintItem(QPainter &painter)
 {
-	QPen pen;
-	pen.setStyle(Qt::DotLine);
-	pen.setColor(m_strokeColor);
-	pen.setWidth((m_strokeWidth + 1));
-	painter.setPen(pen);
-	QFont font = m_font;
-	font.setPointSize(font.pointSize());
-	m_lineEdit->setFont(font);
-	m_lineEdit->move(m_startPos);
-	setBoundingRect();
-	painter.drawRect(m_boundingRect);
-
-	if (m_lineEdit && !m_lineEdit->isVisible())
-	{
-		painter.setBrush(Qt::NoBrush);
-		painter.setFont(font);
-		painter.drawText(m_startPos.x(),m_startPos.y()+25, m_lineEdit->text());
-	}
+	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
+	painter.setFont(m_font);
+	painter.drawText(m_startPos.x(),m_startPos.y()+25, m_text);
 	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::NoBrush);
 }
 
 void LCanvasPath::moveItem(int dx, int dy)
@@ -444,8 +407,7 @@ void LCanvasHexagon::setBoundingRect()
 
 void LCanvasText::setBoundingRect()
 {
-	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(),
-						   m_lineEdit->width(), m_lineEdit->height()).normalized();
+	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height).normalized();
 }
 
 bool LCanvasPath::containsPos(const QPoint &point)
@@ -606,7 +568,7 @@ void LCanvasText::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeAttribute("font-size", QString::number(m_font.pointSize()));
 	writer.writeAttribute("x", QString::number(m_startPos.x()));
 	writer.writeAttribute("y", QString::number(m_startPos.y()));
-	writer.writeCharacters(m_lineEdit->text());
+	writer.writeCharacters(m_text);
 	writer.writeEndElement();
 }
 
