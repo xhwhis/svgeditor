@@ -475,6 +475,41 @@ bool LCanvasText::containsPos(const QPoint &point)
 	return false;
 }
 
+LCanvasItem *LCanvasPath::clone()
+{
+	return new LCanvasPath(*this);
+}
+
+LCanvasItem *LCanvasLine::clone()
+{
+	return new LCanvasLine(*this);
+}
+
+LCanvasItem *LCanvasRect::clone()
+{
+	return new LCanvasRect(*this);
+}
+
+LCanvasItem *LCanvasEllipse::clone()
+{
+	return new LCanvasEllipse(*this);
+}
+
+LCanvasItem *LCanvasTriangle::clone()
+{
+	return new LCanvasTriangle(*this);
+}
+
+LCanvasItem *LCanvasHexagon::clone()
+{
+	return new LCanvasHexagon(*this);
+}
+
+LCanvasItem *LCanvasText::clone()
+{
+	return new LCanvasText(*this);
+}
+
 void LCanvasPath::writeItemToXml(QXmlStreamWriter &writer)
 {
 	QString pointPath = QString("M %1 %2").arg(m_points[0].x()).arg(m_points[0].y());
