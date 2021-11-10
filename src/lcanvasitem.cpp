@@ -475,39 +475,39 @@ bool LCanvasText::containsPos(const QPoint &point)
 	return false;
 }
 
-LCanvasItem *LCanvasPath::clone()
+SPtrLCanvasItem LCanvasPath::clone()
 {
-	return new LCanvasPath(*this);
+	return SPtrLCanvasItem(new LCanvasPath(*this));
 }
 
-LCanvasItem *LCanvasLine::clone()
+SPtrLCanvasItem LCanvasLine::clone()
 {
-	return new LCanvasLine(*this);
+	return SPtrLCanvasItem(new LCanvasLine(*this));
 }
 
-LCanvasItem *LCanvasRect::clone()
+SPtrLCanvasItem LCanvasRect::clone()
 {
-	return new LCanvasRect(*this);
+	return SPtrLCanvasItem(new LCanvasRect(*this));
 }
 
-LCanvasItem *LCanvasEllipse::clone()
+SPtrLCanvasItem LCanvasEllipse::clone()
 {
-	return new LCanvasEllipse(*this);
+	return SPtrLCanvasItem(new LCanvasEllipse(*this));
 }
 
-LCanvasItem *LCanvasTriangle::clone()
+SPtrLCanvasItem LCanvasTriangle::clone()
 {
-	return new LCanvasTriangle(*this);
+	return SPtrLCanvasItem(new LCanvasTriangle(*this));
 }
 
-LCanvasItem *LCanvasHexagon::clone()
+SPtrLCanvasItem LCanvasHexagon::clone()
 {
-	return new LCanvasHexagon(*this);
+	return SPtrLCanvasItem(new LCanvasHexagon(*this));
 }
 
-LCanvasItem *LCanvasText::clone()
+SPtrLCanvasItem LCanvasText::clone()
 {
-	return new LCanvasText(*this);
+	return SPtrLCanvasItem(new LCanvasText(*this));
 }
 
 void LCanvasPath::writeItemToXml(QXmlStreamWriter &writer)

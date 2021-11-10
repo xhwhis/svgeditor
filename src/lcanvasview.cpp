@@ -30,12 +30,6 @@ LCanvasView::LCanvasView(QWidget *parent)
 
 LCanvasView::~LCanvasView()
 {
-	if (!m_allItems.empty())
-	{
-		for (auto &item : m_allItems)
-			delete item;
-	}
-
 	if (!m_selectedItems.isEmpty())
 		deselectAllItems();
 
@@ -78,13 +72,7 @@ void LCanvasView::setStrokeWidth(int width)
 
 void LCanvasView::clearCanvas()
 {
-	if (!m_allItems.isEmpty())
-	{
-		for (auto &item : m_allItems)
-			delete item;
-
-		m_allItems.clear();
-	}
+	m_allItems.clear();
 }
 
 bool LCanvasView::noItems()
@@ -448,8 +436,8 @@ void LCanvasView::copyItem()
 	m_duplicatedItems.clear();
 	foreach (auto &item, m_selectedItems)
 	{
-		LCanvasItem *duplicatedItem = item;
-		duplicatedItem->moveItem(1, 1);
+		SPtrLCanvasItem duplicatedItem = item->clone();
+		duplicatedItem->moveItem(4, 4);
 		m_duplicatedItems << duplicatedItem;
 	}
 }
@@ -470,32 +458,30 @@ void LCanvasView::pasteItem()
 void LCanvasView::deleteItem()
 {
 	m_allItems.removeOne(m_selectedItem);
-	delete m_selectedItem;
-	m_selectedItem = nullptr;
 }
 
 void LCanvasView::moveTopItem()
 {
 	m_allItems.removeOne(m_selectedItem);
-	m_allItems.push_back(m_selectedItem);
+	m_allItems.append(m_selectedItem);
 }
 
 void LCanvasView::moveUpItem()
 {
 	m_allItems.removeOne(m_selectedItem);
-	m_allItems.push_back(m_selectedItem);
+	m_allItems.append(m_selectedItem);
 }
 
 void LCanvasView::moveDownItem()
 {
 	m_allItems.removeOne(m_selectedItem);
-	m_allItems.push_front(m_selectedItem);
+	m_allItems.append(m_selectedItem);
 }
 
 void LCanvasView::moveBottomItem()
 {
 	m_allItems.removeOne(m_selectedItem);
-	m_allItems.push_front(m_selectedItem);
+	m_allItems.append(m_selectedItem);
 }
 
 LCanvasView::ItemHitPos LCanvasView::getItemHitPos(const QPoint &point)
@@ -590,7 +576,7 @@ void LCanvasView::deselectAllItems()
 	m_selectedItems.clear();
 }
 
-void LCanvasView::paintRubberBand(LCanvasItem *item, QPainter &painter)
+void LCanvasView::paintRubberBand(SPtrLCanvasItem item, QPainter &painter)
 {
 	QRect rubberBand = item->boundingRect();
 	painter.setPen(Qt::blue);
@@ -598,7 +584,7 @@ void LCanvasView::paintRubberBand(LCanvasItem *item, QPainter &painter)
 	painter.setPen(Qt::NoPen);
 }
 
-void LCanvasView::paintSelectedBox(LCanvasItem *item, QPainter &painter)
+void LCanvasView::paintSelectedBox(SPtrLCanvasItem item, QPainter &painter)
 {
 	QRect selectedBox = item->boundingRect();
 	int left = selectedBox.left();
@@ -643,20 +629,20 @@ void LCanvasView::beforePaintItem(const QPoint &pos)
 	}
 	case LCanvasItem::Path:
 	{
-		m_item = new LCanvasPath();
+		m_item = SPtrLCanvasItem(new LCanvasPath());
 		m_item->setStrokeWidth(m_strokeWidth);
 		break;
 	}
 	case LCanvasItem::Line:
 	{
-		m_item = new LCanvasLine();
+		m_item = SPtrLCanvasItem(new LCanvasLine());
 		m_item->setFillColor(m_fillColor);
 		m_item->setStrokeWidth(m_strokeWidth);
 		break;
 	}
 	case LCanvasItem::Rect:
 	{
-		m_item = new LCanvasRect();
+		m_item = SPtrLCanvasItem(new LCanvasRect());
 		if (m_item)
 		{
 			m_item->setFillColor(m_fillColor);
@@ -666,28 +652,28 @@ void LCanvasView::beforePaintItem(const QPoint &pos)
 	}
 	case LCanvasItem::Ellipse:
 	{
-		m_item = new LCanvasEllipse();
+		m_item = SPtrLCanvasItem(new LCanvasEllipse());
 		m_item->setFillColor(m_fillColor);
 		m_item->setStrokeWidth(m_strokeWidth);
 		break;
 	}
 	case LCanvasItem::Triangle:
 	{
-		m_item = new LCanvasTriangle();
+		m_item = SPtrLCanvasItem(new LCanvasTriangle());
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
 		break;
 	}
 	case LCanvasItem::Hexagon:
 	{
-		m_item = new LCanvasHexagon();
+		m_item = SPtrLCanvasItem(new LCanvasHexagon());
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
 		break;
 	}
 	case LCanvasItem::Text:
 	{
-		m_item = new LCanvasText();
+		m_item = SPtrLCanvasItem(new LCanvasText());
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setFillColor(m_fillColor);
 		break;
@@ -824,7 +810,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 		QString path = reader.attributes().value(QStringLiteral("d")).toString();
 		QStringList points = path.split(QRegularExpression(QStringLiteral("[ML]")));
 
-		m_item = new LCanvasPath();
+		m_item = SPtrLCanvasItem(new LCanvasPath());
 		m_bPaintingPath = true;
 		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
@@ -839,7 +825,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	}
 	case LCanvasItem::Line:
 	{
-		m_item = new LCanvasLine();
+		m_item = SPtrLCanvasItem(new LCanvasLine());
 		m_item->setStartPos(QPoint(reader.attributes().value(QStringLiteral("x1")).toInt(),
 								   reader.attributes().value(QStringLiteral("y1")).toInt()));
 		m_item->setEndPos(QPoint(reader.attributes().value(QStringLiteral("x2")).toInt(),
@@ -850,7 +836,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	}
 	case LCanvasItem::Rect:
 	{
-		m_item = new LCanvasRect();
+		m_item = SPtrLCanvasItem(new LCanvasRect());
 		int x = reader.attributes().value(QStringLiteral("x")).toInt();
 		int y = reader.attributes().value(QStringLiteral("y")).toInt();
 		int width = reader.attributes().value(QStringLiteral("width")).toInt();
@@ -864,7 +850,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	}
 	case LCanvasItem::Ellipse:
 	{
-		m_item = new LCanvasEllipse();
+		m_item = SPtrLCanvasItem(new LCanvasEllipse());
 		int cx = reader.attributes().value(QStringLiteral("cx")).toInt();
 		int cy = reader.attributes().value(QStringLiteral("cy")).toInt();
 		int rx = reader.attributes().value(QStringLiteral("rx")).toInt();
@@ -878,7 +864,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	}
 	case LCanvasItem::Triangle:
 	{
-		m_item = new LCanvasTriangle();
+		m_item = SPtrLCanvasItem(new LCanvasTriangle());
 		QString polygon = reader.attributes().value(QStringLiteral("points")).toString();
 		QStringList points = polygon.split(QRegularExpression(QStringLiteral("[,]")));
 		m_item->setStartPos(QPoint(points[4].toInt(), points[1].toInt()));
@@ -890,7 +876,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	}
 	case LCanvasItem::Hexagon:
 	{
-		m_item = new LCanvasHexagon();
+		m_item = SPtrLCanvasItem(new LCanvasHexagon());
 		QString polygon = reader.attributes().value(QStringLiteral("points")).toString();
 		QStringList points = polygon.split(QRegularExpression(QStringLiteral("[,]")));
 		m_item->setStartPos(QPoint(points[10].toInt(), points[1].toInt()));
@@ -902,7 +888,7 @@ void LCanvasView::readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamRead
 	}
 	case LCanvasItem::Text:
 	{
-		m_item = new LCanvasText();
+		m_item = SPtrLCanvasItem(new LCanvasText());
 		m_item->setStartPos(QPoint(reader.attributes().value(QStringLiteral("x")).toInt(),
 								   reader.attributes().value(QStringLiteral("y")).toInt()));
 		m_lineEdit->setText(reader.readElementText());

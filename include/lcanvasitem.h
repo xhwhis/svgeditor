@@ -5,6 +5,9 @@
 
 namespace lwscode {
 
+class LCanvasItem;
+typedef QSharedPointer<LCanvasItem> SPtrLCanvasItem;
+
 class LCanvasItem
 {
 public:
@@ -47,7 +50,7 @@ public:
 	virtual void scaleItem(double sx, double sy) = 0;
 	virtual void setBoundingRect() = 0;
 	virtual bool containsPos(const QPoint &point) = 0;
-	virtual LCanvasItem *clone() = 0;
+	virtual SPtrLCanvasItem clone() = 0;
 	virtual void writeItemToXml(QXmlStreamWriter &writer) = 0;
 
 protected:
@@ -74,7 +77,7 @@ public:
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
-	LCanvasItem *clone() override;
+	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 };
 
@@ -91,7 +94,7 @@ public:
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
-	LCanvasItem *clone() override;
+	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 };
 
@@ -106,7 +109,7 @@ public:
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
-	LCanvasItem *clone() override;
+	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -125,7 +128,7 @@ public:
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
-	LCanvasItem *clone() override;
+	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -144,7 +147,7 @@ public:
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
-	LCanvasItem *clone() override;
+	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -164,7 +167,7 @@ public:
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
-	LCanvasItem *clone() override;
+	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
@@ -187,7 +190,7 @@ public:
 	void scaleItem(double sx, double sy) override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
-	LCanvasItem *clone() override;
+	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:

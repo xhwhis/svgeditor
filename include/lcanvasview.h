@@ -5,6 +5,8 @@
 
 namespace lwscode {
 
+typedef QList<SPtrLCanvasItem> LCanvasItemList;
+
 class LCanvasView : public QWidget
 {
 	Q_OBJECT
@@ -61,8 +63,8 @@ private:
 	void initRightClickMenu();
 	void reselectItems();
 	void deselectAllItems();
-	void paintRubberBand(LCanvasItem *item, QPainter &painter);
-	void paintSelectedBox(LCanvasItem *item, QPainter &painter);
+	void paintRubberBand(SPtrLCanvasItem item, QPainter &painter);
+	void paintSelectedBox(SPtrLCanvasItem item, QPainter &painter);
 	void beforePaintItem(const QPoint &pos);
 	void selectItemsByClick(const QPoint &pos);
 	void selectItemsByFrame(const QPoint &pos);
@@ -70,22 +72,29 @@ private:
 	void readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamReader &reader);
 
 private:
-	QMenu *m_rightClickMenu;
 	LCanvasItem::ItemType m_itemType;
-	LCanvasItem *m_item;
-	QList<LCanvasItem *> m_allItems;
-	QSet<LCanvasItem *> m_selectedItems;
-	QList<LCanvasItem *> m_textItems;
-	QSet<LCanvasItem *> m_duplicatedItems;
+	SPtrLCanvasItem m_item;
+	SPtrLCanvasItem m_selectedItem;
+	LCanvasItemList m_allItems;
+	LCanvasItemList m_textItems;
+	LCanvasItemList m_selectedItems;
+	LCanvasItemList m_duplicatedItems;
+	QMenu *m_rightClickMenu;
+	QLineEdit *m_lineEdit;
 	QColor m_canvasColor;
 	QColor m_fillColor;
 	QColor m_strokeColor;
 	int m_strokeWidth;
-	bool m_bPaintingItem;
-	bool m_bPaintingPath;
 	QPoint m_startPos;
 	QPoint m_lastPos;
 	QPoint m_endPos;
+	bool m_bPaintingItem;
+	bool m_bPaintingPath;
+	bool m_showFrameRect;
+	bool m_mouseFrameSelection;
+	bool m_mouseFrameSelect;
+	bool m_mouseClickSelect;
+	ItemHitPos m_itemHitPos;
 	QRect m_rubberBand;
 	QRect m_topLeftPos;
 	QRect m_topMiddlePos;
@@ -95,13 +104,6 @@ private:
 	QRect m_bottomMiddlePos;
 	QRect m_bottomLeftPos;
 	QRect m_middleLeftPos;
-	QLineEdit *m_lineEdit;
-	bool m_showFrameRect;
-	bool m_mouseFrameSelection;
-	bool m_mouseFrameSelect;
-	bool m_mouseClickSelect;
-	LCanvasItem *m_selectedItem;
-	ItemHitPos m_itemHitPos;
 };
 
 } // namespace
