@@ -156,38 +156,39 @@ void LCanvasPath::paintItem(QPainter &painter)
 	for (int i = 1; i < m_points.size(); ++i)
 		path.lineTo(m_points[i]);
 
+	painter.save();
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawPath(path);
-	painter.setPen(Qt::NoPen);
+	painter.restore();
 }
 
 void LCanvasLine::paintItem(QPainter &painter)
 {
+	painter.save();
 	painter.setBrush(m_fillColor);
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawLine(m_startPos, m_endPos);
-	painter.setBrush(Qt::NoBrush);
-	painter.setPen(Qt::NoPen);
+	painter.restore();
 }
 
 void LCanvasRect::paintItem(QPainter &painter)
 {
+	painter.save();
 	painter.setBrush(m_fillColor);
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawRect(m_startPos.x(), m_startPos.y(),
 					 m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
-	painter.setBrush(Qt::NoBrush);
-	painter.setPen(Qt::NoPen);
+	painter.restore();
 }
 
 void LCanvasEllipse::paintItem(QPainter &painter)
 {
+	painter.save();
 	painter.setBrush(m_fillColor);
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawEllipse(m_startPos.x(), m_startPos.y(),
 						m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
-	painter.setBrush(Qt::NoBrush);
-	painter.setPen(Qt::NoPen);
+	painter.restore();
 }
 
 void LCanvasTriangle::paintItem(QPainter &painter)
@@ -201,11 +202,11 @@ void LCanvasTriangle::paintItem(QPainter &painter)
 	m_vertices[2] = QPoint(left, bottom);
 	QPolygon polygon(m_vertices);
 
+	painter.save();
 	painter.setBrush(QBrush(m_fillColor));
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawPolygon(polygon);
-	painter.setBrush(Qt::NoBrush);
-	painter.setPen(Qt::NoPen);
+	painter.restore();
 }
 
 void LCanvasHexagon::paintItem(QPainter &painter)
@@ -222,19 +223,20 @@ void LCanvasHexagon::paintItem(QPainter &painter)
 	m_vertices[5] = QPoint(left, (top + bottom) / 2);
 	QPolygon polygon(m_vertices);
 
+	painter.save();
 	painter.setBrush(QBrush(m_fillColor));
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.drawPolygon(polygon);
-	painter.setBrush(Qt::NoBrush);
-	painter.setPen(Qt::NoPen);
+	painter.restore();
 }
 
 void LCanvasText::paintItem(QPainter &painter)
 {
+	painter.save();
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.setFont(m_font);
-	painter.drawText(m_startPos.x(),m_startPos.y()+25, m_text);
-	painter.setPen(Qt::NoPen);
+	painter.drawText(m_startPos.x(), m_startPos.y(), m_text);
+	painter.restore();
 }
 
 void LCanvasPath::moveItem(int dx, int dy)

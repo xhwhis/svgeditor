@@ -5,11 +5,7 @@ namespace lwscode {
 
 class LCanvasChunk {
 public:
-	LCanvasChunk()
-		: m_bChanged(true)
-	{
-
-	}
+	LCanvasChunk() : m_bChanged(true) {}
 
 	void sort()
 	{
@@ -74,10 +70,10 @@ LCanvasScene::LCanvasScene(int width, int height)
 	init(width, height);
 }
 
-LCanvasScene::LCanvasScene(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight)
+LCanvasScene::LCanvasScene(int hTiles, int vTiles, int tileWidth, int tileHeight)
 {
 	init(hTiles * tileWidth, vTiles * tileHeight, scm(tileWidth, tileHeight));
-	setTiles(image, hTiles, vTiles, tileWidth, tileHeight);
+	setTiles(hTiles, vTiles, tileWidth, tileHeight);
 }
 
 LCanvasScene::~LCanvasScene()
@@ -93,12 +89,11 @@ LCanvasScene::~LCanvasScene()
 	delete[] m_grid;
 }
 
-void LCanvasScene::init(int width, int height, int chunkSize, int maxClusters)
+void LCanvasScene::init(int width, int height, int chunkSize)
 {
 	m_width = width;
 	m_height = height;
 	m_chunkSize = chunkSize;
-	m_maxClusters = maxClusters;
 	m_chunkWidth = (width + chunkSize - 1) / chunkSize;
 	m_chunkHeight = (height + chunkSize - 1) / chunkSize;
 	m_chunks = new LCanvasChunk[m_chunkWidth * m_chunkHeight];
@@ -158,10 +153,8 @@ void LCanvasScene::resize(int width, int height)
 	emit resized();
 }
 
-void LCanvasScene::retune(int chunkSize, int maxClusters)
+void LCanvasScene::retune(int chunkSize)
 {
-	m_maxClusters = maxClusters;
-
 	if (m_chunkSize != chunkSize)
 	{
 		LCanvasItemList hiddenItems;
@@ -204,7 +197,7 @@ void LCanvasScene::removeItem(LCanvasItem* item)
 void LCanvasScene::addView(LCanvasView *view)
 {
 	m_viewList.append(view);
-	if (m_hTiles > 1 || m_vTiles > 1 || m_image.isNull())
+	if (m_hTiles > 1 || m_vTiles > 1)
 	{
 		QPalette::ColorRole role = view->widget()->backgroundRole();
 		QPalette palette = view->widget()->palette();
@@ -446,72 +439,20 @@ void LCanvasScene::setBackgroundColor(const QColor &color)
 	}
 }
 
-QImage LCanvasScene::backgroundImage() const
-{
-	return m_image;
-}
-
-void LCanvasScene::setBackgroundImage(const QImage &image)
-{
-	setTiles(image, 1, 1, image.width(), image.height());
-	for (int i = 0; i < m_viewList.size(); ++i)
-	{
-		LCanvasView *view = m_viewList.at(i);
-		view->widget()->update();
-	}
-}
-
 void LCanvasScene::drawBackground(QPainter &painter, const QRect &rect)
 {
-	if (m_image.isNull())
-	{
-		painter.fillRect(rect, m_backgroundColor);
-	}
-	else if (!m_grid)
-	{
-		for (int x = rect.left() / m_image.width();
-			 x < (rect.left() + rect.width() + m_image.width() - 1) / m_image.width(); ++x)
-		{
-			for (int y = rect.top() / m_image.height();
-				 y < (rect.top() + rect.height() + m_image.height() - 1) / m_image.height(); ++y)
-			{
-				painter.drawImage(x * m_image.width(), y * m_image.height(), m_image);
-			}
-		}
-	}
-	else
-	{
-		const int left = rect.left() / m_tileWidth;
-		int right = rect.right() / m_tileWidth;
-		const int top = rect.top() / m_tileHeight;
-		int bottom = rect.bottom() / m_tileHeight;
-
-		const int row = m_image.width() / m_tileWidth;
-
-		for (int y = top; y <= bottom; ++y) {
-			int _y = y % m_vTiles;
-			for (int x = left; x <= right; ++x) {
-				int _tile = tile(x % m_hTiles, _y);
-				int tileX = _tile % row;
-				int tileY = _tile / row;
-				painter.drawImage(x * m_tileWidth, y * m_tileHeight, m_image,
-								  tileX * m_tileWidth, tileY * m_tileHeight, m_tileWidth, m_tileHeight);
-			}
-		}
-	}
+	painter.fillRect(rect, m_backgroundColor);
 }
 
-void LCanvasScene::setTiles(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight)
+void LCanvasScene::setTiles(int hTiles, int vTiles, int tileWidth, int tileHeight)
 {
-	if (!image.isNull() &&
-		(!tileWidth || !tileHeight || image.width() % tileWidth != 0 || image.height() % tileHeight != 0))
+	if (!tileWidth || !tileHeight)
 		return;
 
 	m_hTiles = hTiles;
 	m_vTiles = vTiles;
 	delete[] m_grid;
-	m_image = image;
-	if (hTiles && vTiles && !image.isNull())
+	if (hTiles && vTiles)
 	{
 		m_grid = new int[hTiles * vTiles];
 		memset(m_grid, 0, hTiles * hTiles * sizeof(int));
@@ -553,7 +494,7 @@ LCanvasItemList LCanvasScene::collisions(const QPoint &p) const
 
 LCanvasItemList LCanvasScene::collisions(const QRect& rect) const
 {
-	LCanvasRect i(rect, (LCanvasScene*)this);
+	LCanvasRect i(rect, (LCanvasScene *)this);
 	i.setPen(Qt::NoPen);
 	i.show();
 	LCanvasItemList l = i.collisions(true);
@@ -575,7 +516,7 @@ LCanvasItemList LCanvasScene::collisions(
 {
 	QSet<LCanvasItem *> seen;
 	LCanvasItemList result;
-	for (int i = 0; i <(int)chunklist.count(); i++) {
+	for (int i = 0; i < chunklist.size(); i++) {
 		int x = chunklist[i].x();
 		int y = chunklist[i].y();
 		if (validChunk(x, y)) {
@@ -1372,7 +1313,7 @@ QPolygon LCanvasEllipse::areaPoints() const
 
 void LCanvasEllipse::drawShape(QPainter &painter)
 {
-	painter.drawEllipse(this->x(), this->y(), m_width, m_height);
+	painter.drawEllipse(QRect(this->x(), this->y(), m_width, m_height).normalized());
 }
 
 int LCanvasEllipse::g_type = Ellipse;

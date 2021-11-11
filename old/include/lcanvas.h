@@ -5,8 +5,6 @@
 
 namespace lwscode {
 
-class LCanvasScene;
-class LCanvasView;
 class LCanvasItem;
 class LCanvasShape;
 class LCanvasRect;
@@ -14,7 +12,9 @@ class LCanvasPolygon;
 class LCanvasEllipse;
 class LCanvasText;
 class LCanvasLine;
+class LCanvasView;
 class LCanvasChunk;
+class LCanvasScene;
 
 typedef QList<LCanvasItem *> LCanvasItemList;
 typedef QList<LCanvasView *> LCanvasViewList;
@@ -26,13 +26,10 @@ class LCanvasScene : public QObject
 public:
 	LCanvasScene(QObject *parent = nullptr);
 	LCanvasScene(int width, int height);
-	LCanvasScene(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight);
+	LCanvasScene(int hTiles, int vTiles, int tileWidth, int tileHeight);
 	virtual ~LCanvasScene();
 
-	virtual void setTiles(QImage image, int hTiles, int vTiles,
-						  int tileWidth, int tileHeight);
-	virtual void setBackgroundImage(const QImage &image);
-	QImage backgroundImage() const;
+	virtual void setTiles(int hTiles, int vTiles, int tileWidth, int tileHeight);
 
 	virtual void setBackgroundColor(const QColor &color);
 	QColor backgroundColor() const;
@@ -57,7 +54,7 @@ public:
 	bool validChunk(const QPoint &point) const { return validChunk(point.x(), point.y()); }
 
 	int chunkSize() const { return m_chunkSize; }
-	virtual void retune(int chunkSize, int maxClusters = 100);
+	virtual void retune(int chunkSize);
 
 	bool sameChunk(int x1, int y1, int x2, int y2) const
 	{
@@ -101,20 +98,19 @@ protected:
 	virtual void drawBackground(QPainter &painter, const QRect &rect);
 
 private:
-	void init(int width, int height, int chunksze = 16, int maxclust = 100);
+	void init(int width, int height, int chunkSize = 16);
 
 	LCanvasChunk &chunk(int x, int y) const;
 	LCanvasChunk &chunkContaining(int x, int y) const;
 
 	QRect changeBounds();
 
-	void initTiles(QImage image, int hTiles, int vTiles, int tileWidth, int tileHeight);
+	void initTiles(int hTiles, int vTiles, int tileWidth, int tileHeight);
 
 private:
 	int m_width;
 	int m_height;
 	int m_chunkSize;
-	int m_maxClusters;
 	int m_chunkWidth;
 	int m_chunkHeight;
 	LCanvasChunk *m_chunks;
@@ -127,7 +123,6 @@ private:
 	int m_vTiles;
 	int m_tileWidth;
 	int m_tileHeight;
-	QImage m_image;
 	QColor m_backgroundColor;
 };
 

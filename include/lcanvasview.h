@@ -61,9 +61,9 @@ private:
 	ItemHitPos getItemHitPos(const QPoint &point);
 	void initLineEdit();
 	void initRightClickMenu();
+	void setCursorByPos(const QPoint &pos);
 	void deselectAllItems();
-	void paintRubberBand(SPtrLCanvasItem item, QPainter &painter);
-	void paintSelectedBox(SPtrLCanvasItem item, QPainter &painter);
+	void paintRubberBand(SPtrLCanvasItem item, QPainter &painter, bool flag = false);
 	void beforePaintItem(const QPoint &pos);
 	void selectItemsByClick(const QPoint &pos);
 	void selectItemsByFrame(const QPoint &pos);
@@ -94,7 +94,6 @@ private:
 	bool m_mouseFrameSelect;
 	bool m_mouseClickSelect;
 	ItemHitPos m_itemHitPos;
-	QRect m_rubberBand;
 	QRect m_topLeftPos;
 	QRect m_topMiddlePos;
 	QRect m_topRightPos;
@@ -103,6 +102,7 @@ private:
 	QRect m_bottomMiddlePos;
 	QRect m_bottomLeftPos;
 	QRect m_middleLeftPos;
+	QRect m_selectedBox;
 };
 
 } // namespace
