@@ -24,12 +24,12 @@ LCanvasView::LCanvasView(QWidget *parent)
 	this->resize(500, 500);
 	this->setMinimumSize(QSize(100, 100));
 	this->setMaximumSize(QSize(2000, 2000));
-	this->setStyleSheet(QStringLiteral("border-radius: 8px"));
 
 	QPalette::ColorRole role = this->backgroundRole();
 	QPalette palette = this->palette();
 	palette.setColor(role, m_canvasColor);
 	this->setPalette(palette);
+//	this->setStyleSheet(QStringLiteral("border-radius: 8px"));
 
 	initLineEdit();
 	initRightClickMenu();
@@ -53,7 +53,6 @@ void LCanvasView::setCanvasColor(const QColor &color)
 	{
 		m_canvasColor = color;
 
-		m_canvasColor = Qt::white;
 		QPalette::ColorRole role = this->backgroundRole();
 		QPalette palette = this->palette();
 		palette.setColor(role, m_canvasColor);

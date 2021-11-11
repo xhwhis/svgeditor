@@ -40,8 +40,6 @@ void MainWindow::initCanvas()
 	m_canvas = new LCanvasView(m_centralWidget);
 	m_centralWidget->setWidget(m_canvas);
 
-
-
 	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
 	connect(this, SIGNAL(sigReadItemsFromFile(const QString &)), m_canvas, SLOT(readItemsFromFile(const QString &)));
 	connect(this, SIGNAL(sigWriteItemsToFile(const QString &)), m_canvas, SLOT(writeItemsToFile(const QString &)));
