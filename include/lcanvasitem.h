@@ -8,7 +8,7 @@ namespace lwscode {
 class LCanvasItem;
 typedef QSharedPointer<LCanvasItem> SPtrLCanvasItem;
 
-enum struct ItemType {
+enum ItemType {
 	NoneType = -1,
 	Path,
 	Line,

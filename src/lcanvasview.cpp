@@ -11,12 +11,8 @@ LCanvasView::LCanvasView(QWidget *parent)
 	, m_fillColor(Qt::white)
 	, m_strokeColor(Qt::black)
 	, m_strokeWidth(1)
-	, m_bPaintingItem(false)
-	, m_bPaintingPath(false)
-	, m_bMovingItems(false)
-	, m_bScalingItem(false)
-	, m_bSelectingItems(false)
 	, m_lineEdit(nullptr)
+	, m_hitTestStatus(HitTestStatus::NoneStatus)
 	, m_itemHitPos(ItemHitPos::NonePos)
 {
 	this->resize(500, 500);
@@ -121,7 +117,7 @@ void LCanvasView::paintEvent(QPaintEvent *event)
 		}
 	}
 
-	if (m_bSelectingItems && m_selectedBox.isValid())
+	if (m_hitTestStatus == HitTestStatus::SelectingItems && m_selectedBox.isValid())
 	{
 		painter.save();
 		QPen pen(Qt::DashLine);
@@ -141,7 +137,7 @@ void LCanvasView::mousePressEvent(QMouseEvent *event)
 	hitTest(pos);
 	setCursorByPos(pos);
 
-	if (m_bPaintingItem)
+	if (m_hitTestStatus & HitTestStatus::PaintingItem)
 	{
 		deselectAllItems();
 		m_item->setStartPos(pos);
@@ -154,18 +150,18 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 {
 	QPoint pos = event->pos();
 
-	if (m_bScalingItem)
+	if (m_hitTestStatus == HitTestStatus::ScalingItem)
 	{
 		resizeSelectedItem(pos);
 	}
-	else if (m_bMovingItems)
+	else if (m_hitTestStatus == HitTestStatus::MovingItems)
 	{
 		int dx = pos.x() - m_lastPos.x();
 		int dy = pos.y() - m_lastPos.y();
 		foreach (auto &item, m_selectedItems)
 			item->moveItem(dx, dy);
 	}
-	else if (m_bSelectingItems)
+	else if (m_hitTestStatus == HitTestStatus::SelectingItems)
 	{
 		deselectAllItems();
 		m_selectedBox = QRect(m_startPos, pos).normalized();
@@ -178,11 +174,11 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 			}
 		}
 	}
-	else if (m_bPaintingPath)
+	else if (m_hitTestStatus == HitTestStatus::PaintingPath)
 	{
 		m_item->addPoint(pos);
 	}
-	else if (m_bPaintingItem)
+	else if (m_hitTestStatus & HitTestStatus::PaintingItem)
 	{
 		m_item->setEndPos(pos);
 	}
@@ -192,21 +188,21 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 
 void LCanvasView::mouseReleaseEvent(QMouseEvent *event)
 {
-	if (m_bPaintingItem)
+	if (m_hitTestStatus & HitTestStatus::PaintingItem)
 	{
 		deselectAllItems();
 		m_item->setSelected(true);
 		m_selectedItems << m_item;
 	}
 
-	if (m_bScalingItem)
+	if (m_hitTestStatus == HitTestStatus::ScalingItem)
 	{
 		m_itemHitPos = ItemHitPos::NonePos;
 		this->setCursor(Qt::ArrowCursor);
 	}
 
 	m_startPos = m_lastPos = QPoint();
-	m_bPaintingPath = m_bPaintingItem = m_bMovingItems = m_bScalingItem = m_bSelectingItems = false;
+	m_hitTestStatus = HitTestStatus::NoneStatus;
 	m_selectedBox = QRect();
 
 	this->update();
@@ -501,29 +497,29 @@ void LCanvasView::initRightClickMenu()
 {
 	m_rightClickMenu = new QMenu(this);
 
-	QAction *cutAction = new QAction(QStringLiteral("Cut"), m_rightClickMenu);
+	QAction *cutAction = new QAction(tr("Cut"), m_rightClickMenu);
 	cutAction->setIcon(QIcon(QStringLiteral(":icons/cut.svg")));
 	cutAction->setShortcut(QKeySequence::Cut);
 
-	QAction *copyAction = new QAction(QStringLiteral("Copy"), m_rightClickMenu);
+	QAction *copyAction = new QAction(tr("Copy"), m_rightClickMenu);
 	copyAction->setIcon(QIcon(QStringLiteral(":icons/copy.svg")));
 	copyAction->setShortcut(QKeySequence::Copy);
 
-	QAction *pasteAction = new QAction(QStringLiteral("Paste"), m_rightClickMenu);
+	QAction *pasteAction = new QAction(tr("Paste"), m_rightClickMenu);
 	pasteAction->setIcon(QIcon(QStringLiteral(":icons/paste.svg")));
 	pasteAction->setShortcut(QKeySequence::Paste);
 
-	QAction *deleteAction = new QAction(QStringLiteral("Delete"), m_rightClickMenu);
+	QAction *deleteAction = new QAction(tr("Delete"), m_rightClickMenu);
 	deleteAction->setIcon(QIcon(QStringLiteral(":icons/delete.svg")));
 	deleteAction->setShortcut(QKeySequence::Delete);
 
-	QAction *moveTopAction = new QAction(QStringLiteral("Move Top"), m_rightClickMenu);
+	QAction *moveTopAction = new QAction(tr("Move Top"), m_rightClickMenu);
 
-	QAction *moveUpAction = new QAction(QStringLiteral("Move Up"), m_rightClickMenu);
+	QAction *moveUpAction = new QAction(tr("Move Up"), m_rightClickMenu);
 
-	QAction *moveDownAction = new QAction(QStringLiteral("Move Down"), m_rightClickMenu);
+	QAction *moveDownAction = new QAction(tr("Move Down"), m_rightClickMenu);
 
-	QAction *moveBottomAction = new QAction(QStringLiteral("Move Bottom"), m_rightClickMenu);
+	QAction *moveBottomAction = new QAction(tr("Move Bottom"), m_rightClickMenu);
 
 	m_rightClickMenu->addAction(cutAction);
 	m_rightClickMenu->addAction(copyAction);
@@ -640,7 +636,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 		m_itemHitPos = getItemHitPos(pos);
 		if (m_itemHitPos != ItemHitPos::NonePos)
 		{
-			m_bScalingItem = true;
+			m_hitTestStatus = HitTestStatus::ScalingItem;
 		}
 		else
 		{
@@ -650,7 +646,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 				{
 					if (m_allItems[i]->containsPos(pos))
 					{
-						m_bMovingItems = true;
+						m_hitTestStatus = HitTestStatus::MovingItems;
 						m_allItems[i]->setSelected(true);
 						m_selectedItems << m_allItems[i];
 						break;
@@ -663,7 +659,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 				{
 					if (m_allItems[i]->containsPos(pos))
 					{
-						m_bMovingItems = true;
+						m_hitTestStatus = HitTestStatus::MovingItems;
 						if (m_allItems[i]->isSelected())
 							break;
 
@@ -675,9 +671,9 @@ void LCanvasView::hitTest(const QPoint &pos)
 				}
 			}
 
-			if (!m_bMovingItems)
+			if (m_hitTestStatus != HitTestStatus::MovingItems)
 			{
-				m_bSelectingItems = true;
+				m_hitTestStatus = HitTestStatus::SelectingItems;
 				deselectAllItems();
 			}
 		}
@@ -686,8 +682,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Path:
 	{
-		m_bPaintingItem = true;
-		m_bPaintingPath = true;
+		m_hitTestStatus = HitTestStatus::PaintingPath;
 		m_item = SPtrLCanvasItem(new LCanvasPath());
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_allItems << m_item;
@@ -695,7 +690,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Line:
 	{
-		m_bPaintingItem = true;
+		m_hitTestStatus = HitTestStatus::PaintingItem;
 		m_item = SPtrLCanvasItem(new LCanvasLine());
 		m_item->setFillColor(m_fillColor);
 		m_item->setStrokeWidth(m_strokeWidth);
@@ -704,7 +699,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Rect:
 	{
-		m_bPaintingItem = true;
+		m_hitTestStatus = HitTestStatus::PaintingItem;
 		m_item = SPtrLCanvasItem(new LCanvasRect());
 		m_item->setFillColor(m_fillColor);
 		m_item->setStrokeWidth(m_strokeWidth);
@@ -713,7 +708,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Ellipse:
 	{
-		m_bPaintingItem = true;
+		m_hitTestStatus = HitTestStatus::PaintingItem;
 		m_item = SPtrLCanvasItem(new LCanvasEllipse());
 		m_item->setFillColor(m_fillColor);
 		m_item->setStrokeWidth(m_strokeWidth);
@@ -722,7 +717,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Triangle:
 	{
-		m_bPaintingItem = true;
+		m_hitTestStatus = HitTestStatus::PaintingItem;
 		m_item = SPtrLCanvasItem(new LCanvasTriangle());
 		m_item->setFillColor(m_fillColor);
 		m_item->setStrokeWidth(m_strokeWidth);
@@ -731,7 +726,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Hexagon:
 	{
-		m_bPaintingItem = true;
+		m_hitTestStatus = HitTestStatus::PaintingItem;
 		m_item = SPtrLCanvasItem(new LCanvasHexagon());
 		m_item->setFillColor(m_fillColor);
 		m_item->setStrokeWidth(m_strokeWidth);
@@ -740,7 +735,7 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Text:
 	{
-		m_bPaintingItem = true;
+		m_hitTestStatus = HitTestStatus::PaintingItem;
 		m_item = SPtrLCanvasItem(new LCanvasText());
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_allItems << m_item;
@@ -826,7 +821,6 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 
 		qDebug() << points;
 		m_item = SPtrLCanvasItem(new LCanvasPath());
-		m_bPaintingPath = true;
 		m_strokeWidth = reader.attributes().value(QStringLiteral("stroke-width")).toInt();
 		m_item->setStrokeWidth(m_strokeWidth);
 		m_item->setStartPos(QPoint(points[0].toInt(), points[1].toInt()));

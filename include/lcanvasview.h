@@ -7,7 +7,17 @@ namespace lwscode {
 
 typedef QList<SPtrLCanvasItem> LCanvasItemList;
 
-enum struct ItemHitPos
+enum HitTestStatus
+{
+	NoneStatus = 0x00000000,
+	PaintingItem = 0x00000010,
+	PaintingPath = 0x00000011,
+	MovingItems = 0x00000020,
+	ScalingItem = 0x00000040,
+	SelectingItems = 0x00000080
+};
+
+enum ItemHitPos
 {
 	NonePos = -1,
 	TopLeft,
@@ -18,16 +28,6 @@ enum struct ItemHitPos
 	BottomMiddle,
 	BottomLeft,
 	MiddleLeft
-};
-
-enum struct HitTestStatue
-{
-	NoneStatus = 0x00000000,
-	PaintingItem = 0x00000001,
-	PaintingPath = 0x00000011,
-	MovingItem = 0x00000020,
-	ScalingItem = 0x00000040,
-	SelectingItem = 0x00000080
 };
 
 class LCanvasView : public QWidget
@@ -96,11 +96,7 @@ private:
 	int m_strokeWidth;
 	QPoint m_startPos;
 	QPoint m_lastPos;
-	bool m_bPaintingItem;
-	bool m_bPaintingPath;
-	bool m_bMovingItems;
-	bool m_bScalingItem;
-	bool m_bSelectingItems;
+	HitTestStatus m_hitTestStatus;
 	ItemHitPos m_itemHitPos;
 	QRect m_topLeftPos;
 	QRect m_topMiddlePos;

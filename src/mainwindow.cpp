@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_canvasWidth(500)
 	, m_canvasHeight(500)
 {
-	this->setWindowTitle(QStringLiteral("SVG Editor"));
+	this->setWindowTitle(tr("SVG Editor"));
 	this->setWindowIcon(QIcon(QStringLiteral(":icons/logo.svg")));
 	this->setMinimumSize(1000, 750);
 	this->setContextMenuPolicy(Qt::NoContextMenu);
@@ -157,61 +157,61 @@ void MainWindow::initLeftToolBar()
 
 	QToolButton *noneButton = new QToolButton(this);
 	noneButton->setIcon(QIcon(QStringLiteral(":icons/none.svg")));
-	noneButton->setText(QStringLiteral("None"));
+	noneButton->setText(tr("None"));
 	noneButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	noneButton->setFixedWidth(64);
 
 	QToolButton *pathButton = new QToolButton(this);
 	pathButton->setIcon(QIcon(QStringLiteral(":icons/path.svg")));
-	pathButton->setText(QStringLiteral("Path"));
+	pathButton->setText(tr("Path"));
 	pathButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	pathButton->setFixedWidth(64);
 
 	QToolButton *lineButton = new QToolButton(this);
 	lineButton->setIcon(QIcon(QStringLiteral(":icons/line.svg")));
-	lineButton->setText(QStringLiteral("Line"));
+	lineButton->setText(tr("Line"));
 	lineButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	lineButton->setFixedWidth(64);
 
 	QToolButton *rectButton = new QToolButton(this);
 	rectButton->setIcon(QIcon(QStringLiteral(":icons/rect.svg")));
-	rectButton->setText(QStringLiteral("Rect"));
+	rectButton->setText(tr("Rect"));
 	rectButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	rectButton->setFixedWidth(64);
 
 	QToolButton *ellipseButton = new QToolButton(this);
 	ellipseButton->setIcon(QIcon(QStringLiteral(":icons/ellipse.svg")));
-	ellipseButton->setText(QStringLiteral("Ellipse"));
+	ellipseButton->setText(tr("Ellipse"));
 	ellipseButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	ellipseButton->setFixedWidth(64);
 
 	QToolButton *triangleButton = new QToolButton(this);
 	triangleButton->setIcon(QIcon(QStringLiteral(":icons/triangle.svg")));
-	triangleButton->setText(QStringLiteral("Triangle"));
+	triangleButton->setText(tr("Triangle"));
 	triangleButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	triangleButton->setFixedWidth(64);
 
 	QToolButton *hexagonButton = new QToolButton(this);
 	hexagonButton->setIcon(QIcon(QStringLiteral(":icons/hexagon.svg")));
-	hexagonButton->setText(QStringLiteral("Hexagon"));
+	hexagonButton->setText(tr("Hexagon"));
 	hexagonButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	hexagonButton->setFixedWidth(64);
 
 	QToolButton *textButton = new QToolButton(this);
 	textButton->setIcon(QIcon(QStringLiteral(":icons/text.svg")));
-	textButton->setText(QStringLiteral("Text"));
+	textButton->setText(tr("Text"));
 	textButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	textButton->setFixedWidth(64);
 
 	QToolButton *paletteButton = new QToolButton(this);
 	paletteButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
-	paletteButton->setText(QStringLiteral("Palette"));
+	paletteButton->setText(tr("Palette"));
 	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	paletteButton->setFixedWidth(64);
 
 	QToolButton *clearButton = new QToolButton(this);
 	clearButton->setIcon(QIcon(QStringLiteral(":icons/clear.svg")));
-	clearButton->setText(QStringLiteral("Clear"));
+	clearButton->setText(tr("Clear"));
 	clearButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	clearButton->setFixedWidth(64);
 
@@ -249,7 +249,7 @@ void MainWindow::initRightToolBar()
 
 	QVBoxLayout *mainLayout = new QVBoxLayout(toolsPanelWidget);
 
-	QLabel *canvasColorLabel = new QLabel(QStringLiteral("Canvas Color"), toolsPanelWidget);
+	QLabel *canvasColorLabel = new QLabel(tr("Canvas Color"), toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
 	m_canvasColorButton->setFixedSize(64, 32);
 	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: white; border-radius: 8px"));
@@ -258,7 +258,7 @@ void MainWindow::initRightToolBar()
 	canvasColorLayout->addWidget(m_canvasColorButton);
 	mainLayout->addLayout(canvasColorLayout);
 
-	QLabel *canvasWidthLabel = new QLabel(QStringLiteral("Canvas Width"), toolsPanelWidget);
+	QLabel *canvasWidthLabel = new QLabel(tr("Canvas Width"), toolsPanelWidget);
 	QSpinBox *canvasWidthSpinBox = new QSpinBox(toolsPanelWidget);
 	canvasWidthSpinBox->setFixedSize(64, 32);
 	canvasWidthSpinBox->setRange(100, 2000);
@@ -270,7 +270,7 @@ void MainWindow::initRightToolBar()
 	canvasWidthLayout->addWidget(canvasWidthSpinBox);
 	mainLayout->addLayout(canvasWidthLayout);
 
-	QLabel *canvasHeightLabel = new QLabel(QStringLiteral("Canvas Height"), toolsPanelWidget);
+	QLabel *canvasHeightLabel = new QLabel(tr("Canvas Height"), toolsPanelWidget);
 	QSpinBox *canvasHeightSpinBox = new QSpinBox(toolsPanelWidget);
 	canvasHeightSpinBox->setFixedSize(64, 32);
 	canvasHeightSpinBox->setRange(100, 2000);
@@ -282,7 +282,7 @@ void MainWindow::initRightToolBar()
 	canvasHeightLayout->addWidget(canvasHeightSpinBox);
 	mainLayout->addLayout(canvasHeightLayout);
 
-	QLabel *strokeWidthLabel = new QLabel(QStringLiteral("Stroke Width"), toolsPanelWidget);
+	QLabel *strokeWidthLabel = new QLabel(tr("Stroke Width"), toolsPanelWidget);
 	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
 	strokeWidthSpinBox->setFixedSize(64, 32);
 	strokeWidthSpinBox->setRange(1, 10);
