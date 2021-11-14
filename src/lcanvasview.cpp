@@ -11,6 +11,7 @@ LCanvasView::LCanvasView(QWidget *parent)
 	, m_fillColor(Qt::white)
 	, m_strokeColor(Qt::black)
 	, m_strokeWidth(1)
+	, m_fScaleFactor(1.0f)
 	, m_lineEdit(nullptr)
 	, m_hitTestStatus(HitTestStatus::NoneStatus)
 	, m_itemHitPos(ItemHitPos::NonePos)
@@ -44,6 +45,22 @@ void LCanvasView::setCanvasColor(const QColor &color)
 		QPalette palette = this->palette();
 		palette.setColor(role, m_canvasColor);
 		this->setPalette(palette);
+	}
+}
+
+void LCanvasView::setFillColor(const QColor &color)
+{
+	if (color.isValid() && m_fillColor != color)
+	{
+		m_fillColor = color;
+
+		if (!m_selectedItems.isEmpty())
+		{
+			foreach (auto &item, m_selectedItems)
+				item->setFillColor(m_fillColor);
+
+			this->update();
+		}
 	}
 }
 
@@ -85,6 +102,7 @@ void LCanvasView::clearCanvas()
 	m_textItems.clear();
 	m_selectedItems.clear();
 	m_duplicatedItems.clear();
+
 	this->update();
 }
 
@@ -97,6 +115,7 @@ void LCanvasView::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
+	painter.scale(m_fScaleFactor, m_fScaleFactor);
 
 	foreach (auto &item, m_allItems)
 	{
@@ -165,12 +184,12 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 	{
 		deselectAllItems();
 		m_selectedBox = QRect(m_startPos, pos).normalized();
-		for (int i = m_allItems.size() - 1; i >= 0; --i)
+		foreach (auto &item, m_allItems)
 		{
-			if (m_selectedBox.intersects(m_allItems[i]->boundingRect()))
+			if (m_selectedBox.intersects(item->boundingRect()))
 			{
-				m_allItems[i]->setSelected(true);
-				m_selectedItems << m_allItems[i];
+				item->setSelected(true);
+				m_selectedItems << item;
 			}
 		}
 	}
@@ -227,7 +246,19 @@ void LCanvasView::mouseDoubleClickEvent(QMouseEvent *event)
 
 void LCanvasView::wheelEvent(QWheelEvent *event)
 {
+	int dy = event->pixelDelta().y();
+	if (dy > 0)
+	{
+		m_fScaleFactor = 1.1f;
+	}
+	else if (dy < 0)
+	{
+		m_fScaleFactor = 0.9f;
+	}
 
+	int width = qMax(this->width() * m_fScaleFactor, 100.0f);
+	int height = qMax(this->height() * m_fScaleFactor, 100.0f);
+	this->resize(width, height);
 }
 
 void LCanvasView::contextMenuEvent(QContextMenuEvent *event)
@@ -640,34 +671,18 @@ void LCanvasView::hitTest(const QPoint &pos)
 		}
 		else
 		{
-			if (m_selectedItems.isEmpty())
+			for (int i = m_allItems.size() - 1; i >= 0; --i)
 			{
-				for (int i = m_allItems.size() - 1; i >= 0; --i)
+				if (m_allItems[i]->containsPos(pos))
 				{
-					if (m_allItems[i]->containsPos(pos))
-					{
-						m_hitTestStatus = HitTestStatus::MovingItems;
-						m_allItems[i]->setSelected(true);
-						m_selectedItems << m_allItems[i];
+					m_hitTestStatus = HitTestStatus::MovingItems;
+					if (m_allItems[i]->isSelected())
 						break;
-					}
-				}
-			}
-			else
-			{
-				for (int i = m_allItems.size() - 1; i >= 0; --i)
-				{
-					if (m_allItems[i]->containsPos(pos))
-					{
-						m_hitTestStatus = HitTestStatus::MovingItems;
-						if (m_allItems[i]->isSelected())
-							break;
 
-						deselectAllItems();
-						m_allItems[i]->setSelected(true);
-						m_selectedItems << m_allItems[i];
-						break;
-					}
+					deselectAllItems();
+					m_allItems[i]->setSelected(true);
+					m_selectedItems << m_allItems[i];
+					break;
 				}
 			}
 

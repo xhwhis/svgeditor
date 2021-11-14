@@ -39,6 +39,7 @@ public:
 	virtual ~LCanvasView();
 
 	void setCanvasColor(const QColor &color);
+	void setFillColor(const QColor &color);
 	void setStrokeColor(const QColor &color);
 	void setStrokeWidth(int width);
 	void clearCanvas();

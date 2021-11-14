@@ -34,6 +34,7 @@ protected slots:
 	void setCanvasColor();
 	void setCanvasWidth(int width);
 	void setCanvasHeight(int height);
+	void setFillColor();
 	void setStrokeColor();
 	void setStrokeWidth(int width);
 

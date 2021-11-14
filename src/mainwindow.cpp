@@ -30,6 +30,7 @@ void MainWindow::initUI()
 	initMenuBar();
 	initLeftToolBar();
 	initRightToolBar();
+	initBottomToolBar();
 }
 
 void MainWindow::initCanvas()
@@ -155,61 +156,61 @@ void MainWindow::initLeftToolBar()
 	m_leftToolBar->setMovable(false);
 	this->addToolBar(Qt::LeftToolBarArea, m_leftToolBar);
 
-	QToolButton *noneButton = new QToolButton(this);
+	QToolButton *noneButton = new QToolButton(m_leftToolBar);
 	noneButton->setIcon(QIcon(QStringLiteral(":icons/none.svg")));
 	noneButton->setText(tr("None"));
 	noneButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	noneButton->setFixedWidth(64);
 
-	QToolButton *pathButton = new QToolButton(this);
+	QToolButton *pathButton = new QToolButton(m_leftToolBar);
 	pathButton->setIcon(QIcon(QStringLiteral(":icons/path.svg")));
 	pathButton->setText(tr("Path"));
 	pathButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	pathButton->setFixedWidth(64);
 
-	QToolButton *lineButton = new QToolButton(this);
+	QToolButton *lineButton = new QToolButton(m_leftToolBar);
 	lineButton->setIcon(QIcon(QStringLiteral(":icons/line.svg")));
 	lineButton->setText(tr("Line"));
 	lineButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	lineButton->setFixedWidth(64);
 
-	QToolButton *rectButton = new QToolButton(this);
+	QToolButton *rectButton = new QToolButton(m_leftToolBar);
 	rectButton->setIcon(QIcon(QStringLiteral(":icons/rect.svg")));
 	rectButton->setText(tr("Rect"));
 	rectButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	rectButton->setFixedWidth(64);
 
-	QToolButton *ellipseButton = new QToolButton(this);
+	QToolButton *ellipseButton = new QToolButton(m_leftToolBar);
 	ellipseButton->setIcon(QIcon(QStringLiteral(":icons/ellipse.svg")));
 	ellipseButton->setText(tr("Ellipse"));
 	ellipseButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	ellipseButton->setFixedWidth(64);
 
-	QToolButton *triangleButton = new QToolButton(this);
+	QToolButton *triangleButton = new QToolButton(m_leftToolBar);
 	triangleButton->setIcon(QIcon(QStringLiteral(":icons/triangle.svg")));
 	triangleButton->setText(tr("Triangle"));
 	triangleButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	triangleButton->setFixedWidth(64);
 
-	QToolButton *hexagonButton = new QToolButton(this);
+	QToolButton *hexagonButton = new QToolButton(m_leftToolBar);
 	hexagonButton->setIcon(QIcon(QStringLiteral(":icons/hexagon.svg")));
 	hexagonButton->setText(tr("Hexagon"));
 	hexagonButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	hexagonButton->setFixedWidth(64);
 
-	QToolButton *textButton = new QToolButton(this);
+	QToolButton *textButton = new QToolButton(m_leftToolBar);
 	textButton->setIcon(QIcon(QStringLiteral(":icons/text.svg")));
 	textButton->setText(tr("Text"));
 	textButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	textButton->setFixedWidth(64);
 
-	QToolButton *paletteButton = new QToolButton(this);
+	QToolButton *paletteButton = new QToolButton(m_leftToolBar);
 	paletteButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
 	paletteButton->setText(tr("Palette"));
 	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	paletteButton->setFixedWidth(64);
 
-	QToolButton *clearButton = new QToolButton(this);
+	QToolButton *clearButton = new QToolButton(m_leftToolBar);
 	clearButton->setIcon(QIcon(QStringLiteral(":icons/clear.svg")));
 	clearButton->setText(tr("Clear"));
 	clearButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
@@ -302,8 +303,17 @@ void MainWindow::initBottomToolBar()
 {
 	m_bottomToolBar = new QToolBar(this);
 	m_bottomToolBar->setMovable(false);
-	this->addToolBar(Qt::BottomToolBarArea, m_rightToolBar);
+	this->addToolBar(Qt::BottomToolBarArea, m_bottomToolBar);
 
+	QToolButton *paletteButton = new QToolButton(m_bottomToolBar);
+	paletteButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
+	paletteButton->setText(tr("Palette"));
+	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	paletteButton->setFixedWidth(64);
+
+	m_bottomToolBar->addWidget(paletteButton);
+
+	connect(paletteButton, SIGNAL(clicked()), this, SLOT(setFillColor()));
 }
 
 void MainWindow::onPaintNone()
@@ -404,6 +414,13 @@ void MainWindow::setCanvasHeight(int height)
 {
 	m_canvasWidth = m_canvas->width();
 	m_canvas->resize(QSize(m_canvasWidth, height));
+}
+
+void MainWindow::setFillColor()
+{
+	QColor color = QColorDialog::getColor();
+	if (color.isValid())
+		m_canvas->setFillColor(color);
 }
 
 void MainWindow::setStrokeColor()
