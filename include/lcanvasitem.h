@@ -11,8 +11,11 @@ typedef QSharedPointer<LCanvasItem> SPtrLCanvasItem;
 class LCanvasItem
 {
 public:
+	LCanvasItem();
+	virtual ~LCanvasItem() {}
+
 	enum ItemType {
-		None,
+		None = -1,
 		Path,
 		Line,
 		Rect,
@@ -21,10 +24,6 @@ public:
 		Hexagon,
 		Text
 	};
-
-	LCanvasItem();
-	virtual ~LCanvasItem() {}
-
 	ItemType getItemType();
 
 	QPoint startPos();

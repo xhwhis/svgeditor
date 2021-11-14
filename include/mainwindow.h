@@ -43,11 +43,13 @@ private:
 	void initMenuBar();
 	void initLeftToolBar();
 	void initRightToolBar();
+	void initBottomToolBar();
 
 private:
 	QMenuBar *m_mainMenuBar;
 	QToolBar *m_leftToolBar;
 	QToolBar *m_rightToolBar;
+	QToolBar *m_bottomToolBar;
 	QScrollArea *m_centralWidget;
 	LCanvasView *m_canvas;
 	QPushButton *m_canvasColorButton;

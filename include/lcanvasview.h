@@ -12,9 +12,18 @@ class LCanvasView : public QWidget
 	Q_OBJECT
 
 public:
+	LCanvasView(QWidget *parent = nullptr);
+	virtual ~LCanvasView();
+
+	void setCanvasColor(const QColor &color);
+	void setStrokeColor(const QColor &color);
+	void setStrokeWidth(int width);
+	void clearCanvas();
+	bool existItems();
+
 	enum ItemHitPos
 	{
-		None,
+		None = -1,
 		TopLeft,
 		TopMiddle,
 		TopRight,
@@ -25,21 +34,13 @@ public:
 		MiddleLeft
 	};
 
-	LCanvasView(QWidget *parent = nullptr);
-	virtual ~LCanvasView();
-
-	void setCanvasColor(const QColor &color);
-	void setStrokeColor(const QColor &color);
-	void setStrokeWidth(int width);
-	void clearCanvas();
-	bool noItems();
-
 protected:
 	void paintEvent(QPaintEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void mouseDoubleClickEvent(QMouseEvent *event);
+	void wheelEvent(QWheelEvent *event);
 	void contextMenuEvent(QContextMenuEvent *event);
 
 protected slots:
@@ -60,39 +61,36 @@ protected slots:
 private:
 	ItemHitPos getItemHitPos(const QPoint &point);
 	void initLineEdit();
+	void showLineEdit();
 	void initRightClickMenu();
 	void setCursorByPos(const QPoint &pos);
 	void deselectAllItems();
 	void paintRubberBand(SPtrLCanvasItem item, QPainter &painter, bool flag = false);
-	void beforePaintItem(const QPoint &pos);
-	void selectItemsByClick(const QPoint &pos);
-	void selectItemsByFrame(const QPoint &pos);
+	void hitTest(const QPoint &pos);
 	void resizeSelectedItem(const QPoint &pos);
 	void readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamReader &reader);
 
 private:
 	LCanvasItem::ItemType m_itemType;
 	SPtrLCanvasItem m_item;
-	SPtrLCanvasItem m_selectedItem;
 	LCanvasItemList m_allItems;
 	LCanvasItemList m_textItems;
 	LCanvasItemList m_selectedItems;
 	LCanvasItemList m_duplicatedItems;
-	QMenu *m_rightClickMenu;
 	QLineEdit *m_lineEdit;
+	QMenu *m_rightClickMenu;
 	QColor m_canvasColor;
+	float m_fScaleFactor;
 	QColor m_fillColor;
 	QColor m_strokeColor;
 	int m_strokeWidth;
 	QPoint m_startPos;
 	QPoint m_lastPos;
-	QPoint m_endPos;
 	bool m_bPaintingItem;
 	bool m_bPaintingPath;
-	bool m_showFrameRect;
-	bool m_mouseFrameSelection;
-	bool m_mouseFrameSelect;
-	bool m_mouseClickSelect;
+	bool m_bMovingItems;
+	bool m_bScalingItem;
+	bool m_bSelectingItems;
 	ItemHitPos m_itemHitPos;
 	QRect m_topLeftPos;
 	QRect m_topMiddlePos;

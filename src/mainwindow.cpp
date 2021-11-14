@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 	this->setWindowTitle(QStringLiteral("SVG Editor"));
 	this->setWindowIcon(QIcon(QStringLiteral(":icons/logo.svg")));
 	this->setMinimumSize(1000, 750);
+	this->setContextMenuPolicy(Qt::NoContextMenu);
 
 	QFile file(QStringLiteral(":qss/light.qss"));
 	file.open(QFile::ReadOnly);
@@ -41,8 +42,8 @@ void MainWindow::initCanvas()
 	m_centralWidget->setWidget(m_canvas);
 
 	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
-	connect(this, SIGNAL(sigReadItemsFromFile(const QString &)), m_canvas, SLOT(readItemsFromFile(const QString &)));
-	connect(this, SIGNAL(sigWriteItemsToFile(const QString &)), m_canvas, SLOT(writeItemsToFile(const QString &)));
+	connect(this, SIGNAL(sigReadItemsFromFile(QString)), m_canvas, SLOT(readItemsFromFile(QString)));
+	connect(this, SIGNAL(sigWriteItemsToFile(QString)), m_canvas, SLOT(writeItemsToFile(QString)));
 }
 
 void MainWindow::initMenuBar()
@@ -263,6 +264,7 @@ void MainWindow::initRightToolBar()
 	canvasWidthSpinBox->setRange(100, 2000);
 	canvasWidthSpinBox->setSingleStep(10);
 	canvasWidthSpinBox->setValue(500);
+	canvasWidthSpinBox->setContextMenuPolicy(Qt::NoContextMenu);
 	QHBoxLayout *canvasWidthLayout = new QHBoxLayout();
 	canvasWidthLayout->addWidget(canvasWidthLabel);
 	canvasWidthLayout->addWidget(canvasWidthSpinBox);
@@ -274,6 +276,7 @@ void MainWindow::initRightToolBar()
 	canvasHeightSpinBox->setRange(100, 2000);
 	canvasHeightSpinBox->setSingleStep(10);
 	canvasHeightSpinBox->setValue(500);
+	canvasHeightSpinBox->setContextMenuPolicy(Qt::NoContextMenu);
 	QHBoxLayout *canvasHeightLayout = new QHBoxLayout();
 	canvasHeightLayout->addWidget(canvasHeightLabel);
 	canvasHeightLayout->addWidget(canvasHeightSpinBox);
@@ -283,6 +286,7 @@ void MainWindow::initRightToolBar()
 	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
 	strokeWidthSpinBox->setFixedSize(64, 32);
 	strokeWidthSpinBox->setRange(1, 10);
+	strokeWidthSpinBox->setContextMenuPolicy(Qt::NoContextMenu);
 	QHBoxLayout *strokeWidthLayout = new QHBoxLayout();
 	strokeWidthLayout->addWidget(strokeWidthLabel);
 	strokeWidthLayout->addWidget(strokeWidthSpinBox);
@@ -292,6 +296,14 @@ void MainWindow::initRightToolBar()
 	connect(canvasWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setCanvasWidth(int)));
 	connect(canvasHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setCanvasHeight(int)));
 	connect(strokeWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStrokeWidth(int)));
+}
+
+void MainWindow::initBottomToolBar()
+{
+	m_bottomToolBar = new QToolBar(this);
+	m_bottomToolBar->setMovable(false);
+	this->addToolBar(Qt::BottomToolBarArea, m_rightToolBar);
+
 }
 
 void MainWindow::onPaintNone()
@@ -339,7 +351,7 @@ void MainWindow::onNewFile()
 	if (!m_canvas)
 		return;
 
-	if (m_canvas->noItems())
+	if (m_canvas->existItems())
 	{
 		int result = QMessageBox::warning(
 					this, tr("New File"), tr("Do you want to clear the canvas?"),
@@ -355,7 +367,7 @@ void MainWindow::onNewFile()
 void MainWindow::onOpenFile()
 {
 	QString filePath = QFileDialog::getOpenFileName(
-				this, QStringLiteral("Open File"), QStringLiteral(), QStringLiteral("SVG FILES(*.svg)"));
+				this, tr("Open File"), QStringLiteral(), tr("SVG FILES(*.svg)"));
 
 	if (!filePath.isEmpty())
 		emit sigReadItemsFromFile(filePath);
@@ -364,7 +376,7 @@ void MainWindow::onOpenFile()
 void MainWindow::onSaveFile()
 {
 	QString filePath = QFileDialog::getSaveFileName(
-				this, QStringLiteral("Save File"), QStringLiteral(), QStringLiteral("SVG FILES(*.svg)"));
+				this, tr("Save File"), QStringLiteral(), tr("SVG FILES(*.svg)"));
 
 	if (!filePath.isEmpty())
 		emit sigWriteItemsToFile(filePath);
@@ -376,9 +388,9 @@ void MainWindow::setCanvasColor()
 	if (color.isValid() && m_canvasColor != color)
 	{
 		m_canvasColor = color;
+		m_canvas->setCanvasColor(color);
 		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: ") + color.name() +
 										   QStringLiteral("; border-radius: 8px"));
-		m_canvas->setCanvasColor(color);
 	}
 }
 
@@ -401,7 +413,7 @@ void MainWindow::setStrokeColor()
 		m_canvas->setStrokeColor(color);
 }
 
-void MainWindow::setStrokeWidth(int size)
+void MainWindow::setStrokeWidth(int width)
 {
-	m_canvas->setStrokeWidth(size);
+	m_canvas->setStrokeWidth(width);
 }
