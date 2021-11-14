@@ -3,7 +3,7 @@
 namespace lwscode {
 
 LCanvasItem::LCanvasItem()
-	: m_itemType(None)
+	: m_itemType(ItemType::NoneType)
 	, m_fillColor(Qt::white)
 	, m_strokeColor(Qt::black)
 	, m_strokeWidth(1.0f)
@@ -12,7 +12,7 @@ LCanvasItem::LCanvasItem()
 
 }
 
-LCanvasItem::ItemType LCanvasItem::getItemType()
+ItemType LCanvasItem::getItemType()
 {
 	return m_itemType;
 }
@@ -84,12 +84,12 @@ void LCanvasItem::addPoint(const QPoint &point)
 
 LCanvasPath::LCanvasPath()
 {
-	m_itemType = Path;
+	m_itemType = ItemType::Path;
 }
 
 LCanvasLine::LCanvasLine()
 {
-	m_itemType = Line;
+	m_itemType = ItemType::Line;
 }
 
 int LCanvasLine::sumDistance(const QPoint &p1, const QPoint &p2)
@@ -99,31 +99,31 @@ int LCanvasLine::sumDistance(const QPoint &p1, const QPoint &p2)
 
 LCanvasRect::LCanvasRect()
 {
-	m_itemType = Rect;
+	m_itemType = ItemType::Rect;
 }
 
 LCanvasEllipse::LCanvasEllipse()
 {
-	m_itemType = Ellipse;
+	m_itemType = ItemType::Ellipse;
 }
 
 LCanvasTriangle::LCanvasTriangle()
 	: m_vertices(QList<QPoint>(3, QPoint()))
 {
-	m_itemType = Triangle;
+	m_itemType = ItemType::Triangle;
 }
 
 LCanvasHexagon::LCanvasHexagon()
 	: m_vertices(QList<QPoint>(6, QPoint()))
 {
-	m_itemType = Hexagon;
+	m_itemType = ItemType::Hexagon;
 }
 
 LCanvasText::LCanvasText()
 	: m_width(0)
 	, m_height(0)
 {
-	m_itemType = Text;
+	m_itemType = ItemType::Text;
 }
 
 void LCanvasText::setFont(const QFont &font)

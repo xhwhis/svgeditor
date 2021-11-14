@@ -8,22 +8,23 @@ namespace lwscode {
 class LCanvasItem;
 typedef QSharedPointer<LCanvasItem> SPtrLCanvasItem;
 
+enum struct ItemType {
+	NoneType = -1,
+	Path,
+	Line,
+	Rect,
+	Ellipse,
+	Triangle,
+	Hexagon,
+	Text
+};
+
 class LCanvasItem
 {
 public:
 	LCanvasItem();
 	virtual ~LCanvasItem() {}
 
-	enum ItemType {
-		None = -1,
-		Path,
-		Line,
-		Rect,
-		Ellipse,
-		Triangle,
-		Hexagon,
-		Text
-	};
 	ItemType getItemType();
 
 	QPoint startPos();

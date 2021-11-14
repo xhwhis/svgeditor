@@ -15,7 +15,7 @@ public:
 	~MainWindow() {}
 
 signals:
-	void changeItemType(LCanvasItem::ItemType itemType);
+	void changeItemType(ItemType itemType);
 	void sigReadItemsFromFile(const QString &filePath);
 	void sigWriteItemsToFile(const QString &filePath);
 

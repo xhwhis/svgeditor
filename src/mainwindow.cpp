@@ -41,7 +41,7 @@ void MainWindow::initCanvas()
 	m_canvas = new LCanvasView(m_centralWidget);
 	m_centralWidget->setWidget(m_canvas);
 
-	connect(this, SIGNAL(changeItemType(LCanvasItem::ItemType)), m_canvas, SLOT(setItemType(LCanvasItem::ItemType)));
+	connect(this, SIGNAL(changeItemType(ItemType)), m_canvas, SLOT(setItemType(ItemType)));
 	connect(this, SIGNAL(sigReadItemsFromFile(QString)), m_canvas, SLOT(readItemsFromFile(QString)));
 	connect(this, SIGNAL(sigWriteItemsToFile(QString)), m_canvas, SLOT(writeItemsToFile(QString)));
 }
@@ -308,42 +308,42 @@ void MainWindow::initBottomToolBar()
 
 void MainWindow::onPaintNone()
 {
-	emit changeItemType(LCanvasItem::None);
+	emit changeItemType(ItemType::NoneType);
 }
 
 void MainWindow::onPaintPath()
 {
-	emit changeItemType(LCanvasItem::Path);
+	emit changeItemType(ItemType::Path);
 }
 
 void MainWindow::onPaintLine()
 {
-	emit changeItemType(LCanvasItem::Line);
+	emit changeItemType(ItemType::Line);
 }
 
 void MainWindow::onPaintRect()
 {
-	emit changeItemType(LCanvasItem::Rect);
+	emit changeItemType(ItemType::Rect);
 }
 
 void MainWindow::onPaintEllipse()
 {
-	emit changeItemType(LCanvasItem::Ellipse);
+	emit changeItemType(ItemType::Ellipse);
 }
 
 void MainWindow::onPaintTriangle()
 {
-	emit changeItemType(LCanvasItem::Triangle);
+	emit changeItemType(ItemType::Triangle);
 }
 
 void MainWindow::onPaintHexagon()
 {
-	emit changeItemType(LCanvasItem::Hexagon);
+	emit changeItemType(ItemType::Hexagon);
 }
 
 void MainWindow::onPaintText()
 {
-	emit changeItemType(LCanvasItem::Text);
+	emit changeItemType(ItemType::Text);
 }
 
 void MainWindow::onNewFile()

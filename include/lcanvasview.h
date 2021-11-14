@@ -7,6 +7,29 @@ namespace lwscode {
 
 typedef QList<SPtrLCanvasItem> LCanvasItemList;
 
+enum struct ItemHitPos
+{
+	NonePos = -1,
+	TopLeft,
+	TopMiddle,
+	TopRight,
+	MiddleRight,
+	BottomRight,
+	BottomMiddle,
+	BottomLeft,
+	MiddleLeft
+};
+
+enum struct HitTestStatue
+{
+	NoneStatus = 0x00000000,
+	PaintingItem = 0x00000001,
+	PaintingPath = 0x00000011,
+	MovingItem = 0x00000020,
+	ScalingItem = 0x00000040,
+	SelectingItem = 0x00000080
+};
+
 class LCanvasView : public QWidget
 {
 	Q_OBJECT
@@ -21,19 +44,6 @@ public:
 	void clearCanvas();
 	bool existItems();
 
-	enum ItemHitPos
-	{
-		None = -1,
-		TopLeft,
-		TopMiddle,
-		TopRight,
-		MiddleRight,
-		BottomRight,
-		BottomMiddle,
-		BottomLeft,
-		MiddleLeft
-	};
-
 protected:
 	void paintEvent(QPaintEvent *event);
 	void mousePressEvent(QMouseEvent *event);
@@ -44,7 +54,7 @@ protected:
 	void contextMenuEvent(QContextMenuEvent *event);
 
 protected slots:
-	void setItemType(LCanvasItem::ItemType itemType);
+	void setItemType(ItemType itemType);
 	void resizeLineEdit();
 	void addText();
 	void readItemsFromFile(const QString &filePath);
@@ -68,10 +78,10 @@ private:
 	void paintRubberBand(SPtrLCanvasItem item, QPainter &painter, bool flag = false);
 	void hitTest(const QPoint &pos);
 	void resizeSelectedItem(const QPoint &pos);
-	void readItemFromXml(LCanvasItem::ItemType itemType, QXmlStreamReader &reader);
+	void readItemFromXml(ItemType itemType, QXmlStreamReader &reader);
 
 private:
-	LCanvasItem::ItemType m_itemType;
+	ItemType m_itemType;
 	SPtrLCanvasItem m_item;
 	LCanvasItemList m_allItems;
 	LCanvasItemList m_textItems;
