@@ -305,15 +305,36 @@ void MainWindow::initBottomToolBar()
 	m_bottomToolBar->setMovable(false);
 	this->addToolBar(Qt::BottomToolBarArea, m_bottomToolBar);
 
-	QToolButton *paletteButton = new QToolButton(m_bottomToolBar);
-	paletteButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
-	paletteButton->setText(tr("Palette"));
-	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	paletteButton->setFixedWidth(64);
+	QWidget *toolsPanelWidget = new QWidget(m_bottomToolBar);
+	m_bottomToolBar->addWidget(toolsPanelWidget);
 
-	m_bottomToolBar->addWidget(paletteButton);
+	QHBoxLayout *mainLayout = new QHBoxLayout(toolsPanelWidget);
 
-	connect(paletteButton, SIGNAL(clicked()), this, SLOT(setFillColor()));
+	QToolButton *fillColorButton = new QToolButton(toolsPanelWidget);
+	fillColorButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
+	fillColorButton->setText(tr("Fill Color"));
+	fillColorButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	mainLayout->addWidget(fillColorButton);
+
+	QToolButton *strokeColorButton = new QToolButton(toolsPanelWidget);
+	strokeColorButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
+	strokeColorButton->setText(tr("Stroke Color"));
+	strokeColorButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	mainLayout->addWidget(strokeColorButton);
+
+	QLabel *strokeWidthLabel = new QLabel(tr("Stroke Width"), toolsPanelWidget);
+	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
+	strokeWidthSpinBox->setFixedSize(64, 32);
+	strokeWidthSpinBox->setRange(1, 10);
+	strokeWidthSpinBox->setContextMenuPolicy(Qt::NoContextMenu);
+	QVBoxLayout *strokeWidthLayout = new QVBoxLayout();
+	strokeWidthLayout->addWidget(strokeWidthSpinBox);
+	strokeWidthLayout->addWidget(strokeWidthLabel);
+	mainLayout->addLayout(strokeWidthLayout);
+
+	connect(fillColorButton, SIGNAL(clicked()), this, SLOT(setFillColor()));
+	connect(strokeColorButton, SIGNAL(clicked()), this, SLOT(setStrokeColor()));
+	connect(strokeWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStrokeWidth(int)));
 }
 
 void MainWindow::onPaintNone()
