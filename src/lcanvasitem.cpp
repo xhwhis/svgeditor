@@ -2,6 +2,7 @@
 
 namespace lwscode {
 
+// LCanvasItem
 LCanvasItem::LCanvasItem()
 	: m_itemType(ItemType::NoneType)
 	, m_fillColor(Qt::white)
@@ -77,16 +78,18 @@ QRect LCanvasItem::boundingRect()
 	return m_boundingRect.isValid() ? m_boundingRect : QRect();
 }
 
-void LCanvasItem::addPoint(const QPoint &point)
-{
-	m_points.push_back(point);
-}
-
+// LCanvasPath
 LCanvasPath::LCanvasPath()
 {
 	m_itemType = ItemType::Path;
 }
 
+void LCanvasPath::addPoint(const QPoint &point)
+{
+	m_points.push_back(point);
+}
+
+// LCanvasLine
 LCanvasLine::LCanvasLine()
 {
 	m_itemType = ItemType::Line;
@@ -97,28 +100,33 @@ int LCanvasLine::sumDistance(const QPoint &p1, const QPoint &p2)
 	return QLineF(p1, p2).length();
 }
 
+// LCanvasRect
 LCanvasRect::LCanvasRect()
 {
 	m_itemType = ItemType::Rect;
 }
 
+// LCanvasEllipse
 LCanvasEllipse::LCanvasEllipse()
 {
 	m_itemType = ItemType::Ellipse;
 }
 
+// LCanvasTriangle
 LCanvasTriangle::LCanvasTriangle()
 	: m_vertices(QList<QPoint>(3, QPoint()))
 {
 	m_itemType = ItemType::Triangle;
 }
 
+// LCanvasHexagon
 LCanvasHexagon::LCanvasHexagon()
 	: m_vertices(QList<QPoint>(6, QPoint()))
 {
 	m_itemType = ItemType::Hexagon;
 }
 
+// LCanvasText
 LCanvasText::LCanvasText()
 	: m_width(0)
 	, m_height(0)
@@ -146,6 +154,7 @@ void LCanvasText::setText(const QString &text)
 	m_height = rect.height();
 }
 
+// paintItem
 void LCanvasPath::paintItem(QPainter &painter)
 {
 	if (m_points.size() <= 1)
@@ -239,6 +248,7 @@ void LCanvasText::paintItem(QPainter &painter)
 	painter.restore();
 }
 
+// moveItem
 void LCanvasPath::moveItem(int dx, int dy)
 {
 	QPoint offset(dx, dy);
@@ -285,6 +295,7 @@ void LCanvasText::moveItem(int dx, int dy)
 	setBoundingRect();
 }
 
+// scaleItem
 void LCanvasPath::scaleItem(double sx, double sy)
 {
 	for (int i = 0; i < m_points.size(); i++)
@@ -340,6 +351,7 @@ void LCanvasText::scaleItem(double sx, double sy)
 	m_startPos.ry() *= sy;
 }
 
+// setBoundingRect
 void LCanvasPath::setBoundingRect()
 {
 	int left = m_points[0].x();
@@ -412,6 +424,7 @@ void LCanvasText::setBoundingRect()
 	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height).normalized();
 }
 
+// containsPos
 bool LCanvasPath::containsPos(const QPoint &point)
 {
 	for (int i = 0; i < m_points.size(); ++i)
@@ -477,6 +490,7 @@ bool LCanvasText::containsPos(const QPoint &point)
 	return false;
 }
 
+// clone
 SPtrLCanvasItem LCanvasPath::clone()
 {
 	return SPtrLCanvasItem(new LCanvasPath(*this));
@@ -512,6 +526,7 @@ SPtrLCanvasItem LCanvasText::clone()
 	return SPtrLCanvasItem(new LCanvasText(*this));
 }
 
+// writeItemToXml
 void LCanvasPath::writeItemToXml(QXmlStreamWriter &writer)
 {
 	QString pointPath = QString("M %1 %2").arg(m_points[0].x()).arg(m_points[0].y());

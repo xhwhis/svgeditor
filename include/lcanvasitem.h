@@ -43,8 +43,6 @@ public:
 
 	QRect boundingRect();
 
-	void addPoint(const QPoint &point);
-
 	virtual void paintItem(QPainter &painter) = 0;
 	virtual void moveItem(int dx, int dy) = 0;
 	virtual void scaleItem(double sx, double sy) = 0;
@@ -52,6 +50,8 @@ public:
 	virtual bool containsPos(const QPoint &point) = 0;
 	virtual SPtrLCanvasItem clone() = 0;
 	virtual void writeItemToXml(QXmlStreamWriter &writer) = 0;
+
+	virtual void addPoint(const QPoint &point) {}
 
 protected:
 	ItemType m_itemType;
@@ -63,7 +63,6 @@ protected:
 	bool m_bSelected;
 	QRect m_boundingRect;
 	QPainterPath m_path;
-	QVector<QPoint> m_points;
 };
 
 class LCanvasPath : public LCanvasItem
@@ -72,6 +71,8 @@ public:
 	LCanvasPath();
 	virtual ~LCanvasPath() {}
 
+	void addPoint(const QPoint &point) override;
+
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
@@ -79,6 +80,9 @@ public:
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
+
+private:
+	QVector<QPoint> m_points;
 };
 
 class LCanvasLine : public LCanvasItem
