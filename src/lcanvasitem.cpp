@@ -132,6 +132,7 @@ LCanvasText::LCanvasText()
 	, m_height(0)
 {
 	m_itemType = ItemType::Text;
+	m_fillColor = Qt::black;
 }
 
 void LCanvasText::setFont(const QFont &font)
@@ -266,7 +267,6 @@ void LCanvasRect::moveItem(int dx, int dy)
 {
 	moveStartPos(dx, dy);
 	moveEndPos(dx, dy);
-	setBoundingRect();
 }
 
 void LCanvasEllipse::moveItem(int dx, int dy)
@@ -279,20 +279,17 @@ void LCanvasTriangle::moveItem(int dx, int dy)
 {
 	moveStartPos(dx, dy);
 	moveEndPos(dx, dy);
-	setBoundingRect();
 }
 
 void LCanvasHexagon::moveItem(int dx, int dy)
 {
 	moveStartPos(dx, dy);
 	moveEndPos(dx, dy);
-	setBoundingRect();
 }
 
 void LCanvasText::moveItem(int dx, int dy)
 {
 	moveStartPos(dx, dy);
-	setBoundingRect();
 }
 
 // scaleItem
@@ -534,10 +531,8 @@ void LCanvasPath::writeItemToXml(QXmlStreamWriter &writer)
 		pointPath += QString(" L %1 %2").arg(m_points[i].x()).arg(m_points[i].y());
 
 	writer.writeStartElement("path");
-	writer.writeAttribute("d",pointPath);
-	writer.writeAttribute("fill", "white");
-	writer.writeAttribute("stroke", "black");
-	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
+	writer.writeAttribute("d", pointPath);
+	writer.writeAttribute("fill", m_fillColor.name());
 	writer.writeEndElement();
 }
 
@@ -548,7 +543,7 @@ void LCanvasLine::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeAttribute("y1", QString::number(m_startPos.y()));
 	writer.writeAttribute("x2", QString::number(m_endPos.x()));
 	writer.writeAttribute("y2", QString::number(m_endPos.y()));
-	writer.writeAttribute("stroke", "black");
+	writer.writeAttribute("stroke", m_strokeColor.name());
 	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
@@ -561,7 +556,7 @@ void LCanvasRect::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeAttribute("width", QString::number(qAbs(m_endPos.x() - m_startPos.x())));
 	writer.writeAttribute("height", QString::number(qAbs(m_endPos.y() - m_startPos.y())));
 	writer.writeAttribute("fill", m_fillColor.name());
-	writer.writeAttribute("stroke", "black");
+	writer.writeAttribute("stroke", m_strokeColor.name());
 	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
@@ -574,7 +569,7 @@ void LCanvasEllipse::writeItemToXml(QXmlStreamWriter& xmlWriter)
 	xmlWriter.writeAttribute("rx", QString::number(qAbs(m_endPos.x() - m_startPos.x()) / 2));
 	xmlWriter.writeAttribute("ry", QString::number(qAbs(m_endPos.y() - m_startPos.y()) / 2));
 	xmlWriter.writeAttribute("fill", m_fillColor.name());
-	xmlWriter.writeAttribute("stroke", "black");
+	xmlWriter.writeAttribute("stroke", m_strokeColor.name());
 	xmlWriter.writeAttribute("stroke-width", QString::number(m_strokeWidth));
 	xmlWriter.writeEndElement();
 }
@@ -591,7 +586,7 @@ void LCanvasTriangle::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeStartElement("polygon");
 	writer.writeAttribute("points", points);
 	writer.writeAttribute("fill", m_fillColor.name());
-	writer.writeAttribute("stroke", "black");
+	writer.writeAttribute("stroke", m_strokeColor.name());
 	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
@@ -608,7 +603,7 @@ void LCanvasHexagon::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeStartElement("polygon");
 	writer.writeAttribute("points", points);
 	writer.writeAttribute("fill", m_fillColor.name());
-	writer.writeAttribute("stroke", "black");
+	writer.writeAttribute("stroke", m_strokeColor.name());
 	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
@@ -616,7 +611,7 @@ void LCanvasHexagon::writeItemToXml(QXmlStreamWriter &writer)
 void LCanvasText::writeItemToXml(QXmlStreamWriter &writer)
 {
 	writer.writeStartElement("text");
-	writer.writeAttribute("font-family", "PingFang SC");
+	writer.writeAttribute("font-family", m_font.family());
 	writer.writeAttribute("font-size", QString::number(m_font.pointSize()));
 	writer.writeAttribute("x", QString::number(m_startPos.x()));
 	writer.writeAttribute("y", QString::number(m_startPos.y()));

@@ -53,6 +53,9 @@ public:
 
 	virtual void addPoint(const QPoint &point) {}
 
+	virtual void setFont(const QFont &font) {}
+	virtual void setText(const QString &text) {}
+
 protected:
 	ItemType m_itemType;
 	QPoint m_startPos;
@@ -186,8 +189,8 @@ public:
 	LCanvasText();
 	virtual ~LCanvasText() {}
 
-	void setFont(const QFont &font);
-	void setText(const QString &text);
+	void setFont(const QFont &font) override;
+	void setText(const QString &text) override;
 
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
