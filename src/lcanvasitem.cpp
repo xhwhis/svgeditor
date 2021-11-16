@@ -130,6 +130,7 @@ LCanvasHexagon::LCanvasHexagon()
 LCanvasText::LCanvasText()
 	: m_width(0)
 	, m_height(0)
+	, m_text(QString::fromUtf8("text"))
 {
 	m_itemType = ItemType::Text;
 	m_fillColor = Qt::black;
@@ -143,6 +144,7 @@ void LCanvasText::setFont(const QFont &font)
 	QRect rect = fontMetrics.boundingRect(m_text);
 	m_width = rect.width() < 8 ? 8 : rect.width();
 	m_height = rect.height();
+	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height);
 }
 
 void LCanvasText::setText(const QString &text)
@@ -153,6 +155,7 @@ void LCanvasText::setText(const QString &text)
 	QRect rect = fontMetrics.boundingRect(m_text);
 	m_width = rect.width() < 8 ? 8 : rect.width();
 	m_height = rect.height();
+	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height);
 }
 
 // paintItem
@@ -245,7 +248,7 @@ void LCanvasText::paintItem(QPainter &painter)
 	painter.save();
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
 	painter.setFont(m_font);
-	painter.drawText(m_startPos.x(), m_startPos.y(), m_text);
+	painter.drawText(m_boundingRect, 0, m_text);
 	painter.restore();
 }
 
@@ -290,6 +293,7 @@ void LCanvasHexagon::moveItem(int dx, int dy)
 void LCanvasText::moveItem(int dx, int dy)
 {
 	moveStartPos(dx, dy);
+	setBoundingRect();
 }
 
 // scaleItem
@@ -448,7 +452,7 @@ bool LCanvasLine::containsPos(const QPoint &point)
 bool LCanvasRect::containsPos(const QPoint &point)
 {
 	QRect rect = QRect(m_startPos, m_endPos);
-	rect.adjust(-m_strokeWidth, -m_strokeWidth, +m_strokeWidth, +m_strokeWidth);
+	rect.adjust(-m_strokeWidth, -m_strokeWidth, m_strokeWidth, m_strokeWidth);
 
 	return rect.contains(point);
 }
@@ -526,51 +530,52 @@ SPtrLCanvasItem LCanvasText::clone()
 // writeItemToXml
 void LCanvasPath::writeItemToXml(QXmlStreamWriter &writer)
 {
-	QString pointPath = QString("M %1 %2").arg(m_points[0].x()).arg(m_points[0].y());
+	QString pointPath = QString("M%1 %2").arg(m_points[0].x()).arg(m_points[0].y());
 	for (int i = 1; i < m_points.size(); i++)
-		pointPath += QString(" L %1 %2").arg(m_points[i].x()).arg(m_points[i].y());
+		pointPath += QString(" L%1 %2").arg(m_points[i].x()).arg(m_points[i].y());
 
-	writer.writeStartElement("path");
-	writer.writeAttribute("d", pointPath);
-	writer.writeAttribute("fill", m_fillColor.name());
+	writer.writeStartElement(QString::fromUtf8("path"));
+	writer.writeAttribute(QString::fromUtf8("d"), pointPath);
+	writer.writeAttribute(QString::fromUtf8("fill"), QString::fromUtf8("none"));
+	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
 	writer.writeEndElement();
 }
 
 void LCanvasLine::writeItemToXml(QXmlStreamWriter &writer)
 {
-	writer.writeStartElement("line");
-	writer.writeAttribute("x1", QString::number(m_startPos.x()));
-	writer.writeAttribute("y1", QString::number(m_startPos.y()));
-	writer.writeAttribute("x2", QString::number(m_endPos.x()));
-	writer.writeAttribute("y2", QString::number(m_endPos.y()));
-	writer.writeAttribute("stroke", m_strokeColor.name());
-	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
+	writer.writeStartElement(QString::fromUtf8("line"));
+	writer.writeAttribute(QString::fromUtf8("x1"), QString::number(m_startPos.x()));
+	writer.writeAttribute(QString::fromUtf8("y1"), QString::number(m_startPos.y()));
+	writer.writeAttribute(QString::fromUtf8("x2"), QString::number(m_endPos.x()));
+	writer.writeAttribute(QString::fromUtf8("y2"), QString::number(m_endPos.y()));
+	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
 
 void LCanvasRect::writeItemToXml(QXmlStreamWriter &writer)
 {
-	writer.writeStartElement("rect");
-	writer.writeAttribute("x", QString::number(m_startPos.x()));
-	writer.writeAttribute("y", QString::number(m_startPos.y()));
-	writer.writeAttribute("width", QString::number(qAbs(m_endPos.x() - m_startPos.x())));
-	writer.writeAttribute("height", QString::number(qAbs(m_endPos.y() - m_startPos.y())));
-	writer.writeAttribute("fill", m_fillColor.name());
-	writer.writeAttribute("stroke", m_strokeColor.name());
-	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
+	writer.writeStartElement(QString::fromUtf8("rect"));
+	writer.writeAttribute(QString::fromUtf8("x"), QString::number(m_startPos.x()));
+	writer.writeAttribute(QString::fromUtf8("y"), QString::number(m_startPos.y()));
+	writer.writeAttribute(QString::fromUtf8("width"), QString::number(qAbs(m_endPos.x() - m_startPos.x())));
+	writer.writeAttribute(QString::fromUtf8("height"), QString::number(qAbs(m_endPos.y() - m_startPos.y())));
+	writer.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
+	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
 
 void LCanvasEllipse::writeItemToXml(QXmlStreamWriter& xmlWriter)
 {
-	xmlWriter.writeStartElement("ellipse");
-	xmlWriter.writeAttribute("cx", QString::number((m_startPos.x() + m_endPos.x()) / 2));
-	xmlWriter.writeAttribute("cy", QString::number((m_startPos.y() + m_endPos.y()) / 2));
-	xmlWriter.writeAttribute("rx", QString::number(qAbs(m_endPos.x() - m_startPos.x()) / 2));
-	xmlWriter.writeAttribute("ry", QString::number(qAbs(m_endPos.y() - m_startPos.y()) / 2));
-	xmlWriter.writeAttribute("fill", m_fillColor.name());
-	xmlWriter.writeAttribute("stroke", m_strokeColor.name());
-	xmlWriter.writeAttribute("stroke-width", QString::number(m_strokeWidth));
+	xmlWriter.writeStartElement(QString::fromUtf8("ellipse"));
+	xmlWriter.writeAttribute(QString::fromUtf8("cx"), QString::number((m_startPos.x() + m_endPos.x()) / 2));
+	xmlWriter.writeAttribute(QString::fromUtf8("cy"), QString::number((m_startPos.y() + m_endPos.y()) / 2));
+	xmlWriter.writeAttribute(QString::fromUtf8("rx"), QString::number(qAbs(m_endPos.x() - m_startPos.x()) / 2));
+	xmlWriter.writeAttribute(QString::fromUtf8("ry"), QString::number(qAbs(m_endPos.y() - m_startPos.y()) / 2));
+	xmlWriter.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
+	xmlWriter.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
+	xmlWriter.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
 	xmlWriter.writeEndElement();
 }
 
@@ -583,11 +588,11 @@ void LCanvasTriangle::writeItemToXml(QXmlStreamWriter &writer)
 		points += QString("%1,%2").arg(m_vertices[i].x()).arg(m_vertices[i].y());
 	}
 
-	writer.writeStartElement("polygon");
-	writer.writeAttribute("points", points);
-	writer.writeAttribute("fill", m_fillColor.name());
-	writer.writeAttribute("stroke", m_strokeColor.name());
-	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
+	writer.writeStartElement(QString::fromUtf8("polygon"));
+	writer.writeAttribute(QString::fromUtf8("points"), points);
+	writer.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
+	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
 
@@ -600,21 +605,21 @@ void LCanvasHexagon::writeItemToXml(QXmlStreamWriter &writer)
 		points += QString("%1,%2").arg(m_vertices[i].x()).arg(m_vertices[i].y());
 	}
 
-	writer.writeStartElement("polygon");
-	writer.writeAttribute("points", points);
-	writer.writeAttribute("fill", m_fillColor.name());
-	writer.writeAttribute("stroke", m_strokeColor.name());
-	writer.writeAttribute("stroke-width", QString::number(m_strokeWidth));
+	writer.writeStartElement(QString::fromUtf8("polygon"));
+	writer.writeAttribute(QString::fromUtf8("points"), points);
+	writer.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
+	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
 	writer.writeEndElement();
 }
 
 void LCanvasText::writeItemToXml(QXmlStreamWriter &writer)
 {
-	writer.writeStartElement("text");
-	writer.writeAttribute("font-family", m_font.family());
-	writer.writeAttribute("font-size", QString::number(m_font.pointSize()));
-	writer.writeAttribute("x", QString::number(m_startPos.x()));
-	writer.writeAttribute("y", QString::number(m_startPos.y()));
+	writer.writeStartElement(QString::fromUtf8("text"));
+	writer.writeAttribute(QString::fromUtf8("font-family"), m_font.family());
+	writer.writeAttribute(QString::fromUtf8("font-size"), QString::number(m_font.pointSize()));
+	writer.writeAttribute(QString::fromUtf8("x"), QString::number(m_startPos.x()));
+	writer.writeAttribute(QString::fromUtf8("y"), QString::number(m_startPos.y()));
 	writer.writeCharacters(m_text);
 	writer.writeEndElement();
 }

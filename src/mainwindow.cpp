@@ -12,11 +12,11 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_canvasHeight(500)
 {
 	this->setWindowTitle(tr("SVG Editor"));
-	this->setWindowIcon(QIcon(QStringLiteral(":icons/logo.svg")));
+	this->setWindowIcon(QIcon(QString::fromUtf8(":icons/logo.svg")));
 	this->setMinimumSize(1000, 750);
 	this->setContextMenuPolicy(Qt::NoContextMenu);
 
-	QFile file(QStringLiteral(":qss/light.qss"));
+	QFile file(QString::fromUtf8(":qss/light.qss"));
 	file.open(QFile::ReadOnly);
 	this->setStyleSheet(file.readAll());
 	file.close();
@@ -56,19 +56,19 @@ void MainWindow::initMenuBar()
 	QMenu *fileMenu = new QMenu(tr("File"), m_mainMenuBar);
 
 	QAction *newFileAction = new QAction(tr("New"), fileMenu);
-	newFileAction->setIcon(QIcon(QStringLiteral(":icons/new.svg")));
+	newFileAction->setIcon(QIcon(QString::fromUtf8(":icons/new.svg")));
 	newFileAction->setShortcut(QKeySequence::New);
 
 	QAction *openFileAction = new QAction(tr("Open"), fileMenu);
-	openFileAction->setIcon(QIcon(QStringLiteral(":icons/open.svg")));
+	openFileAction->setIcon(QIcon(QString::fromUtf8(":icons/open.svg")));
 	openFileAction->setShortcut(QKeySequence::Open);
 
 	QAction *saveFileAction = new QAction(tr("Save"), fileMenu);
-	saveFileAction->setIcon(QIcon(QStringLiteral(":icons/save.svg")));
+	saveFileAction->setIcon(QIcon(QString::fromUtf8(":icons/save.svg")));
 	saveFileAction->setShortcut(QKeySequence::Save);
 
 	QAction *saveAsFileAction = new QAction(tr("Save As"), fileMenu);
-	saveAsFileAction->setIcon(QIcon(QStringLiteral(":icons/save-as.svg")));
+	saveAsFileAction->setIcon(QIcon(QString::fromUtf8(":icons/save-as.svg")));
 	saveAsFileAction->setShortcut(QKeySequence::SaveAs);
 
 	m_mainMenuBar->addAction(fileMenu->menuAction());
@@ -81,27 +81,27 @@ void MainWindow::initMenuBar()
 	QMenu *editMenu = new QMenu(tr("Edit"), m_mainMenuBar);
 
 	QAction *undoEditAction = new QAction(tr("Undo"), editMenu);
-	undoEditAction->setIcon(QIcon(QStringLiteral(":icons/undo.svg")));
+	undoEditAction->setIcon(QIcon(QString::fromUtf8(":icons/undo.svg")));
 	undoEditAction->setShortcut(QKeySequence::Undo);
 
 	QAction *redoEditAction = new QAction(tr("Redo"), editMenu);
-	redoEditAction->setIcon(QIcon(QStringLiteral(":icons/redo.svg")));
+	redoEditAction->setIcon(QIcon(QString::fromUtf8(":icons/redo.svg")));
 	redoEditAction->setShortcut(QKeySequence::Redo);
 
 	QAction *cutEditAction = new QAction(tr("Cut"), editMenu);
-	cutEditAction->setIcon(QIcon(QStringLiteral(":icons/cut.svg")));
+	cutEditAction->setIcon(QIcon(QString::fromUtf8(":icons/cut.svg")));
 	cutEditAction->setShortcut(QKeySequence::Cut);
 
 	QAction *copyEditAction = new QAction(tr("Copy"), editMenu);
-	copyEditAction->setIcon(QIcon(QStringLiteral(":icons/copy.svg")));
+	copyEditAction->setIcon(QIcon(QString::fromUtf8(":icons/copy.svg")));
 	copyEditAction->setShortcut(QKeySequence::Copy);
 
 	QAction *pasteEditAction = new QAction(tr("Paste"), editMenu);
-	pasteEditAction->setIcon(QIcon(QStringLiteral(":icons/paste.svg")));
+	pasteEditAction->setIcon(QIcon(QString::fromUtf8(":icons/paste.svg")));
 	pasteEditAction->setShortcut(QKeySequence::Paste);
 
 	QAction *deleteEditAction = new QAction(tr("Delete"), editMenu);
-	deleteEditAction->setIcon(QIcon(QStringLiteral(":icons/delete.svg")));
+	deleteEditAction->setIcon(QIcon(QString::fromUtf8(":icons/delete.svg")));
 	deleteEditAction->setShortcut(QKeySequence::Delete);
 
 	m_mainMenuBar->addAction(editMenu->menuAction());
@@ -157,61 +157,61 @@ void MainWindow::initLeftToolBar()
 	this->addToolBar(Qt::LeftToolBarArea, m_leftToolBar);
 
 	QToolButton *noneButton = new QToolButton(m_leftToolBar);
-	noneButton->setIcon(QIcon(QStringLiteral(":icons/none.svg")));
+	noneButton->setIcon(QIcon(QString::fromUtf8(":icons/none.svg")));
 	noneButton->setText(tr("None"));
 	noneButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	noneButton->setFixedWidth(64);
 
 	QToolButton *pathButton = new QToolButton(m_leftToolBar);
-	pathButton->setIcon(QIcon(QStringLiteral(":icons/path.svg")));
+	pathButton->setIcon(QIcon(QString::fromUtf8(":icons/path.svg")));
 	pathButton->setText(tr("Path"));
 	pathButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	pathButton->setFixedWidth(64);
 
 	QToolButton *lineButton = new QToolButton(m_leftToolBar);
-	lineButton->setIcon(QIcon(QStringLiteral(":icons/line.svg")));
+	lineButton->setIcon(QIcon(QString::fromUtf8(":icons/line.svg")));
 	lineButton->setText(tr("Line"));
 	lineButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	lineButton->setFixedWidth(64);
 
 	QToolButton *rectButton = new QToolButton(m_leftToolBar);
-	rectButton->setIcon(QIcon(QStringLiteral(":icons/rect.svg")));
+	rectButton->setIcon(QIcon(QString::fromUtf8(":icons/rect.svg")));
 	rectButton->setText(tr("Rect"));
 	rectButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	rectButton->setFixedWidth(64);
 
 	QToolButton *ellipseButton = new QToolButton(m_leftToolBar);
-	ellipseButton->setIcon(QIcon(QStringLiteral(":icons/ellipse.svg")));
+	ellipseButton->setIcon(QIcon(QString::fromUtf8(":icons/ellipse.svg")));
 	ellipseButton->setText(tr("Ellipse"));
 	ellipseButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	ellipseButton->setFixedWidth(64);
 
 	QToolButton *triangleButton = new QToolButton(m_leftToolBar);
-	triangleButton->setIcon(QIcon(QStringLiteral(":icons/triangle.svg")));
+	triangleButton->setIcon(QIcon(QString::fromUtf8(":icons/triangle.svg")));
 	triangleButton->setText(tr("Triangle"));
 	triangleButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	triangleButton->setFixedWidth(64);
 
 	QToolButton *hexagonButton = new QToolButton(m_leftToolBar);
-	hexagonButton->setIcon(QIcon(QStringLiteral(":icons/hexagon.svg")));
+	hexagonButton->setIcon(QIcon(QString::fromUtf8(":icons/hexagon.svg")));
 	hexagonButton->setText(tr("Hexagon"));
 	hexagonButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	hexagonButton->setFixedWidth(64);
 
 	QToolButton *textButton = new QToolButton(m_leftToolBar);
-	textButton->setIcon(QIcon(QStringLiteral(":icons/text.svg")));
+	textButton->setIcon(QIcon(QString::fromUtf8(":icons/text.svg")));
 	textButton->setText(tr("Text"));
 	textButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	textButton->setFixedWidth(64);
 
 	QToolButton *paletteButton = new QToolButton(m_leftToolBar);
-	paletteButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
+	paletteButton->setIcon(QIcon(QString::fromUtf8(":icons/palette.svg")));
 	paletteButton->setText(tr("Palette"));
 	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	paletteButton->setFixedWidth(64);
 
 	QToolButton *clearButton = new QToolButton(m_leftToolBar);
-	clearButton->setIcon(QIcon(QStringLiteral(":icons/clear.svg")));
+	clearButton->setIcon(QIcon(QString::fromUtf8(":icons/clear.svg")));
 	clearButton->setText(tr("Clear"));
 	clearButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	clearButton->setFixedWidth(64);
@@ -253,7 +253,7 @@ void MainWindow::initRightToolBar()
 	QLabel *canvasColorLabel = new QLabel(tr("Canvas Color"), toolsPanelWidget);
 	m_canvasColorButton = new QPushButton(toolsPanelWidget);
 	m_canvasColorButton->setFixedSize(64, 32);
-	m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: white; border-radius: 8px"));
+	m_canvasColorButton->setStyleSheet(QString::fromUtf8("background-color: white; border-radius: 8px"));
 	QHBoxLayout *canvasColorLayout = new QHBoxLayout();
 	canvasColorLayout->addWidget(canvasColorLabel);
 	canvasColorLayout->addWidget(m_canvasColorButton);
@@ -311,13 +311,15 @@ void MainWindow::initBottomToolBar()
 	QHBoxLayout *mainLayout = new QHBoxLayout(toolsPanelWidget);
 
 	QToolButton *fillColorButton = new QToolButton(toolsPanelWidget);
-	fillColorButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
+	fillColorButton->setIcon(QIcon(QString::fromUtf8(":icons/palette.svg")));
+	fillColorButton->setIconSize(QSize(32, 32));
 	fillColorButton->setText(tr("Fill Color"));
 	fillColorButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	mainLayout->addWidget(fillColorButton);
 
 	QToolButton *strokeColorButton = new QToolButton(toolsPanelWidget);
-	strokeColorButton->setIcon(QIcon(QStringLiteral(":icons/palette.svg")));
+	strokeColorButton->setIcon(QIcon(QString::fromUtf8(":icons/palette.svg")));
+	strokeColorButton->setIconSize(QSize(32, 32));
 	strokeColorButton->setText(tr("Stroke Color"));
 	strokeColorButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	mainLayout->addWidget(strokeColorButton);
@@ -398,7 +400,7 @@ void MainWindow::onNewFile()
 void MainWindow::onOpenFile()
 {
 	QString filePath = QFileDialog::getOpenFileName(
-				this, tr("Open File"), QStringLiteral(), tr("SVG FILES(*.svg)"));
+				this, tr("Open File"), QString(), tr("SVG FILES(*.svg)"));
 
 	if (!filePath.isEmpty())
 		emit sigReadItemsFromFile(filePath);
@@ -407,7 +409,7 @@ void MainWindow::onOpenFile()
 void MainWindow::onSaveFile()
 {
 	QString filePath = QFileDialog::getSaveFileName(
-				this, tr("Save File"), QStringLiteral(), tr("SVG FILES(*.svg)"));
+				this, tr("Save File"), QString(), tr("SVG FILES(*.svg)"));
 
 	if (!filePath.isEmpty())
 		emit sigWriteItemsToFile(filePath);
@@ -420,8 +422,8 @@ void MainWindow::setCanvasColor()
 	{
 		m_canvasColor = color;
 		m_canvas->setCanvasColor(color);
-		m_canvasColorButton->setStyleSheet(QStringLiteral("background-color: ") + color.name() +
-										   QStringLiteral("; border-radius: 8px"));
+		m_canvasColorButton->setStyleSheet(QString::fromUtf8("background-color: ") + color.name() +
+										   QString::fromUtf8("; border-radius: 8px"));
 	}
 }
 
