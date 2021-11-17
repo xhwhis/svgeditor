@@ -250,20 +250,24 @@ void LCanvasView::wheelEvent(QWheelEvent *event)
 	{
 		int width = this->width();
 		int height = this->height();
+#ifdef Q_OS_MACOS
 		int dy = event->pixelDelta().y();
+#else
+		int dy = event->angleDelta().y();
+#endif
 		if (dy > 0)
 		{
-			m_fScaleFactor = 1.0f + 0.01 * dy;
-			if (this->width() * m_fScaleFactor > 2000 || this->height() * m_fScaleFactor > 2000)
-				m_fScaleFactor = qMin(2000.0f / this->width(), 2000.0f / this->height());
+			m_fScaleFactor = 1.0f + 0.001 * dy;
+			if (width * m_fScaleFactor > 2000 || height * m_fScaleFactor > 2000)
+				m_fScaleFactor = qMin(2000.0f / width, 2000.0f / height);
 			width *= m_fScaleFactor;
 			height *= m_fScaleFactor;
 		}
 		else if (dy < 0)
 		{
-			m_fScaleFactor = 1.0f - 0.01 * dy;
-			if (this->width() / m_fScaleFactor < 100 || this->height() / m_fScaleFactor < 100)
-				m_fScaleFactor = qMax(this->width() / 100.0f, this->height() / 100.0f);
+			m_fScaleFactor = 1.0f - 0.001 * dy;
+			if (width / m_fScaleFactor < 100 || height / m_fScaleFactor < 100)
+				m_fScaleFactor = qMax(width / 100.0f, height / 100.0f);
 			width /= m_fScaleFactor;
 			height /= m_fScaleFactor;
 		}

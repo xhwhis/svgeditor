@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	QFile file(QString::fromUtf8(":qss/light.qss"));
 	file.open(QFile::ReadOnly);
-	this->setStyleSheet(file.readAll());
+	this->setStyleSheet(QString::fromUtf8(file.readAll()));
 	file.close();
 
 	initUI();
