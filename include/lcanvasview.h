@@ -77,6 +77,7 @@ private:
 	void setCursorByPos(const QPoint &pos);
 	void deselectAllItems();
 	void paintRubberBand(SPtrLCanvasItem item, QPainter &painter, bool flag = false);
+	void startMouseAction(const QPoint &pos);
 	void hitTest(const QPoint &pos);
 	void resizeSelectedItem(const QPoint &pos);
 	void readItemFromXml(ItemType itemType, QXmlStreamReader &reader);

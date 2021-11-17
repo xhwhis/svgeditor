@@ -147,6 +147,11 @@ void LCanvasText::setFont(const QFont &font)
 	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height);
 }
 
+QFont LCanvasText::font() const
+{
+	return m_font;
+}
+
 void LCanvasText::setText(const QString &text)
 {
 	m_text = text;
@@ -156,6 +161,11 @@ void LCanvasText::setText(const QString &text)
 	m_width = rect.width() < 8 ? 8 : rect.width();
 	m_height = rect.height();
 	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height);
+}
+
+QString LCanvasText::text() const
+{
+	return m_text;
 }
 
 // paintItem

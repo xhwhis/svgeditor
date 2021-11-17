@@ -135,7 +135,7 @@ void LCanvasView::paintEvent(QPaintEvent *event)
 		}
 	}
 
-	if (m_hitTestStatus == HitTestStatus::SelectingItems && m_selectedBox.isValid())
+	if ((m_hitTestStatus & HitTestStatus::SelectingItems) && m_selectedBox.isValid())
 	{
 		painter.save();
 		QPen pen(Qt::DashLine);
@@ -151,8 +151,7 @@ void LCanvasView::mousePressEvent(QMouseEvent *event)
 {
 	QPoint pos = event->pos();
 	m_startPos = m_lastPos = pos;
-	m_lineEdit->move(pos);
-	hitTest(pos);
+	startMouseAction(pos);
 	setCursorByPos(pos);
 
 	if (m_hitTestStatus & HitTestStatus::PaintingItem)
@@ -168,18 +167,18 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 {
 	QPoint pos = event->pos();
 
-	if (m_hitTestStatus == HitTestStatus::ScalingItem)
+	if (m_hitTestStatus & HitTestStatus::ScalingItem)
 	{
 		resizeSelectedItem(pos);
 	}
-	else if (m_hitTestStatus == HitTestStatus::MovingItems)
+	else if (m_hitTestStatus & HitTestStatus::MovingItems)
 	{
 		int dx = pos.x() - m_lastPos.x();
 		int dy = pos.y() - m_lastPos.y();
 		foreach (auto &item, m_selectedItems)
 			item->moveItem(dx, dy);
 	}
-	else if (m_hitTestStatus == HitTestStatus::SelectingItems)
+	else if (m_hitTestStatus & HitTestStatus::SelectingItems)
 	{
 		deselectAllItems();
 		m_selectedBox = QRect(m_startPos, pos).normalized();
@@ -213,11 +212,15 @@ void LCanvasView::mouseReleaseEvent(QMouseEvent *event)
 		m_selectedItems << m_item;
 	}
 
-	if (m_hitTestStatus == HitTestStatus::ScalingItem)
+	if (m_hitTestStatus & HitTestStatus::ScalingItem)
 	{
 		m_itemHitPos = ItemHitPos::NonePos;
 		this->setCursor(Qt::ArrowCursor);
 	}
+
+	m_startPos = m_lastPos = QPoint();
+	m_hitTestStatus = HitTestStatus::NoneStatus;
+	m_selectedBox = QRect();
 
 	this->update();
 }
@@ -231,8 +234,10 @@ void LCanvasView::mouseDoubleClickEvent(QMouseEvent *event)
 	{
 		if (m_textItems[i]->containsPos(pos))
 		{
-			m_textItems[i]->setSelected(true);
-			m_selectedItems << m_textItems[i];
+			m_lineEdit->move(m_textItems[i]->startPos());
+			m_lineEdit->setFont(m_textItems[i]->font());
+			m_lineEdit->setText(m_textItems[i]->text());
+			m_allItems.removeOne(m_textItems[i]);
 			showLineEdit();
 			break;
 		}
@@ -241,19 +246,29 @@ void LCanvasView::mouseDoubleClickEvent(QMouseEvent *event)
 
 void LCanvasView::wheelEvent(QWheelEvent *event)
 {
-	int dy = event->pixelDelta().y();
-	if (dy > 0)
+	if (event->modifiers() & Qt::ControlModifier)
 	{
-		m_fScaleFactor = 1.1f;
+		int width = this->width();
+		int height = this->height();
+		int dy = event->pixelDelta().y();
+		if (dy > 0)
+		{
+			m_fScaleFactor = 1.0f + 0.01 * dy;
+			if (this->width() * m_fScaleFactor > 2000 || this->height() * m_fScaleFactor > 2000)
+				m_fScaleFactor = qMin(2000.0f / this->width(), 2000.0f / this->height());
+			width *= m_fScaleFactor;
+			height *= m_fScaleFactor;
+		}
+		else if (dy < 0)
+		{
+			m_fScaleFactor = 1.0f - 0.01 * dy;
+			if (this->width() / m_fScaleFactor < 100 || this->height() / m_fScaleFactor < 100)
+				m_fScaleFactor = qMax(this->width() / 100.0f, this->height() / 100.0f);
+			width /= m_fScaleFactor;
+			height /= m_fScaleFactor;
+		}
+		this->resize(width, height);
 	}
-	else if (dy < 0)
-	{
-		m_fScaleFactor = 0.9f;
-	}
-
-	int width = qMax(this->width() * m_fScaleFactor, 100.0f);
-	int height = qMax(this->height() * m_fScaleFactor, 100.0f);
-	this->resize(width, height);
 }
 
 void LCanvasView::contextMenuEvent(QContextMenuEvent *event)
@@ -536,7 +551,8 @@ void LCanvasView::initLineEdit()
 {
 	m_lineEdit = new QLineEdit(this);
 	m_lineEdit->hide();
-	QFont font(QString::fromUtf8("PingFang SC"), 32);
+	QFont font = m_lineEdit->font();
+	font.setPointSize(32);
 	m_lineEdit->setFont(font);
 
 	QFontMetrics fontMetrics(font);
@@ -552,9 +568,8 @@ void LCanvasView::initLineEdit()
 void LCanvasView::showLineEdit()
 {
 	QPalette palette = m_lineEdit->palette();
-//	m_fillColor = Qt::black;
-//	palette.setBrush(QPalette::Text, m_fillColor);
-//	m_lineEdit->setPalette(palette);
+	palette.setBrush(QPalette::Text, Qt::black);
+	m_lineEdit->setPalette(palette);
 	m_lineEdit->show();
 	m_lineEdit->setFocus();
 }
@@ -692,42 +707,13 @@ void LCanvasView::paintRubberBand(SPtrLCanvasItem item, QPainter &painter, bool 
 	painter.restore();
 }
 
-void LCanvasView::hitTest(const QPoint &pos)
+void LCanvasView::startMouseAction(const QPoint &pos)
 {
 	switch (m_itemType)
 	{
 	case ItemType::NoneType:
 	{
-		m_item = nullptr;
-		m_itemHitPos = getItemHitPos(pos);
-		if (m_itemHitPos != ItemHitPos::NonePos)
-		{
-			m_hitTestStatus = HitTestStatus::ScalingItem;
-		}
-		else
-		{
-			for (int i = m_allItems.size() - 1; i >= 0; --i)
-			{
-				if (m_allItems[i]->containsPos(pos))
-				{
-					m_hitTestStatus = HitTestStatus::MovingItems;
-					if (m_allItems[i]->isSelected())
-						break;
-
-					deselectAllItems();
-					m_allItems[i]->setSelected(true);
-					m_selectedItems << m_allItems[i];
-					break;
-				}
-			}
-
-			if (m_hitTestStatus != HitTestStatus::MovingItems)
-			{
-				m_hitTestStatus = HitTestStatus::SelectingItems;
-				deselectAllItems();
-			}
-		}
-		m_startPos = pos;
+		hitTest(pos);
 		break;
 	}
 	case ItemType::Path:
@@ -790,9 +776,42 @@ void LCanvasView::hitTest(const QPoint &pos)
 	}
 	case ItemType::Text:
 	{
+		m_lineEdit->move(pos);
 		showLineEdit();
 		break;
 	}
+	}
+}
+
+void LCanvasView::hitTest(const QPoint &pos)
+{
+	m_itemHitPos = getItemHitPos(pos);
+	if (m_itemHitPos != ItemHitPos::NonePos)
+	{
+		m_hitTestStatus = HitTestStatus::ScalingItem;
+	}
+	else
+	{
+		for (int i = m_allItems.size() - 1; i >= 0; --i)
+		{
+			if (m_allItems[i]->containsPos(pos))
+			{
+				m_hitTestStatus = HitTestStatus::MovingItems;
+				if (m_allItems[i]->isSelected())
+					break;
+
+				deselectAllItems();
+				m_allItems[i]->setSelected(true);
+				m_selectedItems << m_allItems[i];
+				break;
+			}
+		}
+
+		if (m_hitTestStatus != HitTestStatus::MovingItems)
+		{
+			m_hitTestStatus = HitTestStatus::SelectingItems;
+			deselectAllItems();
+		}
 	}
 }
 
