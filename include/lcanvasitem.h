@@ -7,6 +7,7 @@ namespace lwscode {
 
 class LCanvasItem;
 typedef QSharedPointer<LCanvasItem> SPtrLCanvasItem;
+typedef QList<QPoint> QPoints;
 
 enum ItemType {
 	NoneType = -1,
@@ -17,6 +18,22 @@ enum ItemType {
 	Triangle,
 	Hexagon,
 	Text
+};
+
+enum StretchItemDir {
+	NoneDir = 0x00000000,
+	ToTop = 0x00000001,
+	ToBottom = 0x00000002,
+	ToLeft = 0x00000010,
+	ToRight = 0x00000020,
+	ToTopLeft = ToTop | ToLeft,
+	ToTopMiddle = ToTop,
+	ToTopRight = ToTop | ToRight,
+	ToMiddleRight = ToRight,
+	ToBottomRight = ToBottom | ToRight,
+	ToBottomMiddle = ToBottom,
+	ToBottomLeft = ToBottom | ToLeft,
+	ToMiddleLeft = ToLeft
 };
 
 class LCanvasItem
@@ -46,6 +63,8 @@ public:
 	virtual void paintItem(QPainter &painter) = 0;
 	virtual void moveItem(int dx, int dy) = 0;
 	virtual void scaleItem(double sx, double sy) = 0;
+	virtual void stretchItemTo(StretchItemDir dir, int x, int y) = 0;
+	virtual void updatePath() = 0;
 	virtual void setBoundingRect() = 0;
 	virtual bool containsPos(const QPoint &point) = 0;
 	virtual SPtrLCanvasItem clone() = 0;
@@ -81,13 +100,15 @@ public:
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
+	void stretchItemTo(StretchItemDir dir, int x, int y) override;
+	void updatePath() override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
-	QVector<QPoint> m_points;
+	QPoints m_points;
 };
 
 class LCanvasLine : public LCanvasItem
@@ -101,6 +122,8 @@ public:
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
+	void stretchItemTo(StretchItemDir dir, int x, int y) override;
+	void updatePath() override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;
@@ -116,6 +139,8 @@ public:
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
+	void stretchItemTo(StretchItemDir dir, int x, int y) override;
+	void updatePath() override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;
@@ -135,6 +160,8 @@ public:
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
+	void stretchItemTo(StretchItemDir dir, int x, int y) override;
+	void updatePath() override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;
@@ -154,6 +181,8 @@ public:
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
+	void stretchItemTo(StretchItemDir dir, int x, int y) override;
+	void updatePath() override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;
@@ -162,7 +191,7 @@ public:
 private:
 	int m_width;
 	int m_height;
-	QVector<QPoint> m_vertices;
+	QPoints m_vertices;
 };
 
 class LCanvasHexagon : public LCanvasItem
@@ -174,6 +203,8 @@ public:
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
+	void stretchItemTo(StretchItemDir dir, int x, int y) override;
+	void updatePath() override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;
@@ -182,7 +213,7 @@ public:
 private:
 	int m_width;
 	int m_height;
-	QVector<QPoint> m_vertices;
+	QPoints m_vertices;
 };
 
 class LCanvasText : public LCanvasItem
@@ -199,6 +230,8 @@ public:
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
 	void scaleItem(double sx, double sy) override;
+	void stretchItemTo(StretchItemDir dir, int x, int y) override;
+	void updatePath() override;
 	void setBoundingRect() override;
 	bool containsPos(const QPoint &point) override;
 	SPtrLCanvasItem clone() override;

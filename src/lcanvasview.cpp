@@ -159,6 +159,7 @@ void LCanvasView::mousePressEvent(QMouseEvent *event)
 		deselectAllItems();
 		m_item->setStartPos(pos);
 		m_item->setEndPos(pos);
+		m_item->updatePath();
 	}
 	this->update();
 }
@@ -194,10 +195,12 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 	else if (m_hitTestStatus == HitTestStatus::PaintingPath)
 	{
 		m_item->addPoint(pos);
+		m_item->updatePath();
 	}
 	else if (m_hitTestStatus & HitTestStatus::PaintingItem)
 	{
 		m_item->setEndPos(pos);
+		m_item->updatePath();
 	}
 	this->update();
 	m_lastPos = pos;
@@ -250,11 +253,10 @@ void LCanvasView::wheelEvent(QWheelEvent *event)
 	{
 		int width = this->width();
 		int height = this->height();
-#ifdef Q_OS_MACOS
-		int dy = event->pixelDelta().y();
-#else
-		int dy = event->angleDelta().y();
-#endif
+		float dy = event->pixelDelta().y();
+		if (dy <= 0)
+			dy = event->angleDelta().y() / 120.0f;
+
 		if (dy > 0)
 		{
 			m_fScaleFactor = 1.0f + 0.001 * dy;
@@ -829,12 +831,14 @@ void LCanvasView::resizeSelectedItem(const QPoint &pos)
 	case ItemHitPos::TopLeft:
 	{
 		m_selectedItems[0]->setStartPos(pos);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	case ItemHitPos::TopMiddle:
 	{
 		int height = pos.y() - m_lastPos.y();
 		m_selectedItems[0]->moveStartPos(0, height);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	case ItemHitPos::TopRight:
@@ -843,23 +847,27 @@ void LCanvasView::resizeSelectedItem(const QPoint &pos)
 		int height = pos.y() - m_lastPos.y();
 		m_selectedItems[0]->moveStartPos(0, height);
 		m_selectedItems[0]->moveEndPos(width, 0);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	case ItemHitPos::MiddleRight:
 	{
 		int width = pos.x() - m_lastPos.x();
 		m_selectedItems[0]->moveEndPos(width, 0);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	case ItemHitPos::BottomRight:
 	{
 		m_selectedItems[0]->setEndPos(pos);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	case ItemHitPos::BottomMiddle:
 	{
 		int height = pos.y() - m_lastPos.y();
 		m_selectedItems[0]->moveEndPos(0, height);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	case ItemHitPos::BottomLeft:
@@ -868,12 +876,14 @@ void LCanvasView::resizeSelectedItem(const QPoint &pos)
 		int height = pos.y() - m_lastPos.y();
 		m_selectedItems[0]->moveStartPos(width, 0);
 		m_selectedItems[0]->moveEndPos(0, height);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	case ItemHitPos::MiddleLeft:
 	{
 		int width = pos.x() - m_lastPos.x();
 		m_selectedItems[0]->moveStartPos(width, 0);
+		m_selectedItems[0]->updatePath();
 		break;
 	}
 	default:
@@ -894,10 +904,11 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 		m_item->setStrokeWidth(reader.attributes().value(QString::fromUtf8("stroke-width")).toInt());
 
 		QString path = reader.attributes().value(QString::fromUtf8("d")).toString();
-		QStringList points = path.split(QRegularExpression(QString::fromUtf8("\\D")), Qt::SkipEmptyParts);
+		QStringList points = path.split(QRegularExpression(QString::fromUtf8("\\D+")), Qt::SkipEmptyParts);
 		int size = points.size();
 		m_item->setStartPos(QPoint(points[0].toInt(), points[1].toInt()));
 		m_item->setEndPos(QPoint(points[size - 2].toInt(), points[size - 1].toInt()));
+		m_item->updatePath();
 
 		for (int i = 0; i < points.size() - 1; i += 2)
 			m_item->addPoint(QPoint(points[i].toInt(), points[i + 1].toInt()));
@@ -915,6 +926,7 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 								   reader.attributes().value(QString::fromUtf8("y1")).toInt()));
 		m_item->setEndPos(QPoint(reader.attributes().value(QString::fromUtf8("x2")).toInt(),
 								 reader.attributes().value(QString::fromUtf8("y2")).toInt()));
+		m_item->updatePath();
 
 		m_allItems << m_item;
 		break;
@@ -932,6 +944,7 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 		int height = reader.attributes().value(QString::fromUtf8("height")).toInt();
 		m_item->setStartPos(QPoint(x, y));
 		m_item->setEndPos(QPoint(x + width, y + height));
+		m_item->updatePath();
 
 		m_allItems << m_item;
 		break;
@@ -949,6 +962,7 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 		int ry = reader.attributes().value(QString::fromUtf8("ry")).toInt();
 		m_item->setStartPos(QPoint(cx - rx, cy - ry));
 		m_item->setEndPos(QPoint(cx + rx, cy + cy));
+		m_item->updatePath();
 
 		m_allItems << m_item;
 		break;
@@ -961,9 +975,10 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 		m_item->setStrokeWidth(reader.attributes().value(QString::fromUtf8("stroke-width")).toInt());
 
 		QString polygon = reader.attributes().value(QString::fromUtf8("points")).toString();
-		QStringList points = polygon.split(QRegularExpression(QString::fromUtf8("\\D")), Qt::SkipEmptyParts);
+		QStringList points = polygon.split(QRegularExpression(QString::fromUtf8("\\D+")), Qt::SkipEmptyParts);
 		m_item->setStartPos(QPoint(points[4].toInt(), points[1].toInt()));
 		m_item->setEndPos(QPoint(points[2].toInt(), points[3].toInt()));
+		m_item->updatePath();
 
 		m_allItems << m_item;
 		break;
@@ -976,9 +991,10 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 		m_item->setStrokeWidth(reader.attributes().value(QString::fromUtf8("stroke-width")).toInt());
 
 		QString polygon = reader.attributes().value(QString::fromUtf8("points")).toString();
-		QStringList points = polygon.split(QRegularExpression(QString::fromUtf8("\\D")), Qt::SkipEmptyParts);
+		QStringList points = polygon.split(QRegularExpression(QString::fromUtf8("\\D+")), Qt::SkipEmptyParts);
 		m_item->setStartPos(QPoint(points[10].toInt(), points[1].toInt()));
 		m_item->setEndPos(QPoint(points[4].toInt(), points[7].toInt()));
+		m_item->updatePath();
 
 		m_allItems << m_item;
 		break;
@@ -991,6 +1007,7 @@ void LCanvasView::readItemFromXml(ItemType itemType, QXmlStreamReader &reader)
 		m_item->setStartPos(QPoint(reader.attributes().value(QString::fromUtf8("x")).toInt(),
 								   reader.attributes().value(QString::fromUtf8("y")).toInt()));
 		m_item->setText(reader.readElementText());
+		m_item->updatePath();
 
 		m_allItems << m_item;
 		m_textItems << m_item;

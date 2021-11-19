@@ -114,14 +114,14 @@ LCanvasEllipse::LCanvasEllipse()
 
 // LCanvasTriangle
 LCanvasTriangle::LCanvasTriangle()
-	: m_vertices(QList<QPoint>(3, QPoint()))
+	: m_vertices(QPoints(3, QPoint()))
 {
 	m_itemType = ItemType::Triangle;
 }
 
 // LCanvasHexagon
 LCanvasHexagon::LCanvasHexagon()
-	: m_vertices(QList<QPoint>(6, QPoint()))
+	: m_vertices(QPoints(6, QPoint()))
 {
 	m_itemType = ItemType::Hexagon;
 }
@@ -181,7 +181,7 @@ void LCanvasPath::paintItem(QPainter &painter)
 
 	painter.save();
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
-	painter.drawPath(path);
+	painter.drawPath(m_path);
 	painter.restore();
 }
 
@@ -199,8 +199,9 @@ void LCanvasRect::paintItem(QPainter &painter)
 	painter.save();
 	painter.setBrush(m_fillColor);
 	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
-	painter.drawRect(m_startPos.x(), m_startPos.y(),
-					 m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
+//	painter.drawRect(m_startPos.x(), m_startPos.y(),
+//					 m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
+	painter.drawPath(m_path);
 	painter.restore();
 }
 
@@ -360,6 +361,108 @@ void LCanvasText::scaleItem(double sx, double sy)
 {
 	m_startPos.rx() *= sx;
 	m_startPos.ry() *= sy;
+}
+
+// stretchItemTo
+void LCanvasPath::stretchItemTo(StretchItemDir dir, int x, int y)
+{
+
+}
+
+void LCanvasLine::stretchItemTo(StretchItemDir dir, int x, int y)
+{
+
+}
+
+void LCanvasRect::stretchItemTo(StretchItemDir dir, int x, int y)
+{
+
+}
+
+void LCanvasEllipse::stretchItemTo(StretchItemDir dir, int x, int y)
+{
+
+}
+
+void LCanvasTriangle::stretchItemTo(StretchItemDir dir, int x, int y)
+{
+
+}
+
+void LCanvasHexagon::stretchItemTo(StretchItemDir dir, int x, int y)
+{
+
+}
+
+void LCanvasText::stretchItemTo(StretchItemDir dir, int x, int y)
+{
+
+}
+
+// updatePath
+void LCanvasPath::updatePath()
+{
+	if (m_path.isEmpty())
+		m_path.moveTo(m_startPos);
+	m_path.lineTo(m_endPos);
+}
+
+void LCanvasLine::updatePath()
+{
+	m_path.clear();
+	m_path.moveTo(m_startPos);
+	m_path.lineTo(m_endPos);
+}
+
+void LCanvasRect::updatePath()
+{
+	m_path.clear();
+	m_path.addRect(QRect(m_startPos, m_endPos).normalized());
+}
+
+void LCanvasEllipse::updatePath()
+{
+	m_path.clear();
+	m_path.addEllipse(QRect(m_startPos, m_endPos).normalized());
+}
+
+void LCanvasTriangle::updatePath()
+{
+	int left = m_startPos.x();
+	int top = m_startPos.y();
+	int right = m_endPos.x();
+	int bottom = m_endPos.y();
+	m_vertices[0] = QPoint((left + right) / 2, top);
+	m_vertices[1] = QPoint(right, bottom);
+	m_vertices[2] = QPoint(left, bottom);
+	QPolygon polygon(m_vertices);
+
+	m_path.clear();
+	m_path.addPolygon(polygon);
+}
+
+void LCanvasHexagon::updatePath()
+{
+	int left = m_startPos.x();
+	int top = m_startPos.y();
+	int right = m_endPos.x();
+	int bottom = m_endPos.y();
+	m_vertices[0] = QPoint((left * 3 + right) / 4, top);
+	m_vertices[1] = QPoint((left + right * 3) / 4, top);
+	m_vertices[2] = QPoint(right, (top + bottom) / 2);
+	m_vertices[3] = QPoint((left + right * 3) / 4, bottom);
+	m_vertices[4] = QPoint((left * 3 + right) / 4, bottom);
+	m_vertices[5] = QPoint(left, (top + bottom) / 2);
+	QPolygon polygon(m_vertices);
+
+	m_path.clear();
+	m_path.addPolygon(polygon);
+}
+
+void LCanvasText::updatePath()
+{
+	m_path.clear();
+	m_path.addText(m_startPos, m_font, m_text);
 }
 
 // setBoundingRect

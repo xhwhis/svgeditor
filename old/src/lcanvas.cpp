@@ -489,52 +489,53 @@ void LCanvasScene::setTile(int x, int y, int tileNum)
 
 LCanvasItemList LCanvasScene::collisions(const QPoint &p) const
 {
-	return collisions(QRect(p, QSize(1, 1)));
+//	return collisions(QRect(p, QSize(1, 1)));
+	return LCanvasItemList();
 }
 
-LCanvasItemList LCanvasScene::collisions(const QRect& rect) const
-{
-	LCanvasRect i(rect, (LCanvasScene *)this);
-	i.setPen(Qt::NoPen);
-	i.show();
-	LCanvasItemList l = i.collisions(true);
-	std::sort(l.begin(), l.end(),
-			  [](const LCanvasItem *item1, const LCanvasItem *item2) -> bool
-			{
-		if (item1->z() == item2->z())
-			return item1 > item2;
+//LCanvasItemList LCanvasScene::collisions(const QRect& rect) const
+//{
+//	LCanvasRect i(rect, (LCanvasScene *)this);
+//	i.setPen(Qt::NoPen);
+//	i.show();
+//	LCanvasItemList l = i.collisions(true);
+//	std::sort(l.begin(), l.end(),
+//			  [](const LCanvasItem *item1, const LCanvasItem *item2) -> bool
+//			{
+//		if (item1->z() == item2->z())
+//			return item1 > item2;
 
-		return (item1->z() > item2->z());
-		});
-	return l;
-}
+//		return (item1->z() > item2->z());
+//		});
+//	return l;
+//}
 
-LCanvasItemList LCanvasScene::collisions(
-	const QPolygon& chunklist,
-	const LCanvasItem *item,
-	bool exact) const
-{
-	QSet<LCanvasItem *> seen;
-	LCanvasItemList result;
-	for (int i = 0; i < chunklist.size(); i++) {
-		int x = chunklist[i].x();
-		int y = chunklist[i].y();
-		if (validChunk(x, y)) {
-			const LCanvasItemList &l = chunk(x, y).itemList();
-			for (int i = 0; i < l.size(); ++i) {
-				LCanvasItem *g = l.at(i);
-				if (g != item) {
-					if (!seen.contains(g)) {
-						seen.insert(g);
-						if (!exact || item->collidesWith(g))
-							result.append(g);
-					}
-				}
-			}
-		}
-	}
-	return result;
-}
+//LCanvasItemList LCanvasScene::collisions(
+//	const QPolygon& chunklist,
+//	const LCanvasItem *item,
+//	bool exact) const
+//{
+//	QSet<LCanvasItem *> seen;
+//	LCanvasItemList result;
+//	for (int i = 0; i < chunklist.size(); i++) {
+//		int x = chunklist[i].x();
+//		int y = chunklist[i].y();
+//		if (validChunk(x, y)) {
+//			const LCanvasItemList &l = chunk(x, y).itemList();
+//			for (int i = 0; i < l.size(); ++i) {
+//				LCanvasItem *g = l.at(i);
+//				if (g != item) {
+//					if (!seen.contains(g)) {
+//						seen.insert(g);
+//						if (!exact || item->collidesWith(g))
+//							result.append(g);
+//					}
+//				}
+//			}
+//		}
+//	}
+//	return result;
+//}
 
 LCanvasWidget::LCanvasWidget(LCanvasView *view)
 	: QWidget(view)
@@ -846,11 +847,6 @@ void LCanvasItem::setActive(bool active)
 	}
 }
 
-LCanvasItemList LCanvasItem::collisions(bool exact) const
-{
-	return m_scene->collisions(chunks(), this, exact);
-}
-
 void LCanvasItem::addToChunks()
 {
 	if (m_bVisible && m_scene)
@@ -990,20 +986,6 @@ void LCanvasShape::invalidate()
 	removeFromChunks();
 }
 
-bool LCanvasShape::collidesWith(const LCanvasItem *item) const
-{
-	return item->collidesWith(this, nullptr, nullptr, nullptr);
-}
-
-bool LCanvasShape::collidesWith(const LCanvasShape *shape,
-								const LCanvasRect *rectangle,
-								const LCanvasEllipse *ellipse,
-								const LCanvasText *text) const
-{
-	return collision_double_dispatch(shape, rectangle, ellipse, text,
-									 this, nullptr, nullptr, nullptr);
-}
-
 QRect LCanvasShape::boundingRect() const
 {
 	return areaPoints().boundingRect();
@@ -1105,21 +1087,6 @@ void LCanvasRect::drawShape(QPainter & p)
 }
 
 int LCanvasRect::g_type = Rectangle;
-
-bool LCanvasRect::collidesWith(const LCanvasItem *item) const
-{
-	return item->collidesWith(this, this, nullptr, nullptr);
-}
-
-bool LCanvasRect::collidesWith(
-	const LCanvasShape *shape,
-	const LCanvasRect *rectangle,
-	const LCanvasEllipse *ellipse,
-	const LCanvasText *text) const
-{
-	return collision_double_dispatch(shape, rectangle, ellipse, text,
-									 this, this, nullptr, nullptr);
-}
 
 QPolygon LCanvasRect::chunks() const
 {
@@ -1318,21 +1285,6 @@ void LCanvasEllipse::drawShape(QPainter &painter)
 
 int LCanvasEllipse::g_type = Ellipse;
 
-bool LCanvasEllipse::collidesWith(const LCanvasItem *item) const
-{
-	return item->collidesWith(this, nullptr, this, nullptr);
-}
-
-bool LCanvasEllipse::collidesWith(
-	const LCanvasShape *shape,
-	const LCanvasRect *rectangle,
-	const LCanvasEllipse *ellipse,
-	const LCanvasText *text) const
-{
-	return collision_double_dispatch(shape, rectangle, ellipse, text,
-									 this, nullptr, this, nullptr);
-}
-
 LCanvasText::LCanvasText(LCanvasScene *scene)
 	: LCanvasItem(scene)
 	, m_text("text")
@@ -1480,20 +1432,5 @@ void LCanvasText::removeFromChunks()
 }
 
 int LCanvasText::g_type = Text;
-
-bool LCanvasText::collidesWith(const LCanvasItem *item) const
-{
-	return item->collidesWith(nullptr, nullptr, nullptr, this);
-}
-
-bool LCanvasText::collidesWith(
-	const LCanvasShape *shape,
-	const LCanvasRect *rectangle,
-	const LCanvasEllipse *ellipse,
-	const LCanvasText *text) const
-{
-	return collision_double_dispatch(shape, rectangle, ellipse, text,
-									 nullptr, nullptr, nullptr, this);
-}
 
 } // namespace
