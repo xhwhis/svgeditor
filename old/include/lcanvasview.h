@@ -1,29 +1,11 @@
 #ifndef LCANVASVIEW_H
 #define LCANVASVIEW_H
 
-//namespace lwscode {
+#include <QtWidgets>
 
-class LCanvasWidget : public QWidget
-{
-public:
-	LCanvasWidget(LCanvasView *view);
+namespace lwscode {
 
-protected:
-	void paintEvent(QPaintEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void mouseDoubleClickEvent(QMouseEvent *event);
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dragMoveEvent(QDragMoveEvent *event);
-	void dragLeaveEvent(QDragLeaveEvent *event);
-	void dropEvent(QDropEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void contextMenuEvent(QContextMenuEvent *event);
-
-protected:
-	LCanvasView *m_view;
-};
+class LCanvasScene;
 
 class LCanvasView : public QScrollArea
 {
@@ -31,25 +13,17 @@ class LCanvasView : public QScrollArea
 
 public:
 	LCanvasView(QWidget *parent = nullptr);
-	LCanvasView(LCanvas *canvas, QWidget *parent = nullptr);
+	LCanvasView(LCanvasScene *scene, QWidget *parent = nullptr);
 	virtual ~LCanvasView();
 
-	LCanvas *canvas() const
-	{
-		return m_canvas;
-	}
-	void setCanvas(LCanvas *canvas);
+	LCanvasScene *scene() const { return m_scene; }
+	void setCanvas(LCanvasScene *scene);
 
 	const QTransform &worldMatrix() const;
 	const QTransform &inverseWorldMatrix() const;
 	bool setWorldMatrix(const QTransform &matrix);
 
 	virtual QSize sizeHint() const;
-
-	bool highQualityRendering() const;
-
-public slots:
-	void setHighQualityRendering(bool enable);
 
 protected:
 	friend class LCanvasWidget;
@@ -73,13 +47,12 @@ private:
 	void drawContents(QPainter *painter);
 
 private:
-	friend class LCanvas;
-	LCanvas *m_canvas;
+	friend class LCanvasScene;
+	LCanvasScene *m_scene;
 	QTransform m_worldMatrix;
 	QTransform m_inverseWorldMatrix;
-	bool m_bHighQuality;
 };
 
-//} // namespace
+} // namespace
 
 #endif // LCANVASVIEW_H

@@ -1,8 +1,8 @@
 #include "lcanvaspolygon.h"
 
-//namespace lwscode {
+namespace lwscode {
 
-LCanvasPolygon::LCanvasPolygon(LCanvas* canvas)
+LCanvasPolygon::LCanvasPolygon(LCanvasScene* canvas)
 	: LCanvasShape(canvas)
 {
 
@@ -28,13 +28,13 @@ void LCanvasPolygon::setPoints(QPolygon polygon)
 	addToChunks();
 }
 
-void LCanvasPolygon::moveBy(double deltaX, double deltaY)
+void LCanvasPolygon::moveBy(double dX, double dY)
 {
-	if (deltaX || deltaY) {
+	if (dX || dY) {
 		removeFromChunks();
-		m_polygon.translate(deltaX, deltaY);
-		m_x += deltaX;
-		m_y += deltaY;
+		m_polygon.translate(dX, dY);
+		m_x += dX;
+		m_y += dY;
 		addToChunks();
 	}
 }
@@ -53,4 +53,4 @@ QPolygon LCanvasPolygon::areaPoints() const
 
 int LCanvasPolygon::g_type = Polygon;
 
-//} // namespace
+} // namespace

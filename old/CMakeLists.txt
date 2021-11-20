@@ -21,15 +21,33 @@ set(RES_SOURCES
 
 set(INCLUDE_SOURCES
 	include/mainwindow.h
+	include/svgcanvasview.h
 	include/utility.h
-	include/lcanvas.h
+	include/lcanvasitem.h
+	include/lcanvasshape.h
+	include/lcanvasline.h
+	include/lcanvasrect.h
+	include/lcanvasellipse.h
+	include/lcanvaspolygon.h
+	include/lcanvastext.h
+	include/lcanvasview.h
+	include/lcanvasscene.h
 )
 
 set(SRC_SOURCES
 	src/main.cpp
 	src/mainwindow.cpp
+	src/svgcanvasview.cpp
 	src/utility.cpp
-	src/lcanvas.cpp
+	src/lcanvasitem.cpp
+	src/lcanvasshape.cpp
+	src/lcanvasline.cpp
+	src/lcanvasrect.cpp
+	src/lcanvasellipse.cpp
+	src/lcanvaspolygon.cpp
+	src/lcanvastext.cpp
+	src/lcanvasview.cpp
+	src/lcanvasscene.cpp
 )
 
 set(PROJECT_SOURCES

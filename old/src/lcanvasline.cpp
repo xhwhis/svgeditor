@@ -1,8 +1,8 @@
 #include "lcanvasline.h"
 
-//namespace lwscode {
+namespace lwscode {
 
-LCanvasLine::LCanvasLine(LCanvas* canvas)
+LCanvasLine::LCanvasLine(LCanvasScene* canvas)
 	: LCanvasShape(canvas)
 	, m_x1(0)
 	, m_y1(0)
@@ -83,4 +83,4 @@ QPolygon LCanvasLine::areaPoints() const
 
 int LCanvasLine::g_type = Line;
 
-//} // namespace
+} // namespace

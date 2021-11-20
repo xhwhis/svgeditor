@@ -1,9 +1,6 @@
 #include "mainwindow.h"
 
 #include <QApplication>
-#include <QGuiApplication>
-
-using namespace lwscode;
 
 int main(int argc, char *argv[])
 {
@@ -14,8 +11,8 @@ int main(int argc, char *argv[])
 	w.resize(w.sizeHint());
 	w.setWindowTitle("SVG Editor");
 
-	if (QGuiApplication::primaryScreen()->size().width() > w.width() &&
-		QGuiApplication::primaryScreen()->size().height() > w.height())
+	if (QApplication::primaryScreen()->size().width() > w.width() &&
+		QApplication::primaryScreen()->size().height() > w.height())
 		w.show();
 	else
 		w.showMaximized();
