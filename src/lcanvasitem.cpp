@@ -480,7 +480,8 @@ void LCanvasPath::setBoundingRect()
 		bottom = qMax(bottom, m_points[i].y());
 	}
 	m_boundingRect = QRect(QPoint(left, top), QPoint(right, bottom)).normalized();
-	m_boundingRect.adjust(-m_strokeWidth - 5, -m_strokeWidth - 5, m_strokeWidth + 5, m_strokeWidth + 5);
+	int d = (m_strokeWidth + 1) / 2 + 4;
+	m_boundingRect.adjust(-d, -d, d, d);
 }
 
 void LCanvasLine::setBoundingRect()
@@ -490,7 +491,8 @@ void LCanvasLine::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	m_boundingRect.adjust(-m_strokeWidth - 5, -m_strokeWidth - 5, m_strokeWidth + 5, m_strokeWidth + 5);
+	int d = (m_strokeWidth + 1) / 2 + 4;
+	m_boundingRect.adjust(-d, -d, d, d);
 }
 
 void LCanvasRect::setBoundingRect()
@@ -500,7 +502,8 @@ void LCanvasRect::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	m_boundingRect.adjust(-m_strokeWidth - 5, -m_strokeWidth - 5, m_strokeWidth + 5, m_strokeWidth + 5);
+	int d = (m_strokeWidth + 1) / 2 + 4;
+	m_boundingRect.adjust(-d, -d, d, d);
 }
 
 void LCanvasEllipse::setBoundingRect()
@@ -510,7 +513,8 @@ void LCanvasEllipse::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	m_boundingRect.adjust(-m_strokeWidth - 5, -m_strokeWidth - 5, m_strokeWidth + 5, m_strokeWidth + 5);
+	int d = (m_strokeWidth + 1) / 2 + 4;
+	m_boundingRect.adjust(-d, -d, d, d);
 }
 
 void LCanvasTriangle::setBoundingRect()
@@ -520,7 +524,8 @@ void LCanvasTriangle::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	m_boundingRect.adjust(-m_strokeWidth - 5, -m_strokeWidth - 5, m_strokeWidth + 5, m_strokeWidth + 5);
+	int d = (m_strokeWidth + 1) / 2 + 4;
+	m_boundingRect.adjust(-d, -d, d, d);
 }
 
 void LCanvasHexagon::setBoundingRect()
@@ -530,12 +535,15 @@ void LCanvasHexagon::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	m_boundingRect.adjust(-m_strokeWidth - 5, -m_strokeWidth - 5, m_strokeWidth + 5, m_strokeWidth + 5);
+	int d = (m_strokeWidth + 1) / 2 + 4;
+	m_boundingRect.adjust(-d, -d, d, d);
 }
 
 void LCanvasText::setBoundingRect()
 {
 	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height).normalized();
+	int d = 4;
+	m_boundingRect.adjust(-d, -d, d, d);
 }
 
 // containsPos

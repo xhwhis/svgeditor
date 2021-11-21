@@ -180,10 +180,10 @@ void MainWindow::drawEllipse()
 
 void MainWindow::drawStar()
 {
-	m_view->setItemType(LCanvasItem::None);
+	m_view->setItemType(LCanvasItem::Text);
 }
 
 void MainWindow::drawText()
 {
-	m_view->setItemType(LCanvasItem::None);
+	m_view->setItemType(LCanvasItem::Text);
 }

@@ -691,13 +691,13 @@ void LCanvasView::paintRubberBand(SPtrLCanvasItem item, QPainter &painter, bool 
 		int width = rubberBand.width();
 		int height = rubberBand.height();
 		m_topLeftPos = QRect(left - 4, top - 4, 8, 8);
-		m_topMiddlePos = QRect(left + width / 2 - 4, top - 4, 8, 8);
+		m_topMiddlePos = QRect(left + width / 2, top - 4, 8, 8);
 		m_topRightPos = QRect(left + width - 4, top - 4, 8, 8);
-		m_middleRightPos = QRect(left + width - 4, top + height / 2 - 4, 8, 8);
+		m_middleRightPos = QRect(left + width - 4, top + height / 2, 8, 8);
 		m_bottomRightPos = QRect(left + width - 4, top + height - 4, 8, 8);
-		m_bottomMiddlePos = QRect(left + width / 2 - 4, top + height - 4, 8, 8);
+		m_bottomMiddlePos = QRect(left + width / 2, top + height - 4, 8, 8);
 		m_bottomLeftPos = QRect(left - 4, top + height - 4, 8, 8);
-		m_middleLeftPos = QRect(left - 4, top + height / 2 - 4, 8, 8);
+		m_middleLeftPos = QRect(left - 4, top + height / 2, 8, 8);
 
 		painter.setBrush(Qt::blue);
 		painter.drawRect(m_topLeftPos);

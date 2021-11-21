@@ -42,6 +42,7 @@ private:
 	LCanvasLine *m_paintingLine;
 	LCanvasRect *m_paintingRect;
 	LCanvasEllipse *m_paintingEllipse;
+	LCanvasText *m_paintingText;
 	LCanvasItemList *m_selectionItems;
 	QPoint m_startPos;
 	QPoint m_lastPos;
