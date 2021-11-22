@@ -91,7 +91,6 @@ void SVGCanvasView::contentsMousePressEvent(QMouseEvent *event)
 		m_paintingText->setFont(font);
 		m_paintingText->setColor(Qt::red);
 		m_paintingText->setText("hello world");
-//		m_paintingText->setTextFlags();
 		m_bPaintingItem = true;
 		m_paintingText->show();
 		this->scene()->update();

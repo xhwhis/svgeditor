@@ -204,18 +204,6 @@ void MainWindow::initLeftToolBar()
 	textButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	textButton->setFixedWidth(64);
 
-	QToolButton *paletteButton = new QToolButton(m_leftToolBar);
-	paletteButton->setIcon(QIcon(QString::fromUtf8(":icons/palette.svg")));
-	paletteButton->setText(tr("Palette"));
-	paletteButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	paletteButton->setFixedWidth(64);
-
-	QToolButton *clearButton = new QToolButton(m_leftToolBar);
-	clearButton->setIcon(QIcon(QString::fromUtf8(":icons/clear.svg")));
-	clearButton->setText(tr("Clear"));
-	clearButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	clearButton->setFixedWidth(64);
-
 	m_leftToolBar->addWidget(noneButton);
 	m_leftToolBar->addWidget(pathButton);
 	m_leftToolBar->addWidget(lineButton);
@@ -224,8 +212,6 @@ void MainWindow::initLeftToolBar()
 	m_leftToolBar->addWidget(triangleButton);
 	m_leftToolBar->addWidget(hexagonButton);
 	m_leftToolBar->addWidget(textButton);
-	m_leftToolBar->addWidget(paletteButton);
-	m_leftToolBar->addWidget(clearButton);
 
 	connect(noneButton, SIGNAL(clicked()), this, SLOT(onPaintNone()));
 	connect(pathButton, SIGNAL(clicked()), this, SLOT(onPaintPath()));
@@ -235,8 +221,6 @@ void MainWindow::initLeftToolBar()
 	connect(triangleButton, SIGNAL(clicked()), this, SLOT(onPaintTriangle()));
 	connect(hexagonButton, SIGNAL(clicked()), this, SLOT(onPaintHexagon()));
 	connect(textButton, SIGNAL(clicked()), this, SLOT(onPaintText()));
-	connect(paletteButton, SIGNAL(clicked()), this, SLOT(setStrokeColor()));
-	connect(clearButton, SIGNAL(clicked()), this, SLOT(onNewFile()));
 }
 
 void MainWindow::initRightToolBar()
@@ -283,20 +267,9 @@ void MainWindow::initRightToolBar()
 	canvasHeightLayout->addWidget(canvasHeightSpinBox);
 	mainLayout->addLayout(canvasHeightLayout);
 
-	QLabel *strokeWidthLabel = new QLabel(tr("Stroke Width"), toolsPanelWidget);
-	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
-	strokeWidthSpinBox->setFixedSize(64, 32);
-	strokeWidthSpinBox->setRange(1, 10);
-	strokeWidthSpinBox->setContextMenuPolicy(Qt::NoContextMenu);
-	QHBoxLayout *strokeWidthLayout = new QHBoxLayout();
-	strokeWidthLayout->addWidget(strokeWidthLabel);
-	strokeWidthLayout->addWidget(strokeWidthSpinBox);
-	mainLayout->addLayout(strokeWidthLayout);
-
 	connect(m_canvasColorButton, SIGNAL(clicked()), this, SLOT(setCanvasColor()));
 	connect(canvasWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setCanvasWidth(int)));
 	connect(canvasHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setCanvasHeight(int)));
-	connect(strokeWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStrokeWidth(int)));
 }
 
 void MainWindow::initBottomToolBar()
@@ -311,32 +284,45 @@ void MainWindow::initBottomToolBar()
 	QHBoxLayout *mainLayout = new QHBoxLayout(toolsPanelWidget);
 
 	QToolButton *fillColorButton = new QToolButton(toolsPanelWidget);
-	fillColorButton->setIcon(QIcon(QString::fromUtf8(":icons/palette.svg")));
+	fillColorButton->setIcon(QIcon(QString::fromUtf8(":icons/fill-color.svg")));
 	fillColorButton->setIconSize(QSize(32, 32));
 	fillColorButton->setText(tr("Fill Color"));
 	fillColorButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	mainLayout->addWidget(fillColorButton);
 
 	QToolButton *strokeColorButton = new QToolButton(toolsPanelWidget);
 	strokeColorButton->setIcon(QIcon(QString::fromUtf8(":icons/palette.svg")));
 	strokeColorButton->setIconSize(QSize(32, 32));
 	strokeColorButton->setText(tr("Stroke Color"));
 	strokeColorButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	mainLayout->addWidget(strokeColorButton);
 
-	QLabel *strokeWidthLabel = new QLabel(tr("Stroke Width"), toolsPanelWidget);
 	QSpinBox *strokeWidthSpinBox = new QSpinBox(toolsPanelWidget);
 	strokeWidthSpinBox->setFixedSize(64, 32);
 	strokeWidthSpinBox->setRange(1, 10);
 	strokeWidthSpinBox->setContextMenuPolicy(Qt::NoContextMenu);
+	QLabel *strokeWidthLabel = new QLabel(tr("Stroke Width"), toolsPanelWidget);
+	QFont font = strokeWidthLabel->font();
+	font.setPointSize(10);
+	strokeWidthLabel->setFont(font);
 	QVBoxLayout *strokeWidthLayout = new QVBoxLayout();
 	strokeWidthLayout->addWidget(strokeWidthSpinBox);
 	strokeWidthLayout->addWidget(strokeWidthLabel);
+
+	QToolButton *clearCanvasButton = new QToolButton(toolsPanelWidget);
+	clearCanvasButton->setIcon(QIcon(QString::fromUtf8(":icons/clear.svg")));
+	clearCanvasButton->setIconSize(QSize(32, 32));
+	clearCanvasButton->setText(tr("Clear"));
+	clearCanvasButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+
+	mainLayout->addWidget(fillColorButton);
+	mainLayout->addWidget(strokeColorButton);
 	mainLayout->addLayout(strokeWidthLayout);
+	mainLayout->addStretch();
+	mainLayout->addWidget(clearCanvasButton);
 
 	connect(fillColorButton, SIGNAL(clicked()), this, SLOT(setFillColor()));
 	connect(strokeColorButton, SIGNAL(clicked()), this, SLOT(setStrokeColor()));
 	connect(strokeWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setStrokeWidth(int)));
+	connect(clearCanvasButton, SIGNAL(clicked()), this, SLOT(onNewFile()));
 }
 
 void MainWindow::onPaintNone()

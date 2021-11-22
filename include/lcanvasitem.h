@@ -71,6 +71,8 @@ public:
 	virtual void writeItemToXml(QXmlStreamWriter &writer) = 0;
 
 	virtual void addPoint(const QPoint &point) {}
+	virtual void movePathTo(const QPoint &point) {}
+	virtual void linePathTo(const QPoint &point) {}
 
 	virtual void setFont(const QFont &font) {}
 	virtual QFont font() const { return QFont(); }
@@ -81,9 +83,10 @@ protected:
 	ItemType m_itemType;
 	QPoint m_startPos;
 	QPoint m_endPos;
+	float m_fScaleFactor;
 	QColor m_fillColor;
 	QColor m_strokeColor;
-	double m_strokeWidth;
+	float m_fStrokeWidth;
 	bool m_bSelected;
 	QRect m_boundingRect;
 	QPainterPath m_path;
@@ -96,6 +99,8 @@ public:
 	virtual ~LCanvasPath() {}
 
 	void addPoint(const QPoint &point) override;
+	void movePathTo(const QPoint &point) override;
+	void linePathTo(const QPoint &point) override;
 
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;
@@ -116,8 +121,6 @@ class LCanvasLine : public LCanvasItem
 public:
 	LCanvasLine();
 	virtual ~LCanvasLine() {}
-
-	int sumDistance(const QPoint &p1, const QPoint &p2);
 
 	void paintItem(QPainter &painter) override;
 	void moveItem(int dx, int dy) override;

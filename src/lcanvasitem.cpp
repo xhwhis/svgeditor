@@ -5,9 +5,10 @@ namespace lwscode {
 // LCanvasItem
 LCanvasItem::LCanvasItem()
 	: m_itemType(ItemType::NoneType)
+	, m_fScaleFactor(1.0f)
 	, m_fillColor(Qt::white)
 	, m_strokeColor(Qt::black)
-	, m_strokeWidth(1.0f)
+	, m_fStrokeWidth(1.0f)
 	, m_bSelected(false)
 {
 
@@ -60,7 +61,7 @@ void LCanvasItem::setStrokeColor(const QColor &color)
 
 void LCanvasItem::setStrokeWidth(int width)
 {
-	m_strokeWidth = width;
+	m_fStrokeWidth = width;
 }
 
 bool LCanvasItem::isSelected()
@@ -89,15 +90,20 @@ void LCanvasPath::addPoint(const QPoint &point)
 	m_points.push_back(point);
 }
 
+void LCanvasPath::movePathTo(const QPoint &point)
+{
+	m_path.moveTo(point);
+}
+
+void LCanvasPath::linePathTo(const QPoint &point)
+{
+	m_path.lineTo(point);
+}
+
 // LCanvasLine
 LCanvasLine::LCanvasLine()
 {
 	m_itemType = ItemType::Line;
-}
-
-int LCanvasLine::sumDistance(const QPoint &p1, const QPoint &p2)
-{
-	return QLineF(p1, p2).length();
 }
 
 // LCanvasRect
@@ -180,7 +186,7 @@ void LCanvasPath::paintItem(QPainter &painter)
 		path.lineTo(m_points[i]);
 
 	painter.save();
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
+	painter.setPen(QPen(m_strokeColor, m_fStrokeWidth));
 	painter.drawPath(m_path);
 	painter.restore();
 }
@@ -189,7 +195,7 @@ void LCanvasLine::paintItem(QPainter &painter)
 {
 	painter.save();
 	painter.setBrush(m_fillColor);
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
+	painter.setPen(QPen(m_strokeColor, m_fStrokeWidth));
 	painter.drawLine(m_startPos, m_endPos);
 	painter.restore();
 }
@@ -198,10 +204,10 @@ void LCanvasRect::paintItem(QPainter &painter)
 {
 	painter.save();
 	painter.setBrush(m_fillColor);
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
-//	painter.drawRect(m_startPos.x(), m_startPos.y(),
-//					 m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
-	painter.drawPath(m_path);
+	painter.setPen(QPen(m_strokeColor, m_fStrokeWidth));
+	painter.drawRect(m_startPos.x(), m_startPos.y(),
+					 m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
+//	painter.drawPath(m_path);
 	painter.restore();
 }
 
@@ -209,7 +215,7 @@ void LCanvasEllipse::paintItem(QPainter &painter)
 {
 	painter.save();
 	painter.setBrush(m_fillColor);
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
+	painter.setPen(QPen(m_strokeColor, m_fStrokeWidth));
 	painter.drawEllipse(m_startPos.x(), m_startPos.y(),
 						m_endPos.x() - m_startPos.x(), m_endPos.y() - m_startPos.y());
 	painter.restore();
@@ -228,7 +234,7 @@ void LCanvasTriangle::paintItem(QPainter &painter)
 
 	painter.save();
 	painter.setBrush(QBrush(m_fillColor));
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
+	painter.setPen(QPen(m_strokeColor, m_fStrokeWidth));
 	painter.drawPolygon(polygon);
 	painter.restore();
 }
@@ -249,7 +255,7 @@ void LCanvasHexagon::paintItem(QPainter &painter)
 
 	painter.save();
 	painter.setBrush(QBrush(m_fillColor));
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
+	painter.setPen(QPen(m_strokeColor, m_fStrokeWidth));
 	painter.drawPolygon(polygon);
 	painter.restore();
 }
@@ -257,7 +263,7 @@ void LCanvasHexagon::paintItem(QPainter &painter)
 void LCanvasText::paintItem(QPainter &painter)
 {
 	painter.save();
-	painter.setPen(QPen(m_strokeColor, m_strokeWidth));
+	painter.setPen(QPen(m_strokeColor, m_fStrokeWidth));
 	painter.setFont(m_font);
 	painter.drawText(m_boundingRect, 0, m_text);
 	painter.restore();
@@ -266,9 +272,7 @@ void LCanvasText::paintItem(QPainter &painter)
 // moveItem
 void LCanvasPath::moveItem(int dx, int dy)
 {
-	QPoint offset(dx, dy);
-	for (int i = 0; i < m_points.size(); ++i)
-		m_points[i] += offset;
+	m_path.translate(dx, dy);
 }
 
 void LCanvasLine::moveItem(int dx, int dy)
@@ -366,45 +370,171 @@ void LCanvasText::scaleItem(double sx, double sy)
 // stretchItemTo
 void LCanvasPath::stretchItemTo(StretchItemDir dir, int x, int y)
 {
+	int sx = 1, sy = 1;
+	int dx = 0, dy = 0;
 
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
+
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
 }
 
 void LCanvasLine::stretchItemTo(StretchItemDir dir, int x, int y)
 {
+	int sx = 1, sy = 1;
+	int dx = 0, dy = 0;
 
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
+
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
 }
 
 void LCanvasRect::stretchItemTo(StretchItemDir dir, int x, int y)
 {
+	int sx = 1, sy = 1;
 
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
+
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
 }
 
 void LCanvasEllipse::stretchItemTo(StretchItemDir dir, int x, int y)
 {
+	int sx = 1, sy = 1;
 
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
+
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
 }
 
 void LCanvasTriangle::stretchItemTo(StretchItemDir dir, int x, int y)
 {
+	int sx = 1, sy = 1;
 
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
+
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
 }
 
 void LCanvasHexagon::stretchItemTo(StretchItemDir dir, int x, int y)
 {
+	int sx = 1, sy = 1;
 
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
+
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
 }
 
 void LCanvasText::stretchItemTo(StretchItemDir dir, int x, int y)
 {
+	int sx = 1, sy = 1;
 
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
+
+	if (dir & StretchItemDir::ToTop)
+	{
+
+	}
+	else if (dir & StretchItemDir::ToBottom)
+	{
+
+	}
 }
 
 // updatePath
 void LCanvasPath::updatePath()
 {
-	if (m_path.isEmpty())
-		m_path.moveTo(m_startPos);
-	m_path.lineTo(m_endPos);
+
 }
 
 void LCanvasLine::updatePath()
@@ -468,19 +598,20 @@ void LCanvasText::updatePath()
 // setBoundingRect
 void LCanvasPath::setBoundingRect()
 {
-	int left = m_points[0].x();
-	int top = m_points[0].y();
-	int right = m_points[0].x();
-	int bottom = m_points[0].y();
-	for (int i = 1; i < m_points.size(); ++i)
-	{
-		left = qMin(left, m_points[i].x());
-		top = qMin(top, m_points[i].y());
-		right = qMax(right, m_points[i].x());
-		bottom = qMax(bottom, m_points[i].y());
-	}
-	m_boundingRect = QRect(QPoint(left, top), QPoint(right, bottom)).normalized();
-	int d = (m_strokeWidth + 1) / 2 + 4;
+//	int left = m_points[0].x();
+//	int top = m_points[0].y();
+//	int right = m_points[0].x();
+//	int bottom = m_points[0].y();
+//	for (int i = 1; i < m_points.size(); ++i)
+//	{
+//		left = qMin(left, m_points[i].x());
+//		top = qMin(top, m_points[i].y());
+//		right = qMax(right, m_points[i].x());
+//		bottom = qMax(bottom, m_points[i].y());
+//	}
+//	m_boundingRect = QRect(QPoint(left, top), QPoint(right, bottom)).normalized();
+	m_boundingRect = m_path.boundingRect().toRect();
+	int d = (m_fStrokeWidth + 1) / 2 + 4;
 	m_boundingRect.adjust(-d, -d, d, d);
 }
 
@@ -491,7 +622,7 @@ void LCanvasLine::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	int d = (m_strokeWidth + 1) / 2 + 4;
+	int d = (m_fStrokeWidth + 1) / 2 + 4;
 	m_boundingRect.adjust(-d, -d, d, d);
 }
 
@@ -502,7 +633,7 @@ void LCanvasRect::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	int d = (m_strokeWidth + 1) / 2 + 4;
+	int d = (m_fStrokeWidth + 1) / 2 + 4;
 	m_boundingRect.adjust(-d, -d, d, d);
 }
 
@@ -513,7 +644,7 @@ void LCanvasEllipse::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	int d = (m_strokeWidth + 1) / 2 + 4;
+	int d = (m_fStrokeWidth + 1) / 2 + 4;
 	m_boundingRect.adjust(-d, -d, d, d);
 }
 
@@ -524,7 +655,7 @@ void LCanvasTriangle::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	int d = (m_strokeWidth + 1) / 2 + 4;
+	int d = (m_fStrokeWidth + 1) / 2 + 4;
 	m_boundingRect.adjust(-d, -d, d, d);
 }
 
@@ -535,7 +666,7 @@ void LCanvasHexagon::setBoundingRect()
 	int width = qAbs(m_endPos.x() - m_startPos.x());
 	int height = qAbs(m_endPos.y() - m_startPos.y());
 	m_boundingRect = QRect(left, top, width, height).normalized();
-	int d = (m_strokeWidth + 1) / 2 + 4;
+	int d = (m_fStrokeWidth + 1) / 2 + 4;
 	m_boundingRect.adjust(-d, -d, d, d);
 }
 
@@ -547,34 +678,27 @@ void LCanvasText::setBoundingRect()
 }
 
 // containsPos
-bool LCanvasPath::containsPos(const QPoint &point)
+bool LCanvasPath::containsPos(const QPoint &pos)
 {
-	for (int i = 0; i < m_points.size(); ++i)
-	{
-		if (point.x() - m_points[i].x() < 6 &&
-			point.x() - m_points[i].x() > -6 &&
-			point.y() - m_points[i].y() < 6 &&
-			point.y() - m_points[i].y() > -6)
-			return true;
-	}
-
-	return false;
+	int d = (m_fStrokeWidth + 1) / 2 + 2;
+	QRectF posRect(pos.x() - d, pos.y() - d, d * 2, d * 2);
+	return m_path.intersects(posRect);
 }
 
-bool LCanvasLine::containsPos(const QPoint &point)
+bool LCanvasLine::containsPos(const QPoint &pos)
 {
-	int length = sumDistance(m_startPos, m_endPos);
-	int lenOne = sumDistance(m_startPos, point);
-	int lenTwo = sumDistance(m_endPos, point);
+	QPainterPath path;
+	path.moveTo(m_startPos);
+	path.lineTo(m_endPos);
 
-	return length == (lenOne + lenTwo);
+	int d = (m_fStrokeWidth + 1) / 2 + 2;
+	QRectF posRect(pos.x() - d, pos.y() - d, d * 2, d * 2);
+	return path.intersects(posRect);
 }
 
 bool LCanvasRect::containsPos(const QPoint &point)
 {
-	QRect rect = QRect(m_startPos, m_endPos);
-	rect.adjust(-m_strokeWidth, -m_strokeWidth, m_strokeWidth, m_strokeWidth);
-
+	QRect rect = m_boundingRect.adjusted(4, 4, -4, -4);
 	return rect.contains(point);
 }
 
@@ -670,7 +794,7 @@ void LCanvasLine::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeAttribute(QString::fromUtf8("x2"), QString::number(m_endPos.x()));
 	writer.writeAttribute(QString::fromUtf8("y2"), QString::number(m_endPos.y()));
 	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
-	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_fStrokeWidth));
 	writer.writeEndElement();
 }
 
@@ -683,7 +807,7 @@ void LCanvasRect::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeAttribute(QString::fromUtf8("height"), QString::number(qAbs(m_endPos.y() - m_startPos.y())));
 	writer.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
 	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
-	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_fStrokeWidth));
 	writer.writeEndElement();
 }
 
@@ -696,7 +820,7 @@ void LCanvasEllipse::writeItemToXml(QXmlStreamWriter& xmlWriter)
 	xmlWriter.writeAttribute(QString::fromUtf8("ry"), QString::number(qAbs(m_endPos.y() - m_startPos.y()) / 2));
 	xmlWriter.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
 	xmlWriter.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
-	xmlWriter.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
+	xmlWriter.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_fStrokeWidth));
 	xmlWriter.writeEndElement();
 }
 
@@ -713,7 +837,7 @@ void LCanvasTriangle::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeAttribute(QString::fromUtf8("points"), points);
 	writer.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
 	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
-	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_fStrokeWidth));
 	writer.writeEndElement();
 }
 
@@ -730,7 +854,7 @@ void LCanvasHexagon::writeItemToXml(QXmlStreamWriter &writer)
 	writer.writeAttribute(QString::fromUtf8("points"), points);
 	writer.writeAttribute(QString::fromUtf8("fill"), m_fillColor.name());
 	writer.writeAttribute(QString::fromUtf8("stroke"), m_strokeColor.name());
-	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_strokeWidth));
+	writer.writeAttribute(QString::fromUtf8("stroke-width"), QString::number(m_fStrokeWidth));
 	writer.writeEndElement();
 }
 

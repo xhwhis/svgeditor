@@ -117,6 +117,8 @@ void LCanvasView::paintEvent(QPaintEvent *event)
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.scale(m_fScaleFactor, m_fScaleFactor);
 
+	qDebug() << painter.transform().m11();
+
 	foreach (auto &item, m_allItems)
 	{
 		item->paintItem(painter);
@@ -161,6 +163,12 @@ void LCanvasView::mousePressEvent(QMouseEvent *event)
 		m_item->setEndPos(pos);
 		m_item->updatePath();
 	}
+
+	if (m_hitTestStatus == HitTestStatus::PaintingPath)
+	{
+		m_item->movePathTo(pos);
+	}
+
 	this->update();
 }
 
@@ -195,6 +203,7 @@ void LCanvasView::mouseMoveEvent(QMouseEvent *event)
 	else if (m_hitTestStatus == HitTestStatus::PaintingPath)
 	{
 		m_item->addPoint(pos);
+		m_item->linePathTo(pos);
 		m_item->updatePath();
 	}
 	else if (m_hitTestStatus & HitTestStatus::PaintingItem)
@@ -254,26 +263,27 @@ void LCanvasView::wheelEvent(QWheelEvent *event)
 		int width = this->width();
 		int height = this->height();
 		float dy = event->pixelDelta().y();
-		if (dy <= 0)
+		if (dy == 0)
 			dy = event->angleDelta().y() / 120.0f;
 
+		float fCanvasScaleFactor = 1.0f;
 		if (dy > 0)
 		{
-			m_fScaleFactor = 1.0f + 0.001 * dy;
-			if (width * m_fScaleFactor > 2000 || height * m_fScaleFactor > 2000)
-				m_fScaleFactor = qMin(2000.0f / width, 2000.0f / height);
-			width *= m_fScaleFactor;
-			height *= m_fScaleFactor;
+			fCanvasScaleFactor = 1.0f + 0.001 * dy;
+			if (width * fCanvasScaleFactor > 500 || height * fCanvasScaleFactor > 500)
+				fCanvasScaleFactor = qMin(500.0f / width, 500.0f / height);
 		}
 		else if (dy < 0)
 		{
-			m_fScaleFactor = 1.0f - 0.001 * dy;
-			if (width / m_fScaleFactor < 100 || height / m_fScaleFactor < 100)
-				m_fScaleFactor = qMax(width / 100.0f, height / 100.0f);
-			width /= m_fScaleFactor;
-			height /= m_fScaleFactor;
+			fCanvasScaleFactor = 1.0f / (1.0f - 0.001 * dy);
+			if (width * fCanvasScaleFactor < 100 || height * fCanvasScaleFactor < 100)
+				fCanvasScaleFactor = qMax(100.0f / width, 100.0f / height);
 		}
+		m_fScaleFactor *= fCanvasScaleFactor;
+		width *= fCanvasScaleFactor;
+		height *= fCanvasScaleFactor;
 		this->resize(width, height);
+		this->update();
 	}
 }
 
