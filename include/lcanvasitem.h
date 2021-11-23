@@ -86,7 +86,7 @@ protected:
 	float m_fScaleFactor;
 	QColor m_fillColor;
 	QColor m_strokeColor;
-	float m_fStrokeWidth;
+	int m_nStrokeWidth;
 	bool m_bSelected;
 	QRect m_boundingRect;
 	QPainterPath m_path;
