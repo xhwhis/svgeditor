@@ -46,7 +46,7 @@ public:
 	bool existItems();
 
 protected:
-	void paintEvent(QPaintEvent *event);
+	void paintEvent(QPaintEvent *);
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
@@ -84,7 +84,7 @@ private:
 
 private:
 	ItemType m_itemType;
-	SPtrLCanvasItem m_item;
+	SPtrLCanvasItem m_spItem;
 	LCanvasItemList m_allItems;
 	LCanvasItemList m_textItems;
 	LCanvasItemList m_selectedItems;
@@ -95,7 +95,7 @@ private:
 	float m_fScaleFactor;
 	QColor m_fillColor;
 	QColor m_strokeColor;
-	int m_strokeWidth;
+	int m_nStrokeWidth;
 	QPoint m_startPos;
 	QPoint m_lastPos;
 	HitTestStatus m_hitTestStatus;

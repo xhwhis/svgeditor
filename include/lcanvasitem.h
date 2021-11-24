@@ -150,8 +150,8 @@ public:
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
-	int m_width;
-	int m_height;
+	int m_nWidth;
+	int m_nHeight;
 };
 
 class LCanvasEllipse : public LCanvasItem
@@ -171,8 +171,8 @@ public:
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
-	int m_width;
-	int m_height;
+	int m_nWidth;
+	int m_nHeight;
 };
 
 class LCanvasTriangle : public LCanvasItem
@@ -192,8 +192,8 @@ public:
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
-	int m_width;
-	int m_height;
+	int m_nWidth;
+	int m_nHeight;
 	QPoints m_vertices;
 };
 
@@ -214,8 +214,8 @@ public:
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
-	int m_width;
-	int m_height;
+	int m_nWidth;
+	int m_nHeight;
 	QPoints m_vertices;
 };
 
@@ -241,8 +241,8 @@ public:
 	void writeItemToXml(QXmlStreamWriter &writer) override;
 
 private:
-	int m_width;
-	int m_height;
+	int m_nWidth;
+	int m_nHeight;
 	QFont m_font;
 	QString m_text;
 };

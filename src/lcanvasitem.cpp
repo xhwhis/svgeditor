@@ -134,8 +134,8 @@ LCanvasHexagon::LCanvasHexagon()
 
 // LCanvasText
 LCanvasText::LCanvasText()
-	: m_width(0)
-	, m_height(0)
+	: m_nWidth(0)
+	, m_nHeight(0)
 	, m_text(QString::fromUtf8("text"))
 {
 	m_itemType = ItemType::Text;
@@ -148,9 +148,9 @@ void LCanvasText::setFont(const QFont &font)
 
 	QFontMetrics fontMetrics(m_font);
 	QRect rect = fontMetrics.boundingRect(m_text);
-	m_width = rect.width() < 8 ? 8 : rect.width();
-	m_height = rect.height();
-	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height);
+	m_nWidth = rect.width() < 8 ? 8 : rect.width();
+	m_nHeight = rect.height();
+	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_nWidth, m_nHeight);
 }
 
 QFont LCanvasText::font() const
@@ -164,9 +164,9 @@ void LCanvasText::setText(const QString &text)
 
 	QFontMetrics fontMetrics(m_font);
 	QRect rect = fontMetrics.boundingRect(m_text);
-	m_width = rect.width() < 8 ? 8 : rect.width();
-	m_height = rect.height();
-	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height);
+	m_nWidth = rect.width() < 8 ? 8 : rect.width();
+	m_nHeight = rect.height();
+	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_nWidth, m_nHeight);
 }
 
 QString LCanvasText::text() const
@@ -672,7 +672,7 @@ void LCanvasHexagon::setBoundingRect()
 
 void LCanvasText::setBoundingRect()
 {
-	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_width, m_height).normalized();
+	m_boundingRect = QRect(m_startPos.x(), m_startPos.y(), m_nWidth, m_nHeight).normalized();
 	int d = 4;
 	m_boundingRect.adjust(-d, -d, d, d);
 }
@@ -704,10 +704,10 @@ bool LCanvasRect::containsPos(const QPoint &point)
 
 bool LCanvasEllipse::containsPos(const QPoint &point)
 {
-	m_width = abs(m_endPos.x() - m_startPos.x()) / 2;
-	m_height = abs(m_endPos.y() - m_startPos.y()) / 2;
+	m_nWidth = abs(m_endPos.x() - m_startPos.x()) / 2;
+	m_nHeight = abs(m_endPos.y() - m_startPos.y()) / 2;
 	QPoint centerPoint = QPoint((m_startPos.x() + m_endPos.x())/2,(m_startPos.y() + m_endPos.y())/2);
-	return pow(point.x() - centerPoint.x(), 2) / pow(m_width, 2) + pow(point.y() - centerPoint.y(), 2) / pow(m_height, 2) <= 1;
+	return pow(point.x() - centerPoint.x(), 2) / pow(m_nWidth, 2) + pow(point.y() - centerPoint.y(), 2) / pow(m_nHeight, 2) <= 1;
 }
 
 bool LCanvasTriangle::containsPos(const QPoint &point)
