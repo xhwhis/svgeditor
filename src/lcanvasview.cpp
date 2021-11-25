@@ -117,8 +117,6 @@ void LCanvasView::paintEvent(QPaintEvent *)
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.scale(m_fScaleFactor, m_fScaleFactor);
 
-	qDebug() << painter.transform().m11();
-
 	foreach (auto &item, m_allItems)
 		item->paintItem(painter);
 
